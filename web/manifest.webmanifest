@@ -1,0 +1,26 @@
+{
+  "name": "PHP Tracker — Chadi Khoder",
+  "short_name": "PHP Tracker",
+  "description": "Tracker d'etude PHP : 140 exercices, references W3Schools, quiz et suivi automatique.",
+  "start_url": "./study_tracker.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0f1c",
+  "theme_color": "#0a0f1c",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "image/php-svgrepo-com.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
+    },
+    {
+      "src": "image/php-svgrepo-com.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "maskable"
+    }
+  ]
+}

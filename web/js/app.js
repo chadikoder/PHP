@@ -1,0 +1,2958 @@
+const STORAGE_KEY = "sawa_php_tracker_v3";
+
+/* ====================================================================
+   I18N — t() returns a string in the current language with FR fallback.
+   Curriculum strings can be plain strings (untranslated, shows in both
+   modes) or { fr, en } objects.  UI chrome lives in T below.
+   ==================================================================== */
+function t(v) {
+  if (v == null) return "";
+  if (typeof v === "string") return v;
+  if (typeof v !== "object") return String(v);
+  if (Array.isArray(v)) return v.map(t).join("");
+  const lang = (state && state.lang) || "fr";
+  return v[lang] || v.fr || v.en || "";
+}
+
+const T_DICT = {
+  // Header / chrome
+  menu:          { fr: "Ouvrir le menu",       en: "Open menu" },
+  toggleTheme:   { fr: "Basculer thème",       en: "Toggle theme" },
+  toLight:       { fr: "Passer en mode clair", en: "Switch to light mode" },
+  toDark:        { fr: "Passer en mode sombre",en: "Switch to dark mode" },
+  toggleLang:    { fr: "Switch to English",    en: "Passer en français" },
+  search:        { fr: "Rechercher (raccourci : \"/\")", en: "Search (shortcut: \"/\")" },
+  statLessons:   { fr: "Leçons terminées",     en: "Lessons completed" },
+  statExercises: { fr: "Exercices complétés",  en: "Exercises completed" },
+  statStreak:    { fr: "Jours actifs (streak)",en: "Streak (days in a row)" },
+  lessonsShort:  { fr: "leçons",               en: "lessons" },
+  exosShort:     { fr: "exos",                 en: "exos" },
+  dShort:        { fr: "j",                    en: "d" },
+  examIn:        { fr: "Examen dans",          en: "Exam in" },
+  examPassed:    { fr: "Examen passé",         en: "Exam done" },
+  examToday:     { fr: "Examen aujourd'hui",   en: "Exam today" },
+  daysShort:     { fr: "j",                    en: "d" },
+  // Sidebar sections
+  progress:      { fr: "Progression",          en: "Progress" },
+  lessons:       { fr: "leçons",               en: "lessons" },
+  exos:          { fr: "exos",                 en: "exos" },
+  achievements:  { fr: "🏆 Succès",            en: "🏆 Achievements" },
+  plan7:         { fr: "📘 Plan 7 jours",      en: "📘 7-day Plan" },
+  modePlan:      { fr: "📅 Plan",              en: "📅 Plan" },
+  modeRef:       { fr: "📖 Référence",         en: "📖 Reference" },
+  basic:         { fr: "🟢 PHP Basic",         en: "🟢 PHP Basic" },
+  intermediate:  { fr: "🟡 PHP Intermediate",  en: "🟡 PHP Intermediate" },
+  advanced:      { fr: "🔴 PHP Advanced",      en: "🔴 PHP Advanced" },
+  resetBtn:      { fr: "Réinitialiser",         en: "Reset progress" },
+  resetBtnText:  { fr: "Réinitialiser la progression", en: "Reset progress" },
+  exportBtn:     { fr: "Exporter",              en: "Export" },
+  exportBtnText: { fr: "Exporter",              en: "Export" },
+  importBtn:     { fr: "Importer",              en: "Import" },
+  importBtnText: { fr: "Importer",              en: "Import" },
+  // Welcome
+  welcomeTitle:  { fr: "Plan d'attaque", en: "Attack plan" },
+  welcomeSub:    {
+    fr: "7 jours pour l'examen · 140 exercices PHP · 34 leçons W3Schools · suivi automatique. Examen le 09/07/2026 — projet Sawa en parallèle.",
+    en: "7 days to the exam · 140 PHP exercises · 34 W3Schools lessons · auto-tracked. Exam on 09/07/2026 — Sawa project in parallel."
+  },
+  day:           { fr: "Jour",                 en: "Day" },
+  dayShort:      { fr: "J",                    en: "D" },
+  exoCount:      { fr: "exos",                 en: "exos" },
+  lessonCount:   { fr: "leçons",               en: "lessons" },
+  // Lesson
+  why:           { fr: "🎯 Pourquoi —",        en: "🎯 Why —" },
+  mockExam:      { fr: "🏁 Exercice chronométré", en: "🏁 Timed exercise" },
+  startMock:     { fr: "▶ Lancer l'exercice (120 min)", en: "▶ Start exercise (120 min)" },
+  mockRunning:   { fr: "Exercice en cours — ne ferme pas la page", en: "Exercise running — do not close the page" },
+  mockFinished:  { fr: "Exercice terminé !",   en: "Exercise finished!" },
+  mockStop:      { fr: "⏹ Arrêter",            en: "⏹ Stop" },
+  w3Source:      { fr: "📖 Source W3Schools ↗",en: "📖 W3Schools source ↗" },
+  markDone:      { fr: "Marquer terminé",      en: "Mark done" },
+  marked:        { fr: "✓ Terminé",            en: "✓ Done" },
+  markedAriaLabel: { fr: "Marquer comme terminé", en: "Mark as done" },
+  prev:          { fr: "← Précédent",          en: "← Previous" },
+  nextDir:       { fr: "Suivant →",            en: "Next →" },
+  start:         { fr: "Début",                en: "Start" },
+  end:           { fr: "Fin",                  en: "End" },
+  noLesson:      { fr: "Aucune leçon",         en: "No lesson" },
+  noMoreLessons: { fr: "Plus de leçons",       en: "No more lessons" },
+  // Tabs
+  tabCourse:     { fr: "📖 Cours",             en: "📖 Course" },
+  tabExos:       { fr: "✍️ Exercices",          en: "✍️ Exercises" },
+  // Exercise filters
+  filterAll:     { fr: "Tous",                 en: "All" },
+  filterEasy:    { fr: "🟢 Facile",            en: "🟢 Easy" },
+  filterMedium:  { fr: "🟡 Moyen",             en: "🟡 Medium" },
+  filterHard:    { fr: "🟠 Difficile",         en: "🟠 Hard" },
+  filterExtreme: { fr: "🔴 Extrême",           en: "🔴 Extreme" },
+  filterBookmark:{ fr: "📌 Signets",            en: "📌 Bookmarks" },
+  done:          { fr: "terminés",             en: "done" },
+  noExos:        { fr: "Aucun exercice dans cette catégorie", en: "No exercises in this category" },
+  diffEasy:      { fr: "Facile",               en: "Easy" },
+  diffMedium:    { fr: "Moyen",                en: "Medium" },
+  diffHard:      { fr: "Difficile",            en: "Hard" },
+  diffExtreme:   { fr: "Extrême",              en: "Extreme" },
+  addBookmark:   { fr: "Ajouter un signet",    en: "Add bookmark" },
+  removeBookmark:{ fr: "Retirer le signet",    en: "Remove bookmark" },
+  viewSol:       { fr: "💡 Voir solution",      en: "💡 View solution" },
+  hideSol:       { fr: "▲ Cacher",              en: "▲ Hide" },
+  // Quiz
+  quizTitle:     { fr: "🎯 Mini-quiz — vérifie tes acquis", en: "🎯 Mini quiz — check what stuck" },
+  quizSub:       { fr: "Clique sur la bonne réponse. Pas de score : c'est pour s'entraîner.", en: "Click the right answer. No score — it's for practice." },
+  // Code blocks
+  copy:          { fr: "Copier",               en: "Copy" },
+  copied:        { fr: "Copié ! ✓",             en: "Copied! ✓" },
+  showOutput:    { fr: "▶ Voir résultat",       en: "▶ Show output" },
+  hideOutput:    { fr: "▼ Cacher résultat",     en: "▼ Hide output" },
+  // Callouts
+  tip:           { fr: "✓ Bonne pratique",     en: "✓ Best practice" },
+  note:          { fr: "💡 Astuce",             en: "💡 Tip" },
+  warn:          { fr: "⚠️ Piège examen",       en: "⚠️ Exam trap" },
+  bad:           { fr: "❌ Erreur fatale",      en: "❌ Fatal error" },
+  guess:         { fr: "Devine",               en: "Guess" },
+  seeAnswer:     { fr: "Voir la réponse",      en: "Show the answer" },
+  hideAnswer:    { fr: "▲ Cacher",              en: "▲ Hide" },
+  // Footer hint
+  hintSearch:    { fr: "chercher",             en: "search" },
+  hintNav:       { fr: "naviguer",             en: "navigate" },
+  hintCourseEx:  { fr: "cours/exos",           en: "course/exos" },
+  hintDone:      { fr: "fait",                 en: "done" },
+  hintRandom:    { fr: "aléatoire",            en: "random" },
+  hintClose:     { fr: "fermer",               en: "close" },
+  // Reset modal
+  resetTitle:    { fr: "Réinitialiser la progression ?", en: "Reset all progress?" },
+  resetBody:     { fr: "Ceci efface TOUTE ta progression (leçons, exercices, signets, succès). Cette action est irréversible.", en: "This wipes ALL your progress (lessons, exercises, bookmarks, achievements). This cannot be undone." },
+  resetConfirm:  { fr: "Oui, tout effacer",    en: "Yes, wipe everything" },
+  resetCancel:   { fr: "Annuler",              en: "Cancel" },
+  resetDone:     { fr: "Progression effacée",  en: "Progress wiped" },
+  resetDoneSub:  { fr: "On repart à zéro ! Choisis une leçon dans la barre latérale pour commencer.", en: "Starting fresh! Pick a lesson in the sidebar to begin." },
+  // Import / export
+  exportTitle:   { fr: "Exporter ma progression", en: "Export my progress" },
+  exportDone:    { fr: "Progression copiée dans le presse-papier ✓", en: "Progress copied to clipboard ✓" },
+  importPrompt:  { fr: "Colle ici ta progression JSON :", en: "Paste your JSON progress here:" },
+  importBad:     { fr: "JSON invalide — rien n'a changé.", en: "Invalid JSON — nothing changed." },
+  importOk:      { fr: "Progression restaurée ✓", en: "Progress restored ✓" },
+  // Achievements (full set, all visible)
+  ach1:          { fr: "1ère leçon",           en: "First lesson" },
+  ach2:          { fr: "Mi-parcours (leçons)", en: "Halfway (lessons)" },
+  ach3:          { fr: "PHP prêt",             en: "PHP ready" },
+  ach4:          { fr: "7 jours d'affilée",    en: "7 day streak" },
+  ach5:          { fr: "Tous les exos",        en: "All exercises" },
+  achEx1:        { fr: "1er exercice",         en: "First exercise" },
+  achEx10:       { fr: "10 exercices",         en: "10 exercises" },
+  achEx50:       { fr: "50 exercices",         en: "50 exercises" },
+  achBm:         { fr: "1er signet",           en: "First bookmark" },
+  achDay7:       { fr: "Jour 7 atteint",       en: "Reached Day 7" },
+  achUnlocked:   { fr: "Succès débloqué :",    en: "Achievement unlocked:" },
+  achLocked:     { fr: "🔒 À débloquer",       en: "🔒 Locked" },
+  // Random practice
+  randomBtn:     { fr: "🎲 Aléatoire",         en: "🎲 Random" },
+  randomTitle:   { fr: "Exercice aléatoire (touche R)", en: "Random exercise (press R)" },
+  allExosDone:   { fr: "Tous les exercices sont faits ! 🎉", en: "All exercises done! 🎉" },
+  // Daily goal
+  dailyGoal:     { fr: "Objectif du jour",     en: "Daily goal" },
+  dailyDone:     { fr: "aujourd'hui",          en: "today" },
+  goalReached:   { fr: "Objectif du jour atteint ! 🎉", en: "Daily goal reached! 🎉" },
+  setGoalTitle:  { fr: "Objectif quotidien",   en: "Daily goal" },
+  setGoalBody:   { fr: "Combien d'exercices veux-tu faire par jour ?", en: "How many exercises per day do you want to do?" },
+  save:          { fr: "Enregistrer",          en: "Save" },
+  editGoal:      { fr: "Modifier l'objectif",  en: "Edit goal" },
+  // Lesson mastery
+  lessonMastered:{ fr: "Leçon maîtrisée ! 🌟", en: "Lesson mastered! 🌟" },
+  // Confidence
+  confGot:       { fr: "Je gère",              en: "Got it" },
+  confShaky:     { fr: "Hésitant",             en: "Shaky" },
+  confNo:        { fr: "Aucune idée",          en: "No idea" },
+  confLabel:     { fr: "Niveau de confiance",  en: "Confidence" },
+  filterWeak:    { fr: "🚦 À revoir",          en: "🚦 To review" },
+  noWeak:        { fr: "Rien à revoir ici — bien joué !", en: "Nothing to review here — nice!" },
+  // Pomodoro
+  pomodoro:      { fr: "Pomodoro",             en: "Pomodoro" },
+  pomoFocus:     { fr: "Concentration",        en: "Focus" },
+  pomoShort:     { fr: "Pause",                en: "Break" },
+  pomoLong:      { fr: "Pause longue",         en: "Long break" },
+  pomoStart:     { fr: "Démarrer",             en: "Start" },
+  pomoPause:     { fr: "Pause",                en: "Pause" },
+  pomoDone:      { fr: "pomodoros aujourd'hui",en: "pomodoros today" },
+  pomoFocusMin:  { fr: "Focus (min)",          en: "Focus (min)" },
+  pomoBreakMin:  { fr: "Pause (min)",          en: "Break (min)" },
+  pomoLongMin:   { fr: "Longue (min)",         en: "Long (min)" },
+  pomoAuto:      { fr: "Auto-démarrer la pause", en: "Auto-start break" },
+  pomoToday:     { fr: "Aujourd'hui",          en: "Today" },
+  pomoClear:     { fr: "Effacer",              en: "Clear" },
+  pomoSkip:      { fr: "Passer la phase",      en: "Skip phase" },
+  pomoResetT:    { fr: "Réinitialiser",        en: "Reset" },
+  pomoSound:     { fr: "Activer / couper le son", en: "Toggle sound" },
+  pomoFocusDone: { fr: "Concentration terminée — fais une pause ! 🍵", en: "Focus done — take a break! 🍵" },
+  pomoBreakDone: { fr: "Pause terminée — au travail ! 💪", en: "Break over — back to work! 💪" },
+  // Notes
+  notesLabel:    { fr: "📝 Notes",                en: "📝 Notes" },
+  notesPlaceholder: { fr: "Tes notes sur cet exercice (rappels, pièges, idées)…", en: "Your notes for this exercise (reminders, gotchas, ideas)…" },
+  notesSaved:    { fr: "✓ enregistré",            en: "✓ saved" },
+  // Focus mode
+  focusOn:       { fr: "Mode focus activé",       en: "Focus mode on" },
+  focusOff:      { fr: "Mode focus désactivé",    en: "Focus mode off" },
+  focusBtn:      { fr: "Mode focus (F)",          en: "Focus mode (F)" },
+  // Weekly goal
+  weeklyLabel:   { fr: "Cette semaine",           en: "This week" },
+  weeklyEdit:    { fr: "Objectif hebdo (1-500)",  en: "Weekly goal (1-500)" },
+  // Shortcuts panel
+  shortcutsTitle:{ fr: "Raccourcis clavier",      en: "Keyboard shortcuts" },
+  shortcutsClose:{ fr: "Fermer",                  en: "Close" },
+  scGroupNav:    { fr: "Navigation",              en: "Navigation" },
+  scGroupActions:{ fr: "Actions",                 en: "Actions" },
+  scGroupMisc:   { fr: "Autres",                  en: "Other" },
+  scSearch:      { fr: "Rechercher",              en: "Search" },
+  scPrevNext:    { fr: "Leçon précédente / suivante", en: "Previous / next lesson" },
+  scTabSwap:     { fr: "Basculer cours / exos",   en: "Toggle course / exercises" },
+  scMarkDone:    { fr: "Marquer la leçon comme terminée", en: "Mark lesson as done" },
+  scRandom:      { fr: "Exercice aléatoire",      en: "Random exercise" },
+  scBookmarks:   { fr: "Filtrer signets",         en: "Filter bookmarks" },
+  scFocus:       { fr: "Mode focus",              en: "Focus mode" },
+  scShortcuts:   { fr: "Ouvrir cette aide",       en: "Open this help" },
+  scClose:       { fr: "Fermer modale / menu",    en: "Close modal / menu" },
+  // XP / Level
+  levelUp:       { fr: "Niveau supérieur !",   en: "Level up!" },
+  // Analytics
+  anaTitle:      { fr: "📊 Statistiques",      en: "📊 Stats" },
+  anaXp:         { fr: "Total XP",             en: "Total XP" },
+  anaStreakBest: { fr: "Streak max",           en: "Best streak" },
+  anaBars:       { fr: "14 derniers jours",    en: "Last 14 days" },
+  anaHeatmap:    { fr: "Activité (12 sem)",    en: "Activity (12w)" },
+  anaHeatLess:   { fr: "moins",                en: "less" },
+  anaHeatMore:   { fr: "plus",                 en: "more" },
+  anaAvg:        { fr: "Moy. 7j",              en: "7d avg" },
+  anaExosDay:    { fr: "exos / jour",          en: "exos / day" },
+  // Daily challenge
+  challengeLabel:{ fr: "🎯 Défi du jour",      en: "🎯 Daily challenge" },
+  challengeDone: { fr: "Défi du jour réussi ! 🎉", en: "Daily challenge complete! 🎉" },
+  chal_hard:     { fr: "Termine 3 exercices difficiles", en: "Finish 3 hard exercises" },
+  chal_done:     { fr: "Termine 8 exercices",            en: "Finish 8 exercises" },
+  chal_lesson:   { fr: "Termine 1 leçon entière",        en: "Complete 1 full lesson" },
+  chal_pomo:     { fr: "Fais 3 pomodoros",               en: "Run 3 pomodoros" },
+  chal_review:   { fr: "Note ta confiance sur 5 exos",   en: "Rate confidence on 5 exos" },
+  chal_easy:     { fr: "Termine 5 exos faciles",         en: "Finish 5 easy exos" },
+  // Extra achievements
+  ach_pomo1:     { fr: "1er pomodoro",         en: "First pomodoro" },
+  ach_pomo20:    { fr: "20 pomodoros",         en: "20 pomodoros" },
+  ach_notes:     { fr: "10 notes prises",      en: "10 notes written" },
+  ach_bm10:      { fr: "10 signets",           en: "10 bookmarks" },
+  ach_conf10:    { fr: "10 confiances notées", en: "10 confidence ratings" },
+  ach_week:      { fr: "Objectif semaine",     en: "Weekly goal hit" },
+  ach_lvl5:      { fr: "Niveau 5",             en: "Level 5" },
+  ach_lvl10:     { fr: "Niveau 10",            en: "Level 10" },
+  ach_chal3:     { fr: "3 défis réussis",      en: "3 challenges done" },
+};
+const T = new Proxy(T_DICT, { get(o, k) { return t(o[k]); } });
+
+const EXAM_DATE = new Date(2026, 6, 9); // Month is 0-indexed: 6 = July
+const MOCK_EXAM_MINUTES = 120;
+const MOCK_EXAM_KEY = "sawa_php_mock_exam_end";
+
+let state = loadState();
+let currentTab = "cours";
+let exFilter = "all";
+
+const W3_URLS = {
+  "w3-intro": "https://www.w3schools.com/php/php_intro.asp",
+  "w3-syntax": "https://www.w3schools.com/php/php_syntax.asp",
+  "w3-variables": "https://www.w3schools.com/php/php_variables.asp",
+  "w3-echo": "https://www.w3schools.com/php/php_echo_print.asp",
+  "w3-types": "https://www.w3schools.com/php/php_datatypes.asp",
+  "w3-strings": "https://www.w3schools.com/php/php_string.asp",
+  "w3-numbers": "https://www.w3schools.com/php/php_numbers.asp",
+  "w3-constants": "https://www.w3schools.com/php/php_constants.asp",
+  "w3-operators": "https://www.w3schools.com/php/php_operators.asp",
+  "w3-if": "https://www.w3schools.com/php/php_if_else.asp",
+  "w3-loops": "https://www.w3schools.com/php/php_looping.asp",
+  "w3-functions-basic": "https://www.w3schools.com/php/php_functions.asp",
+  "w3-arrays-basic": "https://www.w3schools.com/php/php_arrays.asp",
+  "w3-superglobals": "https://www.w3schools.com/php/php_superglobals.asp",
+  "w3-forms": "https://www.w3schools.com/php/php_forms.asp",
+  "w3-validation": "https://www.w3schools.com/php/php_form_validation.asp",
+  "w3-regex": "https://www.w3schools.com/php/php_regex.asp",
+  "w3-date": "https://www.w3schools.com/php/php_date.asp",
+  "w3-include": "https://www.w3schools.com/php/php_includes.asp",
+  "w3-file": "https://www.w3schools.com/php/php_file_open.asp",
+  "w3-upload": "https://www.w3schools.com/php/php_file_upload.asp",
+  "w3-cookies": "https://www.w3schools.com/php/php_cookies.asp",
+  "w3-sessions": "https://www.w3schools.com/php/php_sessions.asp",
+  "w3-json": "https://www.w3schools.com/php/php_json.asp",
+  "w3-oop": "https://www.w3schools.com/php/php_oop_what_is.asp",
+  "w3-constructor": "https://www.w3schools.com/php/php_oop_classes_objects.asp",
+  "w3-modifiers": "https://www.w3schools.com/php/php_oop_access_modifiers.asp",
+  "w3-inheritance": "https://www.w3schools.com/php/php_oop_inheritance.asp",
+  "w3-abstract": "https://www.w3schools.com/php/php_oop_classes_abstract.asp",
+  "w3-interfaces": "https://www.w3schools.com/php/php_oop_interfaces.asp",
+  "w3-static": "https://www.w3schools.com/php/php_oop_static_methods.asp",
+  "w3-exceptions": "https://www.w3schools.com/php/php_exception.asp",
+  "w3-mysql": "https://www.w3schools.com/php/php_mysql_intro.asp",
+  "w3-traits": "https://www.w3schools.com/php/php_oop_traits.asp",
+  "day-1": "https://www.w3schools.com/php/php_syntax.asp",
+  "day-2": "https://www.w3schools.com/php/php_functions.asp",
+  "day-3": "https://www.w3schools.com/php/php_form_validation.asp",
+  "day-4": "https://www.w3schools.com/php/php_sessions.asp",
+  "day-5": "https://www.w3schools.com/php/php_mysql_intro.asp",
+  "day-6": "https://www.w3schools.com/php/php_file_upload.asp",
+  "day-7": "https://www.w3schools.com/php/php_oop_what_is.asp",
+};
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return defaultState();
+    return Object.assign(defaultState(), JSON.parse(raw));
+  } catch { return defaultState(); }
+}
+
+function defaultState() {
+  return { completed: {}, exDone: {}, bookmarks: {}, lastActive: null, theme: "dark", lang: "fr", sectionsCollapsed: {}, achSeen: null, dailyGoal: 10, weeklyGoal: 50, confidence: {}, masteredSeen: {}, goalReachedDate: null, pomo: null, quizAnswers: {}, navMode: "plan", notes: {}, focusMode: false, pomoLog: [], xp: 0, challengeSeed: null, challengeDone: {}, reviewSeen: {}, xpClaims: {}, welcomeHintDismissed: false };
+}
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function esc(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// Strip diacritics so search matches "heritage" against "héritage" and vice versa.
+function normalize(s) {
+  return String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+}
+
+// Real consecutive-days streak: counts back from today (or yesterday if no activity today)
+// while there is at least one completed lesson / exercise per day.
+function computeStreak() {
+  const activeDays = new Set();
+  Object.values(state.completed).forEach(ts => activeDays.add(new Date(ts).toDateString()));
+  Object.values(state.exDone).forEach(ts => activeDays.add(new Date(ts).toDateString()));
+  if (activeDays.size === 0) return 0;
+  let streak = 0;
+  let cursor = new Date();
+  // If nothing today, start from yesterday so an off-day in the morning doesn't break the streak.
+  if (!activeDays.has(cursor.toDateString())) cursor.setDate(cursor.getDate() - 1);
+  while (activeDays.has(cursor.toDateString())) {
+    streak++;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
+}
+
+function highlightPhp(code) {
+  let s = esc(code);
+  const stash = [];
+  const hold = (cls, text) => {
+    const i = stash.length;
+    stash.push(`<span class="${cls}">${text}</span>`);
+    return `__SAWAHOLD${i}HOLD__`;
+  };
+  s = s.replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g, m => hold("str", m));
+  s = s.replace(/(\/\/[^\n]*|\/\*[\s\S]*?\*\/|#[^\n]*)/g, m => hold("com", m));
+  s = s.replace(/\b(function|return|if|else|elseif|while|for|foreach|as|switch|case|default|break|continue|do|class|new|public|private|protected|static|const|use|namespace|require|require_once|include|include_once|echo|print|die|exit|true|false|null|self|parent|instanceof|extends|implements|interface|trait|try|catch|finally|throw|fn|match|declare|global|and|or|xor)\b/g, '<span class="kw">$1</span>');
+  s = s.replace(/(\$\w+)/g, '<span class="var">$1</span>');
+  s = s.replace(/\b(\d+(?:\.\d+)?)\b/g, '<span class="num">$1</span>');
+  s = s.replace(/\b([a-z_][a-z0-9_]*)\s*\(/gi, '<span class="fn">$1</span>(');
+  s = s.replace(/(?:&lt;\?php|\?&gt;)/g, '<span class="kw">$&</span>');
+  s = s.replace(/(-&gt;|=&gt;|::)/g, '<span class="op">$&</span>');
+  return s.replace(/__SAWAHOLD(\d+)HOLD__/g, (_, i) => stash[+i] ?? "");
+}
+
+function celebrate() {
+  const c = document.createElement('div');
+  c.className = 'confetti-wrap';
+  const colors = ['#6366f1','#818cf8','#22c55e','#f59e0b','#ef4444','#38bdf8'];
+  for (let i = 0; i < 50; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-p';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.animationDelay = Math.random() * 0.8 + 's';
+    p.style.animationDuration = (1.5 + Math.random() * 1.5) + 's';
+    p.style.width = (6 + Math.random() * 8) + 'px';
+    p.style.height = (6 + Math.random() * 8) + 'px';
+    p.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    c.appendChild(p);
+  }
+  document.body.appendChild(c);
+  setTimeout(() => c.remove(), 3500);
+}
+
+/* ====================================================================
+   SIDEBAR
+   ==================================================================== */
+function renderSidebar() {
+  document.getElementById("nav-days").innerHTML = DAYS.map(navItem).join("");
+  const basic = GIO.filter(l => (l.level || "basic") === "basic");
+  const inter = GIO.filter(l => l.level === "intermediate");
+  const adv = GIO.filter(l => l.level === "advanced");
+  document.getElementById("nav-basic").innerHTML = basic.map(navItem).join("") || `<div class="empty-search">${T.noLesson}</div>`;
+  document.getElementById("nav-intermediate").innerHTML = inter.map(navItem).join("") || `<div class="empty-search">${T.noLesson}</div>`;
+  document.getElementById("nav-advanced").innerHTML = adv.map(navItem).join("") || `<div class="empty-search">${T.noLesson}</div>`;
+  bindNav();
+  applyCollapseState();
+  applyNavMode();
+  refreshProgress();
+}
+
+function updateSidebarActive() {
+  document.querySelectorAll(".nav-item").forEach(el => {
+    const id = el.dataset.id;
+    const lesson = ALL_LESSONS.find(l => l.id === id);
+    if (!lesson) return;
+    el.classList.toggle("active", id === state.lastActive);
+    el.classList.toggle("done", !!state.completed[id]);
+    const exAll = [...(lesson.exercises || []), ...(lesson.problemes || [])];
+    const exTotal = exAll.length;
+    const exDone = exAll.filter(e => state.exDone[lesson.id + "-" + e.num]).length;
+    el.classList.toggle("fully-done", exTotal > 0 && exDone === exTotal);
+    const fill = el.querySelector(".nav-progress-fill");
+    const count = el.querySelector(".nav-ex-count");
+    if (fill) fill.style.width = exTotal ? Math.round(exDone / exTotal * 100) + "%" : "0%";
+    if (count) count.textContent = exDone + "/" + exTotal;
+  });
+  refreshProgress();
+}
+
+function navItem(l) {
+  const done = !!state.completed[l.id];
+  const active = state.lastActive === l.id;
+  const exAll = [...(l.exercises || []), ...(l.problemes || [])];
+  const exTotal = exAll.length;
+  const exDone = exAll.filter(e => state.exDone[l.id + "-" + e.num]).length;
+  const fullyDone = exTotal > 0 && exDone === exTotal;
+  const fullTitle = t(l.title);
+  // Strip "Day N - " / "Jour N - " prefix for sidebar label (the .nav-tag already shows J1/D1)
+  const labelText = fullTitle.replace(/^(Jour|Day) \d+ - /, "");
+  // For 7-day plan items: mark first not-done as "current" and any subsequent untouched ones as "locked"
+  let dayCls = "";
+  if (l.id.startsWith("day-")) {
+    const idx = DAYS.findIndex(d => d.id === l.id);
+    const firstOpenIdx = DAYS.findIndex(d => !state.completed[d.id]);
+    if (!done) {
+      if (idx === firstOpenIdx) dayCls = "day-current";
+      else if (firstOpenIdx !== -1 && idx > firstOpenIdx) dayCls = "day-locked";
+    }
+  }
+  return `<div class="nav-item ${done ? "done" : ""} ${active ? "active" : ""} ${fullyDone ? "fully-done" : ""} ${dayCls}" data-id="${l.id}" title="${esc(fullTitle)}">
+    <span class="nav-check">${done ? "✓" : ""}</span>
+    <span class="nav-tag">${l.code}</span>
+    <span class="nav-label">${esc(labelText)}</span>
+    ${exTotal > 0 ? `
+    <span class="nav-ex-wrap">
+      <span class="nav-star" aria-hidden="true">⭐</span>
+      <span class="nav-progress"><span class="nav-progress-fill" style="width:${exTotal ? Math.round(exDone / exTotal * 100) : 0}%"></span></span>
+      <span class="nav-ex-count">${exDone}/${exTotal}</span>
+    </span>` : ""}
+  </div>`;
+}
+
+function bindNav() {
+  document.querySelectorAll(".nav-item").forEach(el => {
+    el.setAttribute("role", "button");
+    el.setAttribute("tabindex", "0");
+    el.addEventListener("click", () => {
+      openLesson(el.dataset.id);
+      document.body.classList.remove("drawer-open");
+    });
+    el.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openLesson(el.dataset.id);
+        document.body.classList.remove("drawer-open");
+      }
+    });
+
+    const check = el.querySelector(".nav-check");
+    if (check) {
+      check.setAttribute("role", "checkbox");
+      check.setAttribute("tabindex", "0");
+      check.setAttribute("aria-label", T.markedAriaLabel);
+      const toggle = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        const id = el.dataset.id;
+        if (state.completed[id]) {
+          delete state.completed[id];
+          unclaimXp("lesson:" + id);
+        } else {
+          state.completed[id] = Date.now();
+          celebrate();
+          claimXp("lesson:" + id, 25, "Lesson done");
+          checkChallenge();
+        }
+        saveState();
+        updateSidebarActive();
+        if (state.lastActive === id) {
+          const btn = document.getElementById("toggle-done");
+          if (btn) {
+            const done = !!state.completed[id];
+            btn.classList.toggle("done", done);
+            btn.textContent = done ? T.marked : T.markDone;
+          }
+        }
+      };
+      check.addEventListener("click", toggle);
+      check.addEventListener("keydown", e => {
+        if (e.key === "Enter" || e.key === " ") toggle(e);
+      });
+    }
+  });
+}
+
+/* ====================================================================
+   SIDEBAR COLLAPSE
+   ==================================================================== */
+function bindCollapseTitles() {
+  document.querySelectorAll(".collapsible").forEach(el => {
+    el.addEventListener("click", () => {
+      const section = el.dataset.section;
+      if (state.sectionsCollapsed[section]) {
+        delete state.sectionsCollapsed[section];
+      } else {
+        state.sectionsCollapsed[section] = true;
+      }
+      saveState();
+      applyCollapseState();
+    });
+  });
+}
+
+function applyCollapseState() {
+  document.querySelectorAll(".collapsible").forEach(el => {
+    const section = el.dataset.section;
+    const target = document.getElementById("nav-" + section);
+    const arrow = el.querySelector(".collapse-arrow");
+    if (!target || !arrow) return;
+    if (state.sectionsCollapsed[section]) {
+      target.style.display = "none";
+      arrow.style.transform = "rotate(-90deg)";
+      el.classList.add("collapsed");
+    } else {
+      target.style.display = "";
+      arrow.style.transform = "";
+      el.classList.remove("collapsed");
+    }
+  });
+}
+
+function applyNavMode() {
+  const mode = state.navMode === "ref" ? "ref" : "plan";
+  document.querySelectorAll(".nav-track").forEach(tr => {
+    tr.hidden = tr.dataset.track !== mode;
+  });
+  document.querySelectorAll(".nav-mode-btn").forEach(btn => {
+    const on = btn.dataset.mode === mode;
+    btn.classList.toggle("active", on);
+    btn.setAttribute("aria-selected", on ? "true" : "false");
+  });
+}
+
+function setNavMode(mode) {
+  state.navMode = mode === "ref" ? "ref" : "plan";
+  saveState();
+  applyNavMode();
+}
+
+document.querySelectorAll(".nav-mode-btn").forEach(btn => {
+  btn.addEventListener("click", () => setNavMode(btn.dataset.mode));
+});
+
+/* ====================================================================
+   OPEN LESSON
+   ==================================================================== */
+function openLesson(id) {
+  const lesson = ALL_LESSONS.find(l => l.id === id);
+  if (!lesson) return;
+  state.lastActive = id;
+  saveState();
+  updateSidebarActive();
+
+  const done = !!state.completed[id];
+  const isDay = id.startsWith("day-");
+  state.navMode = isDay ? "plan" : "ref";
+  applyNavMode();
+  const hasEx = (lesson.exercises && lesson.exercises.length > 0) || (lesson.problemes && lesson.problemes.length > 0);
+  const idx = ALL_LESSONS.findIndex(l => l.id === id);
+  const prev = idx > 0 ? ALL_LESSONS[idx - 1] : null;
+  const next = idx < ALL_LESSONS.length - 1 ? ALL_LESSONS[idx + 1] : null;
+
+  currentTab = "cours";
+  exFilter = "all";
+
+  const main = document.getElementById("main");
+  const lessonTitle = t(lesson.title);
+  const prevTitle = prev ? t(prev.title).replace(/^(Jour|Day) \d+ - /, "") : "";
+  const nextTitle = next ? t(next.title).replace(/^(Jour|Day) \d+ - /, "") : "";
+  const breadcrumb = isDay
+    ? (state.lang === "en" ? "📘 7-day plan" : "📘 Plan 7 jours")
+    : "🌐 W3Schools PHP";
+  main.innerHTML = `
+    <div class="lesson-header">
+      <div>
+        <div class="breadcrumb">${breadcrumb} · ${lesson.code}</div>
+        <h1 class="lesson-title">${esc(lessonTitle)}</h1>
+        ${lesson.sub ? `<div class="lesson-sub">${esc(t(lesson.sub))}</div>` : ""}
+        ${lesson.tags ? `<div class="tag-row">${lesson.tags.map(tag => `<span class="tag">#${esc(t(tag))}</span>`).join("")}</div>` : ""}
+      </div>
+      <div class="lesson-actions">
+        ${id === "day-7" ? `<span class="tag" style="background:rgba(245,158,11,.12);color:var(--warn);font-weight:700">${T.mockExam}</span>` : ""}
+        ${W3_URLS[id] ? `<a class="w3-link" href="${W3_URLS[id]}" target="_blank" rel="noopener noreferrer">${T.w3Source}</a>` : ""}
+        <button class="complete-btn ${done ? "done" : ""}" id="toggle-done">${done ? T.marked : T.markDone}</button>
+      </div>
+    </div>
+    ${lesson.why ? `<div class="why-card"><b>${T.why}</b> ${t(lesson.why)}</div>` : ""}
+    ${id === "day-7" ? renderMockExamCard() : ""}
+    ${renderReviewStrip(lesson)}
+    <div id="ex-area"></div>
+    <div class="lesson-foot">
+      ${prev ? `<button class="btn-nav prev" data-id="${prev.id}"><span class="dir">${T.prev}</span><span class="ttl">${esc(prevTitle)}</span></button>` : `<div class="btn-nav" style="opacity:.3;cursor:default"><span class="dir">${T.start}</span><span class="ttl">${T.noLesson}</span></div>`}
+      ${next ? `<button class="btn-nav next" data-id="${next.id}"><span class="dir">${T.nextDir}</span><span class="ttl">${esc(nextTitle)}</span></button>` : `<div class="btn-nav next" style="opacity:.3;cursor:default"><span class="dir">${T.end}</span><span class="ttl">${T.noMoreLessons}</span></div>`}
+    </div>
+  `;
+
+  document.getElementById("toggle-done").addEventListener("click", () => toggleDone(id));
+  main.querySelectorAll(".btn-nav[data-id]").forEach(btn => {
+    btn.addEventListener("click", () => openLesson(btn.dataset.id));
+  });
+
+  main.classList.add("main-animate-in");
+  renderExArea(lesson);
+  bindCopyButtons();
+  bindReviewStrip();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function toggleDone(id) {
+  const wasDone = !!state.completed[id];
+  if (wasDone) {
+    delete state.completed[id];
+    unclaimXp("lesson:" + id);
+  } else {
+    state.completed[id] = Date.now();
+    celebrate();
+    claimXp("lesson:" + id, 25, "Lesson done");
+    checkChallenge();
+  }
+  saveState();
+  openLesson(id);
+}
+
+/* ====================================================================
+   EX AREA
+   ==================================================================== */
+function renderExArea(lesson) {
+  const area = document.getElementById("ex-area");
+  if (!area) return;
+  const exsRaw   = lesson.exercises || [];
+  const probsRaw = lesson.problemes || [];
+  const hasEx    = exsRaw.length > 0;
+  const hasProbs = probsRaw.length > 0;
+
+  const doneEx = exsRaw.filter(e => state.exDone[lesson.id + "-" + e.num]).length;
+  const doneP  = probsRaw.filter(e => state.exDone[lesson.id + "-" + e.num]).length;
+
+  // Pick which list the active tab points to (defaults to exercises if probs tab selected on a lesson without probs).
+  if (currentTab === "probs" && !hasProbs) currentTab = "exos";
+  if (currentTab === "exos"  && !hasEx)    currentTab = hasProbs ? "probs" : "cours";
+
+  const activeList = currentTab === "probs" ? probsRaw : exsRaw;
+  const isWeak    = e => { const c = state.confidence[lesson.id + "-" + e.num]; return c === "shaky" || c === "no"; };
+  const total     = activeList.length;
+  const done      = activeList.filter(e => state.exDone[lesson.id + "-" + e.num]).length;
+  const bmCount   = activeList.filter(e => state.bookmarks[lesson.id + "-" + e.num]).length;
+  const weakCount = activeList.filter(isWeak).length;
+
+  let filtered = activeList;
+  if (exFilter !== "all") {
+    if (exFilter === "bookmark") filtered = activeList.filter(e => state.bookmarks[lesson.id + "-" + e.num]);
+    else if (exFilter === "weak") filtered = activeList.filter(isWeak);
+    else filtered = activeList.filter(e => e.diff === exFilter);
+  }
+  const emptyMsg = exFilter === "weak" ? T.noWeak : T.noExos;
+
+  const tabsHtml = `
+    <div class="tab ${currentTab === "cours" ? "active" : ""}" data-tab="cours">${T.tabCourse}</div>
+    ${hasEx ? `<div class="tab ${currentTab === "exos" ? "active" : ""}" data-tab="exos">${T.tabExos} <b style="font-variant-numeric:tabular-nums;margin-left:4px">${doneEx}/${exsRaw.length}</b></div>` : ""}
+    ${hasProbs ? `<div class="tab tab-probs ${currentTab === "probs" ? "active" : ""}" data-tab="probs">Problèmes <b style="font-variant-numeric:tabular-nums;margin-left:4px">${doneP}/${probsRaw.length}</b></div>` : ""}
+  `;
+
+  const listTabHtml = (hasEx || hasProbs) && (currentTab === "exos" || currentTab === "probs") ? `
+    <div class="tab-content active" id="tab-${currentTab}">
+      <div class="ex-filter">
+        <button class="ex-filter-btn ${exFilter === "all" ? "active" : ""}" data-filter="all">${T.filterAll} (${total})</button>
+        <button class="ex-filter-btn ${exFilter === "easy" ? "active" : ""}" data-filter="easy">${T.filterEasy} (${activeList.filter(e => e.diff === "easy").length})</button>
+        <button class="ex-filter-btn ${exFilter === "medium" ? "active" : ""}" data-filter="medium">${T.filterMedium} (${activeList.filter(e => e.diff === "medium").length})</button>
+        <button class="ex-filter-btn ${exFilter === "hard" ? "active" : ""}" data-filter="hard">${T.filterHard} (${activeList.filter(e => e.diff === "hard").length})</button>
+        <button class="ex-filter-btn ${exFilter === "extreme" ? "active" : ""}" data-filter="extreme">${T.filterExtreme} (${activeList.filter(e => e.diff === "extreme").length})</button>
+        <button class="ex-filter-btn ${exFilter === "bookmark" ? "active" : ""}" data-filter="bookmark">${T.filterBookmark} (${bmCount})</button>
+        <button class="ex-filter-btn ${exFilter === "weak" ? "active" : ""}" data-filter="weak">${T.filterWeak} (${weakCount})</button>
+        <button class="ex-filter-btn random-btn" id="random-ex-btn" title="${T.randomTitle}">${T.randomBtn}</button>
+      </div>
+      <div class="ex-counter">
+        <b>${done}</b>/${total} ${T.done}
+        <span class="ex-counter-bar"><span class="ex-counter-fill" style="width:${total ? Math.round(done / total * 100) : 0}%"></span></span>
+      </div>
+      <div class="ex-cards">
+        ${filtered.length ? filtered.map(e => renderExCard(lesson, e)).join("") : `<div class="empty-search">${emptyMsg}</div>`}
+      </div>
+    </div>` : "";
+
+  area.innerHTML = `
+    <div class="tabs">${tabsHtml}</div>
+    <div class="tab-content ${currentTab === "cours" ? "active" : ""}" id="tab-cours">
+      <div class="lesson-body">
+        ${(lesson.sections || []).map(renderSection).join("")}
+        ${lesson.quiz && lesson.quiz.length ? renderQuiz(lesson.quiz, lesson.id) : ""}
+      </div>
+    </div>
+    ${listTabHtml}
+  `;
+
+  // Tab switching
+  area.querySelectorAll(".tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      currentTab = tab.dataset.tab;
+      renderExArea(lesson);
+      bindCopyButtons();
+    });
+  });
+
+  // Quiz (always in "cours" tab)
+  area.querySelectorAll(".quiz-opt").forEach(opt => {
+    opt.addEventListener("click", () => {
+      const card = opt.closest(".quiz-card");
+      if (card.dataset.answered) return;
+      card.dataset.answered = "1";
+      card.classList.add("answered");
+      const correct = card.dataset.correct;
+      card.querySelectorAll(".quiz-opt").forEach(o => {
+        o.classList.add("disabled");
+        if (o.dataset.letter === correct) {
+          o.classList.add("correct");
+          o.insertAdjacentHTML("beforeend", ' <span class="quiz-ico">&#10003;</span>');
+        } else if (o === opt) {
+          o.classList.add("wrong");
+          o.insertAdjacentHTML("beforeend", ' <span class="quiz-ico">&#10007;</span>');
+        }
+      });
+      const expl = card.querySelector(".quiz-expl");
+      if (expl) expl.classList.add("shown");
+      // Persist so the answer survives navigation / reload
+      if (card.dataset.qkey) {
+        if (!state.quizAnswers) state.quizAnswers = {};
+        state.quizAnswers[card.dataset.qkey] = opt.dataset.letter;
+        saveState();
+      }
+    });
+  });
+
+  // Try buttons
+  area.querySelectorAll(".try-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const target = document.getElementById(btn.dataset.target);
+      if (!target) return;
+      const open = target.classList.toggle("open");
+      btn.textContent = open ? T.hideAnswer : T.seeAnswer;
+    });
+  });
+
+  // Output toggle
+  area.querySelectorAll(".output-toggle").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const wrap = btn.closest(".code-output");
+      const open = wrap.classList.toggle("open");
+      btn.textContent = open ? T.hideOutput : T.showOutput;
+    });
+  });
+
+  if (!hasEx) return;
+
+  // Exercise filter
+  area.querySelectorAll(".ex-filter-btn").forEach(btn => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = "1";
+    btn.addEventListener("click", () => {
+      exFilter = btn.dataset.filter;
+      renderExArea(lesson);
+      bindCopyButtons();
+    });
+  });
+
+  // Exercise check toggle
+  area.querySelectorAll(".ex-check").forEach(chk => {
+    chk.addEventListener("click", e => {
+      e.stopPropagation();
+      const key = chk.dataset.key;
+      const wasDone = !!state.exDone[key];
+      if (wasDone) {
+        delete state.exDone[key];
+        unclaimXp("ex:" + key);
+      } else {
+        state.exDone[key] = Date.now();
+        const num = parseInt(key.split("-").pop(), 10);
+        const ex = [...(lesson.exercises||[]), ...(lesson.problemes||[])].find(x => x.num === num);
+        if (ex) claimXp("ex:" + key, xpFromDiff(ex.diff), "Exo " + ex.diff);
+      }
+      saveState();
+      checkLessonMastery(lesson);
+      checkDailyGoal();
+      if (!wasDone) checkChallenge();
+      updateSidebarActive();
+      renderExArea(lesson);
+      bindCopyButtons();
+    });
+  });
+
+  // Random practice button
+  const randomBtn = area.querySelector("#random-ex-btn");
+  if (randomBtn) randomBtn.addEventListener("click", jumpToRandomExercise);
+
+  // Bookmark toggle (kept on the card so users can bookmark without opening)
+  area.querySelectorAll(".ex-card .ex-bookmark").forEach(bm => {
+    bm.addEventListener("click", e => {
+      e.stopPropagation();
+      const key = bm.dataset.key;
+      if (state.bookmarks[key]) delete state.bookmarks[key];
+      else state.bookmarks[key] = Date.now();
+      saveState();
+      renderExArea(lesson);
+    });
+  });
+
+  // Card click / Enter / Space → open modal (ignore clicks on check + bookmark)
+  function openCardModal(card) {
+    const exNum = parseInt(card.dataset.num, 10);
+    const pool = [...(lesson.exercises || []), ...(lesson.problemes || [])];
+    const ex = pool.find(x => x.num === exNum);
+    if (ex) openExModal(lesson, ex);
+  }
+  area.querySelectorAll(".ex-card").forEach(card => {
+    card.addEventListener("click", e => {
+      if (e.target.closest(".ex-check") || e.target.closest(".ex-bookmark")) return;
+      openCardModal(card);
+    });
+    card.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        if (e.target.closest(".ex-check") || e.target.closest(".ex-bookmark")) return;
+        e.preventDefault();
+        openCardModal(card);
+      }
+    });
+  });
+}
+
+function renderSection(s) {
+  let out = `<section class="section-card">`;
+  out += `<h3>${t(s.h)}</h3>`;
+  if (s.p) out += `<p>${t(s.p)}</p>`;
+  if (s.blocks && Array.isArray(s.blocks)) {
+    s.blocks.forEach(b => { out += renderBlock(b); });
+  }
+  out += `</section>`;
+  return out;
+}
+
+function renderBlock(b) {
+  if (b.p) return `<p>${t(b.p)}</p>`;
+  if (b.text) return `<p>${t(b.text)}</p>`;
+  if (b.code) {
+    const out = b.out
+      ? `<div class="code-output"><button class="output-toggle">${T.showOutput}</button><div class="output-content"><pre><code>${esc(t(b.out))}</code></pre></div></div>`
+      : "";
+    // Code body stays as-is (translating code would break it). Comments translation: future work.
+    return `<div class="block-code"><pre><code>${highlightPhp(t(b.code))}</code></pre></div>${out}`;
+  }
+  if (b.note) return `<div class="block-note"><b>${T.note}</b> ${t(b.note)}</div>`;
+  if (b.tip) return `<div class="block-tip"><b>${T.tip}</b> ${t(b.tip)}</div>`;
+  if (b.warn) return `<div class="block-warn"><b>${T.warn}</b> ${t(b.warn)}</div>`;
+  if (b.bad) return `<div class="block-bad"><b>${T.bad}</b> ${t(b.bad)}</div>`;
+  if (b.try) {
+    const id = "try-" + Math.random().toString(36).slice(2, 9);
+    return `<div class="block-try"><b>🤔 ${T.guess} —</b> ${t(b.try)}<button class="try-btn" data-target="${id}">${T.seeAnswer}</button><div class="try-ans" id="${id}">${t(b.ans || "")}</div></div>`;
+  }
+  if (b.table) {
+    const rows = b.table.map((row, i) =>
+      `<tr>${row.map(c => `<${i === 0 ? "th" : "td"}>${c}</${i === 0 ? "th" : "td"}>`).join("")}</tr>`
+    ).join("");
+    return `<div class="block-table"><table>${rows}</table></div>`;
+  }
+  if (b.list) {
+    return `<ul class="block-list">${b.list.map(li => `<li>${li}</li>`).join("")}</ul>`;
+  }
+  return "";
+}
+
+function renderQuiz(quiz, lessonId) {
+  const answers = state.quizAnswers || {};
+  const cards = quiz.map((q, i) => {
+    const key = lessonId + "-q" + i;
+    const chosen = answers[key];           // letter the user picked, or undefined
+    const answered = chosen != null;
+    const letters = q.opts.map((_, j) => String.fromCharCode(97 + j));
+    const opts = q.opts.map((o, j) => {
+      const letter = letters[j];
+      let cls = "quiz-opt", ico = "";
+      if (answered) {
+        cls += " disabled";
+        if (letter === q.correct) { cls += " correct"; ico = ' <span class="quiz-ico">&#10003;</span>'; }
+        else if (letter === chosen) { cls += " wrong"; ico = ' <span class="quiz-ico">&#10007;</span>'; }
+      }
+      return `<button class="${cls}" data-letter="${letter}">${t(o)}${ico}</button>`;
+    }).join("");
+    return `<div class="quiz-card${answered ? " answered" : ""}" data-correct="${q.correct}" data-qkey="${key}"${answered ? ' data-answered="1"' : ""}>
+      <div class="quiz-q"><span class="num">Q${i + 1}.</span> ${t(q.q)}</div>
+      <div class="quiz-opts">${opts}</div>
+      ${q.expl ? `<div class="quiz-expl${answered ? " shown" : ""}">${t(q.expl)}</div>` : ""}
+    </div>`;
+  }).join("");
+  return `<div class="quiz-section">
+    <h3 class="quiz-title">${T.quizTitle}</h3>
+    <p class="quiz-sub">${T.quizSub}</p>
+    ${cards}
+  </div>`;
+}
+
+function renderExCard(lesson, ex) {
+  const key = lesson.id + "-" + ex.num;
+  const exDone = !!state.exDone[key];
+  const isBm = !!state.bookmarks[key];
+  const hasNote = !!(state.notes && state.notes[key] && state.notes[key].trim());
+  const diffLbl = { easy: T.diffEasy, medium: T.diffMedium, hard: T.diffHard, extreme: T.diffExtreme };
+  return `<div class="ex-card ${exDone ? "done" : ""}" id="ex-${key}" data-lesson="${lesson.id}" data-num="${ex.num}" role="button" tabindex="0">
+    <span class="ex-check ${exDone ? "done" : ""}" data-key="${key}" title="${T.markedAriaLabel}">${exDone ? "✓" : ""}</span>
+    <div class="ex-info">
+      <div class="ex-num">#${ex.num}</div>
+      <div class="ex-title">${esc(t(ex.title))}</div>
+    </div>
+    ${hasNote ? `<span class="ex-note-dot" title="Notes" aria-hidden="true"></span>` : ""}
+    <span class="ex-diff ${ex.diff}">${diffLbl[ex.diff] || ex.diff}</span>
+    <button class="ex-bookmark ${isBm ? "active" : ""}" data-key="${key}" title="${isBm ? T.removeBookmark : T.addBookmark}">${isBm ? "🔖" : "🏷️"}</button>
+    <span class="ex-open-arrow" aria-hidden="true">›</span>
+  </div>`;
+}
+
+/* ====================================================================
+   EXERCISE MODAL — centered overlay opened on card click
+   In-place state updates (no full rebuild on each click).
+   ==================================================================== */
+let _exModalCurrent = null;  // { lesson, ex, key }
+let _exModalLastFocus = null;
+
+function _exSyncCardCheck(key, done) {
+  const card = document.getElementById("ex-" + key);
+  if (!card) return;
+  card.classList.toggle("done", done);
+  const chk = card.querySelector(".ex-check");
+  if (chk) { chk.classList.toggle("done", done); chk.textContent = done ? "✓" : ""; }
+}
+function _exSyncCardBookmark(key, on) {
+  const card = document.getElementById("ex-" + key);
+  if (!card) return;
+  const bm = card.querySelector(".ex-bookmark");
+  if (bm) { bm.classList.toggle("active", on); bm.textContent = on ? "🔖" : "🏷️"; }
+}
+
+function _exRenderActions(key) {
+  const conf = state.confidence[key] || "";
+  const isBm = !!state.bookmarks[key];
+  const isDone = !!state.exDone[key];
+  return `
+    <button class="ex-modal-btn ex-modal-done-btn ${isDone ? "done" : ""}" id="ex-modal-done-btn" title="${T.markedAriaLabel}">
+      <span class="ico">${isDone ? "✓" : ""}</span>${isDone ? T.markedAriaLabel : T.markedAriaLabel}
+    </button>
+    <button class="ex-modal-btn ex-modal-sol-btn" id="ex-modal-sol-btn">${T.viewSol}</button>
+    <div class="ex-modal-spacer"></div>
+    <div class="ex-modal-conf" id="ex-modal-conf" title="${T.confLabel}">
+      <button class="conf-btn got ${conf === "got" ? "active" : ""}" data-conf="got" title="${T.confGot}">😎</button>
+      <button class="conf-btn shaky ${conf === "shaky" ? "active" : ""}" data-conf="shaky" title="${T.confShaky}">😐</button>
+      <button class="conf-btn no ${conf === "no" ? "active" : ""}" data-conf="no" title="${T.confNo}">😵</button>
+    </div>
+    <button class="ex-modal-btn-icon ex-modal-bookmark ${isBm ? "active" : ""}" id="ex-modal-bookmark" title="${isBm ? T.removeBookmark : T.addBookmark}">${isBm ? "🔖" : "🏷️"}</button>
+  `;
+}
+
+function _exWireActions(lesson, ex, key) {
+  // Mark done
+  const doneBtn = document.getElementById("ex-modal-done-btn");
+  doneBtn.addEventListener("click", () => {
+    const wasDone = !!state.exDone[key];
+    if (wasDone) {
+      delete state.exDone[key];
+      unclaimXp("ex:" + key);
+    } else {
+      state.exDone[key] = Date.now();
+      claimXp("ex:" + key, xpFromDiff(ex.diff), "Exo " + ex.diff);
+    }
+    saveState();
+    const on = !!state.exDone[key];
+    doneBtn.classList.toggle("done", on);
+    doneBtn.querySelector(".ico").textContent = on ? "✓" : "";
+    _exSyncCardCheck(key, on);
+    checkLessonMastery(lesson);
+    checkDailyGoal();
+    if (!wasDone) checkChallenge();
+    updateSidebarActive();
+    refreshProgress();
+  });
+
+  // Solution toggle
+  const solBox = document.getElementById("ex-modal-sol");
+  const solBtn = document.getElementById("ex-modal-sol-btn");
+  solBtn.addEventListener("click", () => {
+    const showing = !solBox.hidden;
+    solBox.hidden = showing;
+    solBtn.classList.toggle("open", !showing);
+    solBtn.textContent = !showing ? T.hideSol : T.viewSol;
+    if (!showing) bindCopyButtons();
+  });
+
+  // Confidence (in-place)
+  document.querySelectorAll("#ex-modal-conf .conf-btn").forEach(btn => {
+    btn.addEventListener("click", e => {
+      e.stopPropagation();
+      const val = btn.dataset.conf;
+      const wasSame = state.confidence[key] === val;
+      if (wasSame) delete state.confidence[key];
+      else state.confidence[key] = val;
+      saveState();
+      if (!wasSame) { noteConfidenceToday(key); checkChallenge(); }
+      document.querySelectorAll("#ex-modal-conf .conf-btn").forEach(b => {
+        b.classList.toggle("active", state.confidence[key] === b.dataset.conf);
+      });
+    });
+  });
+
+  // Bookmark (in-place)
+  const bmBtn = document.getElementById("ex-modal-bookmark");
+  bmBtn.addEventListener("click", e => {
+    e.stopPropagation();
+    if (state.bookmarks[key]) delete state.bookmarks[key];
+    else state.bookmarks[key] = Date.now();
+    saveState();
+    const on = !!state.bookmarks[key];
+    bmBtn.classList.toggle("active", on);
+    bmBtn.textContent = on ? "🔖" : "🏷️";
+    bmBtn.title = on ? T.removeBookmark : T.addBookmark;
+    _exSyncCardBookmark(key, on);
+  });
+}
+
+let _noteSaveTimer = null;
+let _noteSavedTimer = null;
+function _exWireNote(key) {
+  const ta = document.getElementById("ex-modal-note-input");
+  const label = document.getElementById("ex-modal-note-label");
+  const savedTag = document.getElementById("ex-modal-note-saved");
+  if (!ta || !label) return;
+  if (!state.notes) state.notes = {};
+  ta.value = state.notes[key] || "";
+  ta.setAttribute("placeholder", T.notesPlaceholder);
+  label.textContent = T.notesLabel;
+  if (savedTag) { savedTag.textContent = T.notesSaved; savedTag.classList.remove("show"); }
+  ta.oninput = () => {
+    clearTimeout(_noteSaveTimer);
+    _noteSaveTimer = setTimeout(() => {
+      const v = ta.value;
+      if (v && v.trim()) state.notes[key] = v;
+      else delete state.notes[key];
+      saveState();
+      // Sync indicator dot on the card list
+      const card = document.getElementById("ex-" + key);
+      if (card) {
+        const has = !!(state.notes[key] && state.notes[key].trim());
+        let dot = card.querySelector(".ex-note-dot");
+        if (has && !dot) {
+          dot = document.createElement("span");
+          dot.className = "ex-note-dot";
+          dot.title = "Notes";
+          dot.setAttribute("aria-hidden", "true");
+          const ref = card.querySelector(".ex-diff");
+          card.insertBefore(dot, ref);
+        } else if (!has && dot) {
+          dot.remove();
+        }
+      }
+      if (savedTag) {
+        savedTag.classList.add("show");
+        clearTimeout(_noteSavedTimer);
+        _noteSavedTimer = setTimeout(() => savedTag.classList.remove("show"), 1100);
+      }
+    }, 320);
+  };
+}
+
+function openExModal(lesson, ex) {
+  const modal = document.getElementById("ex-modal");
+  if (!modal) return;
+  const key = lesson.id + "-" + ex.num;
+  _exModalCurrent = { lesson, ex, key };
+  _exModalLastFocus = document.activeElement;
+
+  const diffLbl = { easy: T.diffEasy, medium: T.diffMedium, hard: T.diffHard, extreme: T.diffExtreme };
+  document.getElementById("ex-modal-num").textContent = "#" + ex.num;
+  document.getElementById("ex-modal-title").textContent = t(ex.title);
+  const diffEl = document.getElementById("ex-modal-diff");
+  diffEl.className = "ex-modal-diff " + ex.diff;
+  diffEl.textContent = diffLbl[ex.diff] || ex.diff;
+  document.getElementById("ex-modal-body").innerHTML = t(ex.desc || "");
+
+  document.getElementById("ex-modal-actions").innerHTML = _exRenderActions(key);
+
+  const solBox = document.getElementById("ex-modal-sol");
+  solBox.innerHTML = `<div class="block-code"><pre><code>${highlightPhp(t(ex.sol))}</code></pre></div>`;
+  solBox.hidden = true;
+
+  _exWireActions(lesson, ex, key);
+  _exWireNote(key);
+
+  modal.hidden = false;
+  // Compensate scrollbar to avoid layout shift when locking body scroll.
+  const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
+  if (scrollbarW > 0) document.documentElement.style.paddingRight = scrollbarW + "px";
+  document.documentElement.style.overflow = "hidden";
+
+  // Focus the close button so Esc / Tab feel natural.
+  setTimeout(() => {
+    const closeBtn = document.getElementById("ex-modal-close");
+    if (closeBtn) closeBtn.focus();
+  }, 30);
+}
+
+function closeExModal() {
+  const modal = document.getElementById("ex-modal");
+  if (!modal) return;
+  modal.hidden = true;
+  document.documentElement.style.overflow = "";
+  document.documentElement.style.paddingRight = "";
+  if (_exModalLastFocus && typeof _exModalLastFocus.focus === "function") {
+    try { _exModalLastFocus.focus(); } catch {}
+  }
+  _exModalCurrent = null;
+}
+
+// One-time global wiring for the modal shell (backdrop + close + Esc + focus trap).
+(function wireExModalShell() {
+  function init() {
+    const closeBtn = document.getElementById("ex-modal-close");
+    const backdrop = document.getElementById("ex-modal-backdrop");
+    const dialog   = document.getElementById("ex-modal-dialog");
+    if (closeBtn) closeBtn.addEventListener("click", closeExModal);
+    if (backdrop) backdrop.addEventListener("click", closeExModal);
+    document.addEventListener("keydown", e => {
+      if (!_exModalCurrent) return;
+      if (e.key === "Escape") { e.stopPropagation(); closeExModal(); return; }
+      if (e.key === "Tab" && dialog) {
+        // Simple focus trap inside the dialog.
+        const focusables = dialog.querySelectorAll('button, [href], [tabindex]:not([tabindex="-1"])');
+        if (!focusables.length) return;
+        const first = focusables[0], last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    }, true);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
+})();
+
+/* ====================================================================
+   COPY BUTTON
+   ==================================================================== */
+function bindCopyButtons() {
+  document.querySelectorAll(".block-code pre code").forEach(codeBlock => {
+    const pre = codeBlock.parentElement;
+    if (pre.querySelector(".copy-btn")) return;
+    const btn = document.createElement("button");
+    btn.className = "copy-btn";
+    btn.textContent = T.copy;
+    pre.appendChild(btn);
+    btn.addEventListener("click", async e => {
+      e.stopPropagation();
+      try {
+        await navigator.clipboard.writeText(codeBlock.innerText);
+        btn.textContent = T.copied;
+        btn.style.background = "var(--good)";
+        btn.style.color = "#fff";
+        setTimeout(() => {
+          btn.textContent = T.copy;
+          btn.style.background = "";
+          btn.style.color = "";
+        }, 1800);
+      } catch {}
+    });
+  });
+}
+
+/* ====================================================================
+   PROGRESS
+   ==================================================================== */
+function refreshProgress() {
+  const doneLessons = Object.keys(state.completed).length;
+  const doneEx = Object.keys(state.exDone).length;
+  const pct = Math.round((doneLessons / TOTAL) * 100);
+
+  document.getElementById("pct").textContent = pct;
+  document.getElementById("stat-lessons").textContent = doneLessons;
+  document.getElementById("stat-exercises").textContent = doneEx;
+
+  const bar = document.getElementById("bar-fill");
+  if (bar) bar.style.width = pct + "%";
+  const barWrap = bar && bar.parentElement;
+  if (barWrap) barWrap.setAttribute("aria-valuenow", pct);
+
+  // Circular progress ring — 226.19 = 2 * PI * 36
+  const ring = document.getElementById("progress-ring-fg");
+  if (ring) {
+    const C = 226.19;
+    ring.style.strokeDashoffset = String(C - (C * pct) / 100);
+  }
+
+  const lTotal = document.getElementById("pct-lessons-total");
+  if (lTotal) lTotal.textContent = TOTAL;
+  const eTotal = document.getElementById("pct-exos-total");
+  if (eTotal) eTotal.textContent = TOTAL_EXERCISES;
+  const lDone = document.getElementById("pct-lessons");
+  if (lDone) lDone.textContent = doneLessons;
+  const eDone = document.getElementById("pct-exos");
+  if (eDone) eDone.textContent = doneEx;
+
+  document.getElementById("stat-streak").textContent = computeStreak();
+
+  refreshAchievements();
+  updateDayIndicator();
+  updateDailyGoal();
+  updateWeeklyGoal();
+  refreshXp();
+}
+
+/* ====================================================================
+   ACHIEVEMENTS
+   ==================================================================== */
+function computeBadges() {
+  const doneLessons = Object.keys(state.completed).length;
+  const doneEx = Object.keys(state.exDone).length;
+  const doneBm = Object.keys(state.bookmarks).length;
+  const day7Done = !!state.completed["day-7"];
+  const streak = computeStreak();
+  const notesCount = state.notes ? Object.values(state.notes).filter(n => n && n.trim()).length : 0;
+  const confCount = state.confidence ? Object.keys(state.confidence).length : 0;
+  const pomoCount = Array.isArray(state.pomoLog) ? state.pomoLog.length : 0;
+  const chalDone = state.challengeDone ? Object.keys(state.challengeDone).length : 0;
+  const weeklyHit = (() => {
+    const goal = state.weeklyGoal || 50;
+    return weekExoCount() >= goal;
+  })();
+  const lvl = xpLevel(state.xp || 0);
+  return [
+    { id: "first-lesson", emoji: "🎓", label: T.ach1,        unlocked: doneLessons >= 1 },
+    { id: "first-exo",    emoji: "⚡", label: T.achEx1,       unlocked: doneEx >= 1 },
+    { id: "exo-10",       emoji: "🔟", label: T.achEx10,      unlocked: doneEx >= 10 },
+    { id: "bookmark",     emoji: "📌", label: T.achBm,        unlocked: doneBm >= 1 },
+    { id: "halfway",      emoji: "🌗", label: T.ach2,         unlocked: doneLessons >= Math.ceil(TOTAL / 2) },
+    { id: "streak-7",     emoji: "⭐", label: T.ach4,         unlocked: streak >= 7 },
+    { id: "exo-50",       emoji: "🥇", label: T.achEx50,      unlocked: doneEx >= 50 },
+    { id: "day-7",        emoji: "🏁", label: T.achDay7,      unlocked: day7Done },
+    { id: "pomo-1",       emoji: "🍅", label: T.ach_pomo1,    unlocked: pomoCount >= 1 },
+    { id: "pomo-20",      emoji: "⏱️", label: T.ach_pomo20,   unlocked: pomoCount >= 20 },
+    { id: "notes-10",     emoji: "📝", label: T.ach_notes,    unlocked: notesCount >= 10 },
+    { id: "bm-10",        emoji: "🔖", label: T.ach_bm10,     unlocked: doneBm >= 10 },
+    { id: "conf-10",      emoji: "🚦", label: T.ach_conf10,   unlocked: confCount >= 10 },
+    { id: "week-goal",    emoji: "📈", label: T.ach_week,     unlocked: weeklyHit },
+    { id: "lvl-5",        emoji: "🌟", label: T.ach_lvl5,     unlocked: lvl >= 5 },
+    { id: "lvl-10",       emoji: "✨", label: T.ach_lvl10,    unlocked: lvl >= 10 },
+    { id: "chal-3",       emoji: "🎯", label: T.ach_chal3,    unlocked: chalDone >= 3 },
+    { id: "all-lessons",  emoji: "🏆", label: T.ach3,         unlocked: doneLessons >= TOTAL },
+    { id: "all-exos",     emoji: "💪", label: T.ach5,         unlocked: doneEx >= TOTAL_EXERCISES },
+  ];
+}
+
+function refreshAchievements() {
+  const row = document.getElementById("achieve-row");
+  const countEl = document.getElementById("achieve-count");
+  const badges = computeBadges();
+  const unlockedCount = badges.filter(b => b.unlocked).length;
+
+  // First run / migration: sync the "seen" set silently so pre-earned badges
+  // don't all fire a celebration at once. Afterwards, new unlocks celebrate.
+  if (!state.achSeen) {
+    state.achSeen = {};
+    badges.forEach(b => { if (b.unlocked) state.achSeen[b.id] = true; });
+    saveState();
+  } else {
+    const newly = badges.filter(b => b.unlocked && !state.achSeen[b.id]);
+    if (newly.length) {
+      newly.forEach(b => { state.achSeen[b.id] = true; });
+      saveState();
+      const last = newly[newly.length - 1];
+      toast(`${last.emoji} ${T.achUnlocked} ${last.label}`);
+      celebrate();
+    }
+  }
+
+  if (countEl) countEl.textContent = `${unlockedCount}/${badges.length}`;
+  if (!row) return;
+  // Only rewrite (and re-trigger the pop animation) when the unlocked set or
+  // language actually changed — avoids every badge popping on each refresh.
+  const sig = badges.map(b => (b.unlocked ? "1" : "0")).join("") + "|" + (state.lang || "fr");
+  if (row.dataset.sig === sig) return;
+  row.dataset.sig = sig;
+  row.innerHTML = badges.map(b =>
+    `<span class="achieve-badge ${b.unlocked ? 'unlocked' : 'locked'}" title="${esc(b.unlocked ? b.label : T.achLocked + ' · ' + b.label)}">${b.emoji}</span>`
+  ).join("");
+}
+
+/* ====================================================================
+   LESSON MASTERY — confetti once when every exercise in a lesson is done
+   ==================================================================== */
+function isLessonMastered(lesson) {
+  const exs = [...(lesson.exercises || []), ...(lesson.problemes || [])];
+  return exs.length > 0 && exs.every(e => state.exDone[lesson.id + "-" + e.num]);
+}
+function checkLessonMastery(lesson) {
+  if (isLessonMastered(lesson)) {
+    if (!state.masteredSeen[lesson.id]) {
+      state.masteredSeen[lesson.id] = true;
+      saveState();
+      celebrate();
+      claimXp("mastery:" + lesson.id, 30, "Lesson mastered");
+      toast(`${T.lessonMastered} ${t(lesson.title).replace(/^(Jour|Day) \d+ - /, "")}`);
+    }
+  } else if (state.masteredSeen[lesson.id]) {
+    // un-completed an exercise — allow re-celebration later, refund the mastery XP
+    delete state.masteredSeen[lesson.id];
+    unclaimXp("mastery:" + lesson.id);
+    saveState();
+  }
+}
+
+/* ====================================================================
+   DAILY GOAL — exercises completed today vs target
+   ==================================================================== */
+function todayExoCount() {
+  const today = new Date().toDateString();
+  let n = 0;
+  Object.values(state.exDone).forEach(ts => { if (new Date(ts).toDateString() === today) n++; });
+  return n;
+}
+function updateDailyGoal() {
+  const el = document.getElementById("daily-goal");
+  if (!el) return;
+  const goal = state.dailyGoal || 10;
+  const done = todayExoCount();
+  const pct = Math.min(100, Math.round((done / goal) * 100));
+  const reached = done >= goal;
+  el.classList.toggle("reached", reached);
+  el.innerHTML = `
+    <div class="daily-head">
+      <span class="daily-label">🎯 ${T.dailyGoal}</span>
+      <button class="daily-edit" id="daily-edit" title="${T.editGoal}">✏️</button>
+    </div>
+    <div class="daily-ring-row">
+      <span class="daily-count"><b>${done}</b><small>/${goal}</small></span>
+      <span class="daily-bar"><span class="daily-fill" style="width:${pct}%"></span></span>
+      ${reached ? `<span class="daily-check">✓</span>` : ""}
+    </div>`;
+  const editBtn = el.querySelector("#daily-edit");
+  if (editBtn) editBtn.addEventListener("click", openGoalEditor);
+}
+function openGoalEditor() {
+  const input = document.createElement("input");
+  input.type = "number";
+  input.min = "1";
+  input.max = "200";
+  input.value = String(state.dailyGoal || 10);
+  input.className = "goal-input";
+  showModal({
+    title: T.setGoalTitle,
+    body: `<p>${T.setGoalBody}</p>`,
+    actions: [
+      { label: T.resetCancel, variant: "secondary" },
+      { label: T.save, variant: "primary", onClick: () => {
+          const v = parseInt(input.value, 10);
+          if (v >= 1 && v <= 200) { state.dailyGoal = v; saveState(); updateDailyGoal(); }
+        }},
+    ]
+  });
+  modalBodyEl.appendChild(input);
+  setTimeout(() => { input.focus(); input.select(); }, 100);
+}
+function checkDailyGoal() {
+  const goal = state.dailyGoal || 10;
+  const today = new Date().toDateString();
+  if (todayExoCount() >= goal && state.goalReachedDate !== today) {
+    state.goalReachedDate = today;
+    saveState();
+    celebrate();
+    awardXp(15, "Daily goal");
+    toast(T.goalReached);
+  }
+  updateDailyGoal();
+  updateWeeklyGoal();
+}
+
+/* ====================================================================
+   RANDOM PRACTICE — jump to a random not-yet-done exercise
+   ==================================================================== */
+function jumpToRandomExercise() {
+  const pool = [];
+  ALL_LESSONS.forEach(l => {
+    [...(l.exercises || []), ...(l.problemes || [])].forEach(e => {
+      if (!state.exDone[l.id + "-" + e.num]) pool.push({ lessonId: l.id, key: l.id + "-" + e.num });
+    });
+  });
+  if (!pool.length) { toast(T.allExosDone); return; }
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  const lesson = ALL_LESSONS.find(l => l.id === pick.lessonId);
+  openLesson(pick.lessonId);
+  currentTab = "exos";
+  exFilter = "all";
+  renderExArea(lesson);
+  bindCopyButtons();
+  document.body.classList.remove("drawer-open");
+  setTimeout(() => {
+    const card = document.getElementById("ex-" + pick.key);
+    if (card) {
+      card.scrollIntoView({ behavior: "smooth", block: "center" });
+      card.classList.remove("flash");
+      void card.offsetWidth; // restart animation
+      card.classList.add("flash");
+    }
+  }, 80);
+}
+
+/* ====================================================================
+   SEARCH
+   ==================================================================== */
+const searchInput = document.getElementById("search");
+if (searchInput) {
+  searchInput.addEventListener("input", e => {
+    const q = normalize(e.target.value.trim());
+    if (!q) { renderSidebar(); return; }
+    const filter = arr => arr.filter(l => {
+      const hay = normalize(
+        t(l.title) + " " + t(l.sub || "") + " " +
+        (l.tags || []).map(t).join(" ") + " " +
+        (l.sections || []).map(s => t(s.h) + " " + t(s.p || "")).join(" ") + " " +
+        [...(l.exercises || []), ...(l.problemes || [])].map(x => t(x.title) + " " + t(x.desc || "")).join(" ")
+      );
+      return hay.includes(q);
+    });
+    const days = filter(DAYS);
+    const basic = filter(GIO.filter(l => (l.level || "basic") === "basic"));
+    const inter = filter(GIO.filter(l => l.level === "intermediate"));
+    const adv = filter(GIO.filter(l => l.level === "advanced"));
+    const fill = (id, list) =>
+      document.getElementById(id).innerHTML = list.length
+        ? list.map(navItem).join("")
+        : `<div class="empty-search">${T.noLesson}</div>`;
+    fill("nav-days", days);
+    fill("nav-basic", basic);
+    fill("nav-intermediate", inter);
+    fill("nav-advanced", adv);
+    // Reveal everything so a collapsed section can't hide its matches
+    document.querySelectorAll(".nav-track").forEach(tr => { tr.hidden = false; });
+    document.querySelectorAll(".nav-section").forEach(s => { s.style.display = ""; });
+    document.querySelectorAll(".collapsible").forEach(el => {
+      el.classList.remove("collapsed");
+      const arrow = el.querySelector(".collapse-arrow");
+      if (arrow) arrow.style.transform = "";
+    });
+    bindNav();
+  });
+}
+
+/* ====================================================================
+   XP / LEVEL — earn points across actions, level grows roughly with sqrt(xp)
+   ==================================================================== */
+function xpFromDiff(d) { return d === "extreme" ? 25 : d === "hard" ? 15 : d === "medium" ? 10 : 5; }
+function xpLevel(xp) {
+  // Smooth curve: level n requires xp ≥ 50 * n * (n + 1) / 2 (triangular)
+  // Solve for n: n = floor((-1 + sqrt(1 + 8 * xp / 50)) / 2) + 1
+  if (xp <= 0) return 1;
+  return Math.floor((-1 + Math.sqrt(1 + (8 * xp) / 50)) / 2) + 1;
+}
+function xpForLevel(n) { return 50 * (n * (n - 1)) / 2; }   // start of level n
+// Idempotent XP — claim records the amount per key so unclaim can refund the exact value.
+// Use for actions that can be reversed (lesson done / exercise done). For one-way actions
+// like pomodoro complete or daily-goal, call awardXp directly.
+function claimXp(claimKey, amount, reason) {
+  if (!state.xpClaims) state.xpClaims = {};
+  if (state.xpClaims[claimKey]) return;  // already paid for this exact action
+  state.xpClaims[claimKey] = amount;
+  awardXp(amount, reason);
+}
+function unclaimXp(claimKey) {
+  if (!state.xpClaims || !state.xpClaims[claimKey]) return;
+  const amount = state.xpClaims[claimKey];
+  delete state.xpClaims[claimKey];
+  state.xp = Math.max(0, (state.xp || 0) - amount);
+  saveState();
+  refreshXp();
+}
+
+function awardXp(amount, reason) {
+  if (!amount) return;
+  const prevLevel = xpLevel(state.xp || 0);
+  state.xp = (state.xp || 0) + amount;
+  saveState();
+  refreshXp();
+  const newLevel = xpLevel(state.xp);
+  if (newLevel > prevLevel) {
+    toast(`🆙 ${T.levelUp} ${newLevel}`);
+    celebrate();
+    const row = document.getElementById("xp-row");
+    if (row) { row.classList.remove("level-up-pulse"); void row.offsetWidth; row.classList.add("level-up-pulse"); }
+  } else if (amount >= 10) {
+    // Small flash for meaningful gains (silent for the +5 trickle)
+    const toastEl = document.getElementById("toast");
+    if (toastEl) {
+      toastEl.classList.add("xp");
+      setTimeout(() => toastEl.classList.remove("xp"), 2800);
+    }
+    toast(`+${amount} XP${reason ? " · " + reason : ""}`);
+  }
+}
+function refreshXp() {
+  const xp = state.xp || 0;
+  const lvl = xpLevel(xp);
+  const start = xpForLevel(lvl);
+  const next = xpForLevel(lvl + 1);
+  const span = next - start || 1;
+  const into = xp - start;
+  const pct = Math.min(100, Math.round((into / span) * 100));
+  const fill = document.getElementById("xp-bar-fill");
+  const lvlEl = document.getElementById("xp-level");
+  const curEl = document.getElementById("xp-current");
+  const nextEl = document.getElementById("xp-next");
+  if (fill) fill.style.width = pct + "%";
+  if (lvlEl) lvlEl.textContent = lvl;
+  if (curEl) curEl.textContent = into;
+  if (nextEl) nextEl.textContent = span;
+}
+
+/* ====================================================================
+   DAILY CHALLENGE — deterministic pick per day, reward = XP
+   ==================================================================== */
+const CHALLENGE_TEMPLATES = [
+  { id: "hard",    target: 3, xp: 60, key: "chal_hard",    icon: "🔥",
+    progress: () => todayDoneByDiff("hard") + todayDoneByDiff("extreme") },
+  { id: "done",    target: 8, xp: 50, key: "chal_done",    icon: "✅",
+    progress: () => todayExoCount() },
+  { id: "lesson",  target: 1, xp: 70, key: "chal_lesson",  icon: "📘",
+    progress: () => todayLessonsDone() },
+  { id: "pomo",    target: 3, xp: 50, key: "chal_pomo",    icon: "🍅",
+    progress: () => pomoTodayCount() },
+  { id: "review",  target: 5, xp: 50, key: "chal_review",  icon: "🚦",
+    progress: () => todayConfidenceCount() },
+  { id: "easy",    target: 5, xp: 40, key: "chal_easy",    icon: "🟢",
+    progress: () => todayDoneByDiff("easy") },
+];
+function todayDoneByDiff(diff) {
+  const today = new Date().toDateString();
+  let n = 0;
+  for (const k in state.exDone) {
+    const ts = state.exDone[k];
+    if (new Date(ts).toDateString() !== today) continue;
+    // Parse k = "lessonId-num"
+    const dash = k.lastIndexOf("-");
+    if (dash < 0) continue;
+    const lessonId = k.slice(0, dash);
+    const num = parseInt(k.slice(dash + 1), 10);
+    const lesson = ALL_LESSONS.find(l => l.id === lessonId);
+    if (!lesson) continue;
+    const ex = [...(lesson.exercises || []), ...(lesson.problemes || [])].find(e => e.num === num);
+    if (ex && ex.diff === diff) n++;
+  }
+  return n;
+}
+function todayLessonsDone() {
+  const today = new Date().toDateString();
+  let n = 0;
+  Object.values(state.completed).forEach(ts => { if (new Date(ts).toDateString() === today) n++; });
+  return n;
+}
+function todayConfidenceCount() {
+  if (!state.reviewSeen) state.reviewSeen = {};
+  // Count distinct confidence keys updated today — we cheaply track set of seen-today keys
+  const today = new Date().toDateString();
+  const dateKey = "d-" + today;
+  const seen = state.reviewSeen[dateKey] || {};
+  return Object.keys(seen).length;
+}
+function noteConfidenceToday(key) {
+  if (!state.reviewSeen) state.reviewSeen = {};
+  const today = new Date().toDateString();
+  const dateKey = "d-" + today;
+  if (!state.reviewSeen[dateKey]) state.reviewSeen[dateKey] = {};
+  state.reviewSeen[dateKey][key] = 1;
+  // Prune any older day stash
+  for (const k in state.reviewSeen) if (k !== dateKey) delete state.reviewSeen[k];
+  saveState();
+}
+function todayChallenge() {
+  // Deterministic pick by date: hash YYYY-MM-DD → index
+  const today = new Date();
+  const dateKey = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+  let h = 0;
+  for (let i = 0; i < dateKey.length; i++) h = ((h << 5) - h + dateKey.charCodeAt(i)) | 0;
+  const idx = Math.abs(h) % CHALLENGE_TEMPLATES.length;
+  return { tpl: CHALLENGE_TEMPLATES[idx], date: dateKey };
+}
+function renderChallengeCard() {
+  const { tpl, date } = todayChallenge();
+  const done = !!(state.challengeDone && state.challengeDone[date]);
+  const cur = Math.min(tpl.target, tpl.progress());
+  const pct = Math.round((cur / tpl.target) * 100);
+  const label = t(T_DICT[tpl.key]);
+  return `<div class="challenge-card ${done || cur >= tpl.target ? "done" : ""}" id="challenge-card">
+    <div class="challenge-badge">${tpl.icon}</div>
+    <div class="challenge-info">
+      <div class="challenge-title">${T.challengeLabel}</div>
+      <div class="challenge-desc">${esc(label)}</div>
+      <div class="challenge-progress"><b>${cur}</b>/${tpl.target} · ${pct}%</div>
+    </div>
+    <span class="challenge-reward">+${tpl.xp} XP</span>
+  </div>`;
+}
+function checkChallenge() {
+  const { tpl, date } = todayChallenge();
+  if (state.challengeDone && state.challengeDone[date]) return;
+  if (tpl.progress() >= tpl.target) {
+    if (!state.challengeDone) state.challengeDone = {};
+    state.challengeDone[date] = Date.now();
+    saveState();
+    awardXp(tpl.xp, "Daily challenge");
+    toast(T.challengeDone);
+    celebrate();
+  }
+  // Re-render card on welcome screen
+  const cc = document.getElementById("challenge-card");
+  if (cc) cc.outerHTML = renderChallengeCard();
+}
+
+/* ====================================================================
+   ANALYTICS — last 14 days bar chart + 12-week heatmap
+   ==================================================================== */
+function exoCountByDay(daysBack) {
+  // returns array of length daysBack with counts ending today (today last)
+  const arr = new Array(daysBack).fill(0);
+  const map = {};
+  Object.values(state.exDone).forEach(ts => {
+    const d = new Date(ts).toDateString();
+    map[d] = (map[d] || 0) + 1;
+  });
+  const today = new Date(); today.setHours(0,0,0,0);
+  for (let i = 0; i < daysBack; i++) {
+    const d = new Date(today); d.setDate(today.getDate() - (daysBack - 1 - i));
+    arr[i] = map[d.toDateString()] || 0;
+  }
+  return arr;
+}
+function bestStreak() {
+  // Walk all activity dates sorted, find longest run of consecutive days
+  const set = new Set();
+  Object.values(state.completed).forEach(ts => set.add(new Date(ts).toDateString()));
+  Object.values(state.exDone).forEach(ts => set.add(new Date(ts).toDateString()));
+  if (!set.size) return 0;
+  const dates = [...set].map(s => new Date(s).getTime()).sort((a,b)=>a-b);
+  let best = 1, cur = 1;
+  for (let i = 1; i < dates.length; i++) {
+    const diff = Math.round((dates[i] - dates[i-1]) / 86400000);
+    if (diff === 1) { cur++; if (cur > best) best = cur; }
+    else if (diff > 1) cur = 1;
+  }
+  return best;
+}
+function renderAnalytics() {
+  const last14 = exoCountByDay(14);
+  const max14 = Math.max(1, ...last14);
+  const avg7 = (last14.slice(-7).reduce((a,b)=>a+b,0) / 7).toFixed(1);
+  const xp = state.xp || 0;
+  const lvl = xpLevel(xp);
+  const best = bestStreak();
+
+  const last84 = exoCountByDay(84); // 12 weeks
+  // Bucket into 12 columns of 7 rows (Mon-first not critical here; just 7 cells/col)
+  const cols = [];
+  for (let c = 0; c < 12; c++) {
+    cols.push(last84.slice(c * 7, c * 7 + 7));
+  }
+  const colorClass = (n) => n <= 0 ? "" : n <= 2 ? "l1" : n <= 5 ? "l2" : n <= 9 ? "l3" : "l4";
+
+  const barsHtml = last14.map(n => {
+    if (n === 0) return `<span class="ana-bar empty" title="0"></span>`;
+    const h = Math.max(8, Math.round((n / max14) * 64));
+    return `<span class="ana-bar" style="height:${h}px" title="${n} exos"></span>`;
+  }).join("");
+
+  const heatHtml = cols.map(col => `<div class="ana-heat-col">${col.map(n => `<div class="ana-heat-cell ${colorClass(n)}" title="${n} exos"></div>`).join("")}</div>`).join("");
+
+  return `<div class="analytics">
+    <div class="analytics-head">
+      <span>${T.anaTitle}</span>
+      <span class="ana-count">${T.anaXp} · ${xp.toLocaleString()}</span>
+    </div>
+    <div class="analytics-grid">
+      <div class="ana-card">
+        <h4>⭐ Level <span style="color:var(--accent)">${lvl}</span></h4>
+        <div class="ana-big">${xp.toLocaleString()}<small>XP</small></div>
+        <div class="ana-sub">${T.anaStreakBest}: <b>${best}</b> · ${T.anaAvg}: <b>${avg7}</b> ${T.anaExosDay}</div>
+      </div>
+      <div class="ana-card">
+        <h4>${T.anaBars}</h4>
+        <div class="ana-bars">${barsHtml}</div>
+        <div class="ana-bars-axis"><span>-14d</span><span>-7d</span><span>${state.lang === "en" ? "today" : "auj."}</span></div>
+      </div>
+      <div class="ana-card" style="grid-column:1 / -1">
+        <h4>${T.anaHeatmap}</h4>
+        <div class="ana-heatmap">${heatHtml}</div>
+        <div class="ana-heat-legend">
+          <span>${T.anaHeatLess}</span>
+          <span class="ana-heat-cell"></span>
+          <span class="ana-heat-cell l1"></span>
+          <span class="ana-heat-cell l2"></span>
+          <span class="ana-heat-cell l3"></span>
+          <span class="ana-heat-cell l4"></span>
+          <span>${T.anaHeatMore}</span>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ====================================================================
+   PWA — service worker + install button
+   ==================================================================== */
+let _pwaDeferred = null;
+const pwaInstallBtn = document.getElementById("pwa-install");
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("../web/sw.js").catch(() => {});
+  });
+}
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault();
+  _pwaDeferred = e;
+  if (pwaInstallBtn) pwaInstallBtn.classList.add("show");
+});
+if (pwaInstallBtn) {
+  pwaInstallBtn.addEventListener("click", async () => {
+    if (!_pwaDeferred) return;
+    _pwaDeferred.prompt();
+    const { outcome } = await _pwaDeferred.userChoice.catch(() => ({ outcome: "dismissed" }));
+    if (outcome === "accepted") pwaInstallBtn.classList.remove("show");
+    _pwaDeferred = null;
+  });
+}
+window.addEventListener("appinstalled", () => {
+  if (pwaInstallBtn) pwaInstallBtn.classList.remove("show");
+});
+
+/* ====================================================================
+   MOBILE — left-edge swipe-open / drawer swipe-close
+   Touch-only; pointer events keep desktop unaffected.
+   ==================================================================== */
+(function initSwipe(){
+  const sidebar = document.getElementById("sidebar");
+  if (!sidebar) return;
+  let startX = 0, startY = 0, startWidth = 0, dragging = false, openAtStart = false;
+  const isTouch = () => matchMedia("(pointer:coarse)").matches || window.innerWidth < 720;
+  document.addEventListener("touchstart", e => {
+    if (!isTouch()) return;
+    const t = e.touches[0];
+    openAtStart = document.body.classList.contains("drawer-open");
+    if (!openAtStart && t.clientX > 24) return;          // edge-open: must start near left edge
+    if (openAtStart && !sidebar.contains(e.target)) return; // close: drag inside sidebar
+    startX = t.clientX; startY = t.clientY;
+    startWidth = sidebar.getBoundingClientRect().width;
+    dragging = true;
+  }, { passive: true });
+  document.addEventListener("touchmove", e => {
+    if (!dragging) return;
+    const t = e.touches[0];
+    const dx = t.clientX - startX, dy = t.clientY - startY;
+    if (Math.abs(dy) > Math.abs(dx) * 1.4) { dragging = false; return; } // vertical scroll wins
+    sidebar.classList.add("swiping");
+    if (openAtStart) {
+      const tx = Math.min(0, dx);
+      sidebar.style.transform = `translateX(${tx}px)`;
+    } else {
+      const tx = Math.max(-startWidth, -startWidth + dx);
+      document.body.classList.add("drawer-open");
+      sidebar.style.transform = `translateX(${tx}px)`;
+    }
+  }, { passive: true });
+  document.addEventListener("touchend", e => {
+    if (!dragging) return;
+    dragging = false;
+    sidebar.classList.remove("swiping");
+    sidebar.style.transform = "";
+    const dx = (e.changedTouches[0].clientX - startX);
+    if (openAtStart && dx < -60) document.body.classList.remove("drawer-open");
+    else if (!openAtStart && dx > 60) document.body.classList.add("drawer-open");
+    else if (!openAtStart && dx <= 60) document.body.classList.remove("drawer-open");
+  });
+
+  // Swipe left/right on the main lesson body — prev/next lesson
+  const main = document.getElementById("main");
+  if (main) {
+    let mx = 0, my = 0, mActive = false;
+    const inHScrollZone = (el) =>
+      !!(el && el.closest && (el.closest(".block-code") || el.closest("pre") || el.closest(".ana-bars") || el.closest(".ana-heatmap") || el.closest(".tabs") || el.closest(".ex-filter") || el.closest(".block-table") || el.closest("textarea") || el.closest("input") || el.closest(".pomo-history-list")));
+    main.addEventListener("touchstart", e => {
+      if (!isTouch()) return;
+      if (e.touches.length > 1) return;
+      if (inHScrollZone(e.target)) { mActive = false; return; }
+      mActive = true; mx = e.touches[0].clientX; my = e.touches[0].clientY;
+    }, { passive: true });
+    main.addEventListener("touchend", e => {
+      if (!mActive) return;
+      mActive = false;
+      const dx = e.changedTouches[0].clientX - mx;
+      const dy = e.changedTouches[0].clientY - my;
+      if (Math.abs(dx) < 90 || Math.abs(dy) > Math.abs(dx) * 0.7) return;
+      if (!state.lastActive) return;
+      const idx = ALL_LESSONS.findIndex(l => l.id === state.lastActive);
+      if (dx < 0 && idx < ALL_LESSONS.length - 1) openLesson(ALL_LESSONS[idx + 1].id);
+      else if (dx > 0 && idx > 0) openLesson(ALL_LESSONS[idx - 1].id);
+    });
+  }
+})();
+
+/* ====================================================================
+   SPACED REPETITION — surface a stale or weak exercise to review
+   Picks among: confidence === 'shaky' or 'no', or exercises not seen in 14+ days.
+   Shown at the top of the lesson body when present; dismissable for the session.
+   ==================================================================== */
+const _reviewDismissed = new Set();   // session-scoped — fresh on reload
+function pickReviewExercise() {
+  const candidates = [];
+  ALL_LESSONS.forEach(l => {
+    const exs = [...(l.exercises || []), ...(l.problemes || [])];
+    exs.forEach(e => {
+      const key = l.id + "-" + e.num;
+      if (_reviewDismissed.has(key)) return;
+      const conf = state.confidence[key];
+      const lastTs = state.exDone[key] || 0;
+      const ageDays = lastTs ? Math.floor((Date.now() - lastTs) / 86400000) : 0;
+      let score = 0;
+      if (conf === "no") score += 6;
+      else if (conf === "shaky") score += 4;
+      if (lastTs && ageDays >= 14) score += 2;
+      if (lastTs && ageDays >= 30) score += 2;
+      // Bookmarked = wants to review
+      if (state.bookmarks[key] && !state.exDone[key]) score += 3;
+      if (score > 0) candidates.push({ lesson: l, ex: e, key, score, ageDays });
+    });
+  });
+  if (!candidates.length) return null;
+  candidates.sort((a, b) => b.score - a.score);
+  // Pick from top-5 to keep it from being deterministic on a quiet day
+  const pool = candidates.slice(0, 5);
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+function renderReviewStrip(lesson) {
+  if (!lesson) return "";
+  const pick = pickReviewExercise();
+  if (!pick) return "";
+  const confLbl = state.confidence[pick.key] === "no" ? "😵" : state.confidence[pick.key] === "shaky" ? "😐" : "🕒";
+  const tagText = pick.ageDays >= 30 ? (state.lang === "en" ? "30d+" : "+30j")
+                : pick.ageDays >= 14 ? (state.lang === "en" ? "14d+" : "+14j")
+                : (state.lang === "en" ? "weak" : "fragile");
+  const title = esc(t(pick.ex.title));
+  const lessonTitle = esc(t(pick.lesson.title).replace(/^(Jour|Day) \d+ - /, ""));
+  return `<div class="review-strip" data-key="${pick.key}" data-lesson="${pick.lesson.id}" data-num="${pick.ex.num}">
+    <span style="font-size:22px">${confLbl}</span>
+    <div class="review-strip-info">
+      <div class="review-strip-label">${state.lang === "en" ? "Review" : "Révision"} · ${tagText}</div>
+      <div class="review-strip-desc">${title}</div>
+      <div class="review-strip-meta">${lessonTitle}</div>
+    </div>
+    <button class="review-strip-btn" data-action="open">${state.lang === "en" ? "Open" : "Ouvrir"}</button>
+    <button class="review-strip-dismiss" data-action="dismiss" aria-label="Dismiss">×</button>
+  </div>`;
+}
+function bindReviewStrip() {
+  document.querySelectorAll(".review-strip").forEach(strip => {
+    const key = strip.dataset.key;
+    const lessonId = strip.dataset.lesson;
+    const num = parseInt(strip.dataset.num, 10);
+    strip.querySelector("[data-action=open]").addEventListener("click", () => {
+      const lesson = ALL_LESSONS.find(l => l.id === lessonId);
+      const ex = lesson && [...(lesson.exercises||[]), ...(lesson.problemes||[])].find(x => x.num === num);
+      if (lesson && ex) {
+        if (state.lastActive !== lessonId) openLesson(lessonId);
+        setTimeout(() => openExModal(lesson, ex), 100);
+      }
+    });
+    strip.querySelector("[data-action=dismiss]").addEventListener("click", () => {
+      _reviewDismissed.add(key);
+      strip.remove();
+    });
+  });
+}
+
+/* ====================================================================
+   SHARE PROGRESS CARD — render a 16:9 card and download as PNG via canvas
+   ==================================================================== */
+function openShareCard() {
+  const xp = state.xp || 0;
+  const lvl = xpLevel(xp);
+  const doneLessons = Object.keys(state.completed).length;
+  const doneEx = Object.keys(state.exDone).length;
+  const streak = computeStreak();
+  const best = bestStreak();
+  const pct = Math.round((doneLessons / TOTAL) * 100);
+  const dateStr = new Date().toLocaleDateString();
+  const cardId = "share-card-render";
+  const html = `
+    <div class="share-card" id="${cardId}">
+      <div class="share-card-head">
+        <div class="share-card-brand"><span class="dot"></span> <span>PHP Tracker · Chadi Khoder</span></div>
+        <div class="share-card-date">${esc(dateStr)}</div>
+      </div>
+      <div class="share-card-body">
+        <div class="share-stat"><span class="v">${pct}<small style="font-size:18px;color:inherit;-webkit-text-fill-color:inherit">%</small></span><span class="l">${state.lang === "en" ? "completion" : "complétion"}</span></div>
+        <div class="share-stat"><span class="v">${doneEx}</span><span class="l">${state.lang === "en" ? "exos" : "exos"}</span></div>
+        <div class="share-stat"><span class="v">L${lvl}</span><span class="l">${state.lang === "en" ? "level" : "niveau"}</span></div>
+      </div>
+      <div class="share-card-foot">
+        <span>🔥 ${streak} ${state.lang === "en" ? "day streak" : "jours de suite"} · 🏆 ${state.lang === "en" ? "best" : "max"} ${best}d</span>
+        <span>${xp.toLocaleString()} XP</span>
+      </div>
+    </div>
+    <div class="share-actions">
+      <button class="modal-btn primary" id="share-download">${state.lang === "en" ? "Download PNG" : "Télécharger PNG"}</button>
+      <button class="modal-btn secondary" id="share-copy">${state.lang === "en" ? "Copy text" : "Copier en texte"}</button>
+    </div>
+  `;
+  showModal({
+    title: state.lang === "en" ? "Share progress" : "Partager ma progression",
+    body: html,
+    actions: [{ label: state.lang === "en" ? "Close" : "Fermer", variant: "secondary" }],
+  });
+  // Wire actions
+  setTimeout(() => {
+    const dl = document.getElementById("share-download");
+    const cp = document.getElementById("share-copy");
+    if (dl) dl.addEventListener("click", () => downloadShareCardPng(cardId));
+    if (cp) cp.addEventListener("click", () => {
+      const txt = `PHP Tracker · ${pct}% · ${doneEx} exos · Level ${lvl} · ${xp} XP · 🔥 ${streak}d`;
+      if (navigator.clipboard) navigator.clipboard.writeText(txt).then(() => toast(state.lang === "en" ? "Copied!" : "Copié !"));
+    });
+  }, 50);
+}
+function downloadShareCardPng(cardId) {
+  // Render the styled card into an SVG foreignObject → PNG via canvas. Pure browser, no deps.
+  const node = document.getElementById(cardId);
+  if (!node) return;
+  const rect = node.getBoundingClientRect();
+  const w = Math.round(rect.width * 2);
+  const h = Math.round(rect.height * 2);
+  const cloned = node.cloneNode(true);
+  // Inline computed styles for fidelity
+  const inline = el => {
+    const cs = getComputedStyle(el);
+    let s = "";
+    for (let i = 0; i < cs.length; i++) {
+      const p = cs[i];
+      s += `${p}:${cs.getPropertyValue(p)};`;
+    }
+    el.setAttribute("style", s);
+    [...el.children].forEach(inline);
+  };
+  inline(cloned);
+  cloned.style.width = rect.width + "px";
+  cloned.style.height = rect.height + "px";
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${rect.width} ${rect.height}">
+    <foreignObject width="100%" height="100%">
+      <div xmlns="http://www.w3.org/1999/xhtml">${cloned.outerHTML}</div>
+    </foreignObject>
+  </svg>`;
+  const img = new Image();
+  const blob = new Blob([svg], { type: "image/svg+xml" });
+  const url = URL.createObjectURL(blob);
+  img.onload = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#0a0f1c"; ctx.fillRect(0, 0, w, h);
+    ctx.drawImage(img, 0, 0, w, h);
+    canvas.toBlob(b => {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(b);
+      a.download = `php-tracker-${new Date().toISOString().slice(0,10)}.png`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(a.href);
+      toast(state.lang === "en" ? "Card saved!" : "Carte enregistrée !");
+    }, "image/png");
+    URL.revokeObjectURL(url);
+  };
+  img.onerror = () => {
+    URL.revokeObjectURL(url);
+    toast(state.lang === "en" ? "Could not render PNG" : "Rendu PNG impossible");
+  };
+  img.src = url;
+}
+
+/* ====================================================================
+   FOCUS MODE
+   ==================================================================== */
+const focusBtn = document.getElementById("focus-btn");
+function applyFocusMode() {
+  document.body.classList.toggle("focus-mode", !!state.focusMode);
+  if (focusBtn) focusBtn.setAttribute("title", T.focusBtn);
+}
+function toggleFocusMode() {
+  state.focusMode = !state.focusMode;
+  saveState();
+  applyFocusMode();
+  toast(state.focusMode ? T.focusOn : T.focusOff);
+}
+if (focusBtn) focusBtn.addEventListener("click", toggleFocusMode);
+
+/* ====================================================================
+   SHORTCUTS HELP PANEL — opens with ?
+   ==================================================================== */
+function openShortcutsModal() {
+  const rows = [
+    { group: T.scGroupNav, items: [
+      ["/", T.scSearch],
+      ["←  →", T.scPrevNext],
+      ["T", T.scTabSwap],
+      ["R", T.scRandom],
+      ["B", T.scBookmarks],
+    ]},
+    { group: T.scGroupActions, items: [
+      ["D", T.scMarkDone],
+      ["F", T.scFocus],
+      ["S", state.lang === "en" ? "Share progress card" : "Carte de partage"],
+    ]},
+    { group: T.scGroupMisc, items: [
+      ["?", T.scShortcuts],
+      ["Esc", T.scClose],
+    ]},
+  ];
+  const html = rows.map(g => `
+    <div class="sc-group">
+      <h4>${esc(g.group)}</h4>
+      ${g.items.map(([k, label]) => `
+        <div class="sc-row">
+          <span class="sc-keys">${k.split(/\s+/).map(part => `<kbd>${esc(part)}</kbd>`).join(" ")}</span>
+          <span>${esc(label)}</span>
+        </div>`).join("")}
+    </div>`).join("");
+  showModal({
+    title: T.shortcutsTitle,
+    body: `<div class="shortcuts-modal">${html}</div>`,
+    actions: [{ label: T.shortcutsClose, variant: "secondary" }],
+  });
+}
+
+/* ====================================================================
+   WEEKLY GOAL — exercises completed in the last 7 days vs target
+   ==================================================================== */
+function weekExoCount() {
+  const cutoff = Date.now() - 7 * 86400000;
+  let n = 0;
+  Object.values(state.exDone).forEach(ts => { if (ts >= cutoff) n++; });
+  return n;
+}
+function updateWeeklyGoal() {
+  const target = document.getElementById("daily-goal");
+  if (!target) return;
+  let el = document.getElementById("weekly-goal");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "weekly-goal";
+    el.className = "weekly-goal";
+    target.appendChild(el);
+  }
+  const goal = state.weeklyGoal || 50;
+  const done = weekExoCount();
+  const pct = Math.min(100, Math.round((done / goal) * 100));
+  el.classList.toggle("reached", done >= goal);
+  el.innerHTML = `
+    <span class="weekly-goal-label">📈 ${T.weeklyLabel}</span>
+    <span class="weekly-goal-bar"><span class="weekly-goal-fill" style="width:${pct}%"></span></span>
+    <span><b>${done}</b>/${goal}</span>
+  `;
+}
+
+/* ====================================================================
+   THEME
+   ==================================================================== */
+const themeBtn = document.getElementById("theme-btn");
+function applyTheme() {
+  if (state.theme === "light") {
+    document.documentElement.setAttribute("data-theme", "light");
+    if (themeBtn) themeBtn.setAttribute("title", T.toDark);
+  } else {
+    document.documentElement.removeAttribute("data-theme");
+    if (themeBtn) themeBtn.setAttribute("title", T.toLight);
+  }
+}
+if (themeBtn) {
+  themeBtn.addEventListener("click", () => {
+    state.theme = state.theme === "light" ? "dark" : "light";
+    saveState();
+    applyTheme();
+  });
+}
+
+/* ====================================================================
+   LANGUAGE TOGGLE
+   ==================================================================== */
+const langBtn = document.getElementById("lang-btn");
+const langLabel = document.getElementById("lang-label");
+function applyLang() {
+  document.documentElement.setAttribute("lang", state.lang === "en" ? "en" : "fr");
+  if (langLabel) langLabel.textContent = state.lang === "en" ? "EN" : "FR";
+  if (langBtn) langBtn.setAttribute("title", T.toggleLang);
+  applyI18n();
+  applyTheme();
+  updateExamCountdown();
+  renderSidebar();
+  updateDayIndicator();
+  // Re-render current view
+  if (state.lastActive && ALL_LESSONS.find(l => l.id === state.lastActive)) {
+    openLesson(state.lastActive);
+  } else {
+    renderWelcome();
+  }
+}
+function applyI18n() {
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const k = el.dataset.i18n;
+    if (T_DICT[k]) el.textContent = t(T_DICT[k]);
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+    const k = el.dataset.i18nPlaceholder;
+    if (T_DICT[k]) el.setAttribute("placeholder", t(T_DICT[k]));
+  });
+  document.querySelectorAll("[data-i18n-title]").forEach(el => {
+    const k = el.dataset.i18nTitle;
+    if (T_DICT[k]) el.setAttribute("title", t(T_DICT[k]));
+  });
+}
+if (langBtn) {
+  langBtn.addEventListener("click", () => {
+    state.lang = state.lang === "en" ? "fr" : "en";
+    saveState();
+    applyLang();
+  });
+}
+
+/* ====================================================================
+   EXAM COUNTDOWN
+   ==================================================================== */
+function updateExamCountdown() {
+  const el = document.getElementById("exam-countdown");
+  const daysEl = document.getElementById("exam-days");
+  const lblEl = document.getElementById("exam-lbl");
+  if (!el || !daysEl) return;
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const examDay = new Date(EXAM_DATE.getFullYear(), EXAM_DATE.getMonth(), EXAM_DATE.getDate());
+  const ms = examDay - today;
+  const examDaysLeft = Math.round(ms / 86400000);
+
+  // Show the current plan day (J3/7) in the chip; the days-until-exam is in the tooltip
+  let currentDayIdx = DAYS.findIndex(d => !state.completed[d.id]);
+  if (currentDayIdx === -1) currentDayIdx = DAYS.length - 1;
+  const planDay = currentDayIdx + 1;
+  const planTotal = DAYS.length;
+  const examDateStr = examDay.toLocaleDateString();
+
+  el.classList.remove("urgent", "passed");
+  daysEl.textContent = `${state.lang === "en" ? "D" : "J"}${planDay}`;
+  if (lblEl) lblEl.textContent = `/${planTotal}`;
+
+  if (examDaysLeft > 0) {
+    el.setAttribute("title", `${t(T_DICT.examIn)} ${examDaysLeft} ${t(T_DICT.daysShort)} · ${examDateStr}`);
+    if (examDaysLeft <= 14) el.classList.add("urgent");
+  } else if (examDaysLeft === 0) {
+    el.setAttribute("title", t(T_DICT.examToday));
+    el.classList.add("urgent");
+  } else {
+    el.setAttribute("title", t(T_DICT.examPassed));
+    el.classList.add("passed");
+  }
+  // All plan days done?
+  if (state.completed[DAYS[DAYS.length - 1].id]) {
+    daysEl.textContent = "✓";
+    if (lblEl) lblEl.textContent = "";
+    el.classList.add("passed");
+  }
+}
+
+/* ====================================================================
+   DAY-OF-PLAN INDICATOR
+   ==================================================================== */
+function updateDayIndicator() {
+  const el = document.getElementById("day-indicator");
+  if (!el) return;
+  // Current day = first day-N lesson not yet completed; if all done, last day.
+  let currentDayIdx = DAYS.findIndex(d => !state.completed[d.id]);
+  if (currentDayIdx === -1) currentDayIdx = DAYS.length - 1;
+  const bullets = DAYS.map((d, i) => {
+    if (state.completed[d.id]) return `<span class="day-bullet done" title="${esc(t(d.title))}"></span>`;
+    if (i === currentDayIdx) return `<span class="day-bullet current" title="${esc(t(d.title))}"></span>`;
+    return `<span class="day-bullet" title="${esc(t(d.title))}"></span>`;
+  }).join("");
+  el.hidden = false;
+  el.innerHTML = `${t(T_DICT.day)} <b>${currentDayIdx + 1}</b> / ${DAYS.length} ${bullets}`;
+}
+
+/* ====================================================================
+   WELCOME PAGE
+   ==================================================================== */
+function renderWelcome() {
+  const main = document.getElementById("main");
+  if (!main) return;
+  document.documentElement.classList.remove("has-active");
+
+  // Build day-card metadata with progress per day + which is "next up"
+  const firstOpenDay = DAYS.findIndex(d => !state.completed[d.id]);
+  const dayMeta = [
+    { id: "day-1", ico: "🧱", title: { fr: "PHP Basics",            en: "PHP Basics" },           sub: { fr: "Syntaxe · types · loops", en: "Syntax · types · loops" } },
+    { id: "day-2", ico: "🧮", title: { fr: "Functions / Arrays",    en: "Functions / Arrays" },   sub: { fr: "fns · arrays · dates",    en: "fns · arrays · dates" } },
+    { id: "day-3", ico: "📝", title: { fr: "Formulaires",           en: "Forms" },                sub: { fr: "forms · regex · validation", en: "forms · regex · validation" } },
+    { id: "day-4", ico: "🔐", title: { fr: "Sessions / Auth",       en: "Sessions / Auth" },      sub: { fr: "cookies · sessions",      en: "cookies · sessions" } },
+    { id: "day-5", ico: "🗄️", title: { fr: "MySQL / PDO",          en: "MySQL / PDO" },          sub: { fr: "DB · PDO · prepared",     en: "DB · PDO · prepared" } },
+    { id: "day-6", ico: "📦", title: { fr: "Uploads / CSV",         en: "Uploads / CSV" },        sub: { fr: "files · upload · CSV",   en: "files · upload · CSV" } },
+    { id: "day-7", ico: "🏁", title: { fr: "OOP + Exercice",        en: "OOP + Exercise" },       sub: { fr: "OOP · examen blanc",      en: "OOP · mock exam" } },
+  ];
+  const refMeta = [
+    { id: "w3-intro", ico: "🟢", title: { fr: "PHP Basic",        en: "PHP Basic" },        sub: { fr: "14 leçons · W3Schools",  en: "14 lessons · W3Schools" } },
+    { id: "w3-forms", ico: "🟡", title: { fr: "PHP Intermediate", en: "PHP Intermediate" }, sub: { fr: "10 leçons · W3Schools",  en: "10 lessons · W3Schools" } },
+    { id: "w3-oop",   ico: "🔴", title: { fr: "PHP Advanced",     en: "PHP Advanced" },     sub: { fr: "10 leçons · W3Schools",  en: "10 lessons · W3Schools" } },
+  ];
+
+  function dayCardHtml(m, planIdx) {
+    const lesson = ALL_LESSONS.find(l => l.id === m.id);
+    const exs = lesson ? [...(lesson.exercises||[]), ...(lesson.problemes||[])] : [];
+    const exTotal = exs.length;
+    const exDone = exs.filter(e => state.exDone[m.id + "-" + e.num]).length;
+    const pct = exTotal ? Math.round(exDone / exTotal * 100) : 0;
+    const done = !!state.completed[m.id];
+    const current = !done && planIdx === firstOpenDay;
+    const cls = ["quick-card", done ? "done" : "", current ? "current" : ""].filter(Boolean).join(" ");
+    const tag = current ? `<span class="quick-card-tag">${state.lang === "en" ? "Next up" : "À toi"}</span>` : "";
+    const dayLbl = `${t(T_DICT.dayShort)}${planIdx + 1}`;
+    return `<button class="${cls}" data-jump="${m.id}">
+      <span class="quick-card-ico">${m.ico}</span>
+      <span class="quick-card-body">
+        <span class="big">${dayLbl} · ${esc(t(m.title))}</span>
+        <span class="sub">${esc(t(m.sub))}</span>
+        <span class="quick-card-meta"><span class="quick-card-bar"><span class="quick-card-bar-fill" style="width:${pct}%"></span></span><span>${exDone}/${exTotal}</span></span>
+      </span>
+      ${tag}
+      <span class="quick-card-arrow" aria-hidden="true">→</span>
+    </button>`;
+  }
+  function refCardHtml(m) {
+    const lesson = ALL_LESSONS.find(l => l.id === m.id);
+    // Show progress across the matching group (basic / intermediate / advanced)
+    const group = m.id === "w3-intro" ? "basic" : m.id === "w3-forms" ? "intermediate" : "advanced";
+    const lessons = GIO.filter(l => (l.level || "basic") === group);
+    const total = lessons.length;
+    const done = lessons.filter(l => state.completed[l.id]).length;
+    const pct = total ? Math.round(done / total * 100) : 0;
+    const isDone = total > 0 && done === total;
+    const cls = ["quick-card", isDone ? "done" : ""].filter(Boolean).join(" ");
+    return `<button class="${cls}" data-jump="${m.id}">
+      <span class="quick-card-ico">${m.ico}</span>
+      <span class="quick-card-body">
+        <span class="big">${esc(t(m.title))}</span>
+        <span class="sub">${esc(t(m.sub))}</span>
+        <span class="quick-card-meta"><span class="quick-card-bar"><span class="quick-card-bar-fill" style="width:${pct}%"></span></span><span>${done}/${total}</span></span>
+      </span>
+      <span class="quick-card-arrow" aria-hidden="true">→</span>
+    </button>`;
+  }
+
+  // First-run hint — only when there's zero activity AND the user hasn't dismissed it
+  const noActivity = Object.keys(state.completed).length === 0 && Object.keys(state.exDone).length === 0;
+  const hintShown = !state.welcomeHintDismissed && noActivity;
+  const hintHtml = hintShown ? `
+    <div class="welcome-hint">
+      <span class="welcome-hint-ico">👋</span>
+      <span class="welcome-hint-text">${state.lang === "en"
+        ? "Click <b>Day 1</b> below to start. Each exercise gives XP and counts toward your daily goal."
+        : "Clique sur <b>Jour 1</b> ci-dessous pour démarrer. Chaque exercice donne de l'XP et avance l'objectif du jour."}</span>
+      <button class="welcome-hint-dismiss" id="welcome-hint-dismiss">${state.lang === "en" ? "Got it" : "OK"}</button>
+    </div>` : "";
+  const badges = computeBadges();
+  const unlockedCount = badges.filter(b => b.unlocked).length;
+  const badgesHtml = badges.map(b =>
+    `<div class="wc-badge ${b.unlocked ? "unlocked" : "locked"}" title="${esc(b.label)}">
+      <span class="wc-badge-emoji">${b.unlocked ? b.emoji : "🔒"}</span>
+      <span class="wc-badge-label">${esc(b.label)}</span>
+    </div>`
+  ).join("");
+  main.innerHTML = `
+    <div class="welcome">
+      <h1>${t(T_DICT.welcomeTitle)} <span class="accent">PHP</span></h1>
+      <p>${t(T_DICT.welcomeSub)}</p>
+      ${hintHtml}
+      <div class="wc-group-label">${t(T_DICT.modePlan)}</div>
+      <div class="quick-grid">
+        ${dayMeta.map((m, i) => dayCardHtml(m, i)).join("")}
+      </div>
+      <div class="wc-group-label">${t(T_DICT.modeRef)}</div>
+      <div class="quick-grid">
+        ${refMeta.map(refCardHtml).join("")}
+      </div>
+      ${renderChallengeCard()}
+      <div style="display:flex;gap:8px;margin-top:18px;flex-wrap:wrap">
+        <button class="sidebar-action-btn" id="share-btn" style="flex:0 0 auto;padding:9px 16px">📸 ${state.lang === "en" ? "Share progress" : "Partager"}</button>
+      </div>
+      <div class="wc-achievements">
+        <div class="wc-ach-head">
+          <span>${t(T_DICT.achievements)}</span>
+          <span class="wc-ach-count">${unlockedCount}/${badges.length}</span>
+        </div>
+        <div class="wc-badges">${badgesHtml}</div>
+      </div>
+      ${renderAnalytics()}
+    </div>
+  `;
+  main.querySelectorAll(".quick-card").forEach(c => {
+    c.setAttribute("role", "button");
+    c.setAttribute("tabindex", "0");
+    c.addEventListener("click", () => openLesson(c.dataset.jump));
+    c.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openLesson(c.dataset.jump);
+      }
+    });
+  });
+  const shareBtn = document.getElementById("share-btn");
+  if (shareBtn) shareBtn.addEventListener("click", openShareCard);
+  const hintDismiss = document.getElementById("welcome-hint-dismiss");
+  if (hintDismiss) hintDismiss.addEventListener("click", () => {
+    state.welcomeHintDismissed = true;
+    saveState();
+    const strip = document.querySelector(".welcome-hint");
+    if (strip) strip.remove();
+  });
+}
+
+/* ====================================================================
+   MODAL + TOAST
+   ==================================================================== */
+const modalBackdrop = document.getElementById("modal-backdrop");
+const modalTitleEl = document.getElementById("modal-title");
+const modalBodyEl = document.getElementById("modal-body");
+const modalActionsEl = document.getElementById("modal-actions");
+let modalLastFocus = null;
+
+function showModal({ title, body, actions }) {
+  if (!modalBackdrop) return;
+  modalLastFocus = document.activeElement;
+  modalTitleEl.textContent = title || "";
+  modalBodyEl.innerHTML = "";
+  if (typeof body === "string") modalBodyEl.innerHTML = body;
+  else if (body instanceof Node) modalBodyEl.appendChild(body);
+  modalActionsEl.innerHTML = "";
+  (actions || []).forEach(a => {
+    const btn = document.createElement("button");
+    btn.className = "modal-btn " + (a.variant || "secondary");
+    btn.textContent = a.label;
+    btn.addEventListener("click", () => {
+      try { a.onClick && a.onClick(); } finally {
+        if (a.closeAfter !== false) hideModal();
+      }
+    });
+    modalActionsEl.appendChild(btn);
+  });
+  modalBackdrop.classList.add("open");
+  // Focus the first primary/danger button
+  const primary = modalActionsEl.querySelector(".primary, .danger") || modalActionsEl.querySelector(".modal-btn");
+  if (primary) setTimeout(() => primary.focus(), 50);
+}
+function hideModal() {
+  if (!modalBackdrop) return;
+  modalBackdrop.classList.remove("open");
+  if (modalLastFocus && typeof modalLastFocus.focus === "function") modalLastFocus.focus();
+}
+if (modalBackdrop) {
+  modalBackdrop.addEventListener("click", e => {
+    if (e.target === modalBackdrop) hideModal();
+  });
+}
+// ESC closes any open modal
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && modalBackdrop && modalBackdrop.classList.contains("open")) {
+    e.stopPropagation();
+    hideModal();
+  }
+}, true);
+
+const toastEl = document.getElementById("toast");
+let toastTimer = null;
+function toast(msg) {
+  if (!toastEl) return;
+  toastEl.textContent = msg;
+  toastEl.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2600);
+}
+
+/* ====================================================================
+   RESET (uses modal)
+   ==================================================================== */
+const resetBtn = document.getElementById("reset-btn");
+if (resetBtn) {
+  resetBtn.addEventListener("click", () => {
+    showModal({
+      title: T.resetTitle,
+      body: T.resetBody,
+      actions: [
+        { label: T.resetCancel, variant: "secondary" },
+        { label: T.resetConfirm, variant: "danger", onClick: () => {
+            state = Object.assign(defaultState(), { theme: state.theme, lang: state.lang });
+            stopMockExam();
+            saveState();
+            renderSidebar();
+            renderWelcome();
+            toast(T.resetDone);
+          }},
+      ]
+    });
+  });
+}
+
+/* ====================================================================
+   EXPORT / IMPORT
+   ==================================================================== */
+const exportBtn = document.getElementById("export-btn");
+const importBtn = document.getElementById("import-btn");
+if (exportBtn) {
+  exportBtn.addEventListener("click", () => {
+    const json = JSON.stringify(state, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const stamp = new Date().toISOString().slice(0, 10);
+    a.href = url; a.download = `php-tracker-${stamp}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+    // Also copy to clipboard for convenience
+    if (navigator.clipboard) navigator.clipboard.writeText(json).catch(() => {});
+    toast(T.exportDone);
+  });
+}
+if (importBtn) {
+  importBtn.addEventListener("click", () => {
+    const ta = document.createElement("textarea");
+    ta.placeholder = "{ ... }";
+    showModal({
+      title: T.importBtn,
+      body: `<p>${T.importPrompt}</p>`,
+      actions: [
+        { label: T.resetCancel, variant: "secondary" },
+        { label: T.importBtn, variant: "primary", onClick: () => {
+            try {
+              const parsed = JSON.parse(ta.value);
+              if (!parsed || typeof parsed !== "object") throw new Error("bad");
+              state = Object.assign(defaultState(), parsed);
+              saveState();
+              renderSidebar();
+              if (state.lastActive && ALL_LESSONS.find(l => l.id === state.lastActive)) openLesson(state.lastActive);
+              else renderWelcome();
+              toast(T.importOk);
+            } catch {
+              toast(T.importBad);
+            }
+          }},
+      ]
+    });
+    modalBodyEl.appendChild(ta);
+    setTimeout(() => ta.focus(), 100);
+  });
+}
+
+/* ====================================================================
+   MOCK EXAM TIMER (Day 7)
+   ==================================================================== */
+let mockTimer = null;
+
+function renderMockExamCard() {
+  const endTs = parseInt(localStorage.getItem(MOCK_EXAM_KEY) || "0", 10);
+  const running = endTs > Date.now();
+  if (running) {
+    return `<div class="mock-exam-card">
+      <div class="mock-info">
+        <div class="mock-title">${T.mockRunning}</div>
+        <div class="mock-sub">${T.mockExam}</div>
+      </div>
+      <span class="mock-exam-countdown" id="mock-countdown">--:--</span>
+      <button class="mock-exam-btn stop" id="mock-stop">${T.mockStop}</button>
+    </div>`;
+  }
+  return `<div class="mock-exam-card">
+    <div class="mock-info">
+      <div class="mock-title">${T.mockExam}</div>
+      <div class="mock-sub">${MOCK_EXAM_MINUTES} min</div>
+    </div>
+    <button class="mock-exam-btn" id="mock-start">${T.startMock}</button>
+  </div>`;
+}
+
+function startMockExam() {
+  const end = Date.now() + MOCK_EXAM_MINUTES * 60 * 1000;
+  localStorage.setItem(MOCK_EXAM_KEY, String(end));
+  document.body.classList.add("mock-running");
+  if (state.lastActive) openLesson(state.lastActive);
+  startMockTicker();
+}
+function stopMockExam() {
+  localStorage.removeItem(MOCK_EXAM_KEY);
+  document.body.classList.remove("mock-running");
+  if (mockTimer) { clearInterval(mockTimer); mockTimer = null; }
+}
+function startMockTicker() {
+  if (mockTimer) clearInterval(mockTimer);
+  const tick = () => {
+    const endTs = parseInt(localStorage.getItem(MOCK_EXAM_KEY) || "0", 10);
+    if (!endTs) { stopMockExam(); return; }
+    const remain = Math.max(0, endTs - Date.now());
+    const el = document.getElementById("mock-countdown");
+    if (el) {
+      const mm = String(Math.floor(remain / 60000)).padStart(2, "0");
+      const ss = String(Math.floor((remain % 60000) / 1000)).padStart(2, "0");
+      el.textContent = `${mm}:${ss}`;
+      el.classList.toggle("urgent", remain < 5 * 60 * 1000);
+    }
+    if (remain <= 0) {
+      stopMockExam();
+      toast(T.mockFinished);
+      celebrate();
+      if (state.lastActive) openLesson(state.lastActive);
+    }
+  };
+  tick();
+  mockTimer = setInterval(tick, 500);
+}
+// Bind mock buttons via event delegation (works each re-render)
+document.body.addEventListener("click", e => {
+  if (e.target && e.target.id === "mock-start") startMockExam();
+  if (e.target && e.target.id === "mock-stop") {
+    showModal({
+      title: T.mockStop,
+      body: t({ fr: "Arrêter l'exercice en cours ?", en: "Stop the exercise in progress?" }),
+      actions: [
+        { label: T.resetCancel, variant: "secondary" },
+        { label: T.mockStop, variant: "danger", onClick: () => { stopMockExam(); if (state.lastActive) openLesson(state.lastActive); }},
+      ],
+    });
+  }
+});
+
+/* ====================================================================
+   KEYBOARD SHORTCUTS
+   ==================================================================== */
+document.addEventListener("keydown", e => {
+  const tag = e.target.tagName;
+  if (tag === "INPUT" || tag === "TEXTAREA" || e.target.isContentEditable) return;
+  if (e.key === "/") {
+    e.preventDefault();
+    document.body.classList.add("drawer-open");
+    setTimeout(() => document.getElementById("search").focus(), 50);
+    return;
+  }
+  if (e.key === "?") {
+    e.preventDefault();
+    openShortcutsModal();
+    return;
+  }
+  if (e.key === "f" || e.key === "F") {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    toggleFocusMode();
+    return;
+  }
+  if (e.key === "s" || e.key === "S") {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    openShareCard();
+    return;
+  }
+  if (e.key === "r" || e.key === "R") {
+    jumpToRandomExercise();
+    return;
+  }
+  if (!state.lastActive) return;
+  const idx = ALL_LESSONS.findIndex(l => l.id === state.lastActive);
+  if (e.key === "ArrowRight" && idx < ALL_LESSONS.length - 1) {
+    openLesson(ALL_LESSONS[idx + 1].id);
+  }
+  if (e.key === "ArrowLeft" && idx > 0) {
+    openLesson(ALL_LESSONS[idx - 1].id);
+  }
+  if (e.key === "t" || e.key === "T") {
+    const lesson = ALL_LESSONS[idx];
+    if (lesson && ((lesson.exercises && lesson.exercises.length) || (lesson.problemes && lesson.problemes.length))) {
+      currentTab = currentTab === "cours" ? "exos" : "cours";
+      renderExArea(lesson);
+      bindCopyButtons();
+    }
+  }
+  if (e.key === "b" || e.key === "B") {
+    const lesson = ALL_LESSONS[idx];
+    if (!lesson) return;
+    const exAll = [...(lesson.exercises || []), ...(lesson.problemes || [])];
+    const bmCount = exAll.filter(e => state.bookmarks[lesson.id + "-" + e.num]).length;
+    if (bmCount > 0 && exAll.length) {
+      currentTab = "exos";
+      renderExArea(lesson);
+      bindCopyButtons();
+    }
+  }
+  if (e.key === "d" || e.key === "D") {
+    if (ALL_LESSONS[idx]) toggleDone(state.lastActive);
+  }
+  if (e.key === "Escape") {
+    document.body.classList.remove("drawer-open");
+  }
+});
+
+/* ====================================================================
+   MOBILE DRAWER
+   ==================================================================== */
+const menuBtn = document.getElementById("menu-btn");
+const backdrop = document.getElementById("drawer-backdrop");
+
+if (menuBtn) {
+  menuBtn.addEventListener("click", () => document.body.classList.toggle("drawer-open"));
+}
+if (backdrop) {
+  backdrop.addEventListener("click", () => document.body.classList.remove("drawer-open"));
+}
+
+/* ====================================================================
+   POMODORO TIMER + ALARM
+   Classic 25/5 (long break every 4). State lives in state.pomo so it
+   rides the per-tracker storage key. endTs is absolute so it survives
+   reloads. Alarm uses Web Audio (no asset) + optional Notification.
+   ==================================================================== */
+function pomoState() {
+  const def = { phase: "focus", running: false, endTs: null, leftMs: null, focusMin: 25, shortMin: 5, longMin: 15, completed: 0, cycle: 0, soundOn: true, autoStart: false };
+  if (!state.pomo || typeof state.pomo !== "object") state.pomo = def;
+  else for (const k in def) if (!(k in state.pomo)) state.pomo[k] = def[k];
+  return state.pomo;
+}
+function pomoPhaseMin(p) { return p.phase === "focus" ? p.focusMin : p.phase === "long" ? p.longMin : p.shortMin; }
+function pomoPhaseLabel(p) { return p.phase === "focus" ? T.pomoFocus : p.phase === "long" ? T.pomoLong : T.pomoShort; }
+function pomoFmt(ms) {
+  ms = Math.max(0, ms);
+  const m = Math.floor(ms / 60000), s = Math.floor((ms % 60000) / 1000);
+  return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+}
+function pomoRemaining() {
+  const p = pomoState();
+  if (p.running && p.endTs) return Math.max(0, p.endTs - Date.now());
+  if (p.leftMs != null) return p.leftMs;
+  return pomoPhaseMin(p) * 60000;
+}
+let pomoAudio = null;
+function pomoEnsureAudio() {
+  try {
+    pomoAudio = pomoAudio || new (window.AudioContext || window.webkitAudioContext)();
+    if (pomoAudio.state === "suspended") pomoAudio.resume();
+  } catch (e) {}
+}
+function pomoBeep(times) {
+  if (!pomoState().soundOn) return;
+  pomoEnsureAudio();
+  if (!pomoAudio) return;
+  try {
+    let t = pomoAudio.currentTime;
+    for (let i = 0; i < times; i++) {
+      const o = pomoAudio.createOscillator(), g = pomoAudio.createGain();
+      o.type = "sine";
+      o.frequency.value = i % 2 ? 660 : 880;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.32, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.34);
+      o.connect(g); g.connect(pomoAudio.destination);
+      o.start(t); o.stop(t + 0.36);
+      t += 0.42;
+    }
+  } catch (e) {}
+}
+function pomoNotify(msg) {
+  try {
+    if (window.Notification && Notification.permission === "granted") {
+      new Notification("🍅 " + T.pomodoro, { body: msg });
+    }
+  } catch (e) {}
+}
+let pomoTimer = null;
+function pomoStartTicker() {
+  if (pomoTimer) clearInterval(pomoTimer);
+  pomoTimer = setInterval(pomoTick, 500);
+}
+function pomoStopTicker() {
+  if (pomoTimer) { clearInterval(pomoTimer); pomoTimer = null; }
+}
+function pomoTick() {
+  const p = pomoState();
+  if (!p.running) return;
+  if (pomoRemaining() <= 0) { pomoComplete(); return; }
+  pomoRender();
+}
+function pomoStart() {
+  const p = pomoState();
+  const base = p.leftMs != null ? p.leftMs : pomoPhaseMin(p) * 60000;
+  p.endTs = Date.now() + base;
+  p.leftMs = null;
+  p.running = true;
+  pomoEnsureAudio();
+  saveState();
+  pomoStartTicker();
+  pomoRender();
+}
+function pomoPause() {
+  const p = pomoState();
+  p.leftMs = pomoRemaining();
+  p.running = false;
+  p.endTs = null;
+  pomoStopTicker();
+  saveState();
+  pomoRender();
+}
+function pomoToggle() { pomoState().running ? pomoPause() : pomoStart(); }
+function pomoReset() {
+  const p = pomoState();
+  p.running = false; p.endTs = null; p.leftMs = pomoPhaseMin(p) * 60000;
+  pomoStopTicker();
+  saveState();
+  pomoRender();
+}
+function pomoAdvance() {
+  const p = pomoState();
+  if (p.phase === "focus") {
+    p.completed += 1;
+    p.cycle += 1;
+    p.phase = (p.cycle % 4 === 0) ? "long" : "short";
+  } else {
+    p.phase = "focus";
+  }
+  p.running = false; p.endTs = null; p.leftMs = pomoPhaseMin(p) * 60000;
+  pomoStopTicker();
+  saveState();
+  pomoRender();
+}
+function pomoComplete() {
+  const p = pomoState();
+  const wasFocus = p.phase === "focus";
+  pomoStopTicker();
+  pomoBeep(3);
+  if (wasFocus) {
+    if (!Array.isArray(state.pomoLog)) state.pomoLog = [];
+    state.pomoLog.push({ ts: Date.now(), min: p.focusMin });
+    // Cap log to keep storage light (last 200 sessions)
+    if (state.pomoLog.length > 200) state.pomoLog = state.pomoLog.slice(-200);
+    saveState();
+    awardXp(5, "Pomodoro");
+    checkChallenge();
+  }
+  pomoAdvance();
+  // Auto-start the next phase if break and the user opted in
+  if (wasFocus && p.autoStart) {
+    pomoStart();
+  }
+  const msg = wasFocus ? T.pomoFocusDone : T.pomoBreakDone;
+  toast(msg);
+  pomoNotify(msg);
+}
+
+function pomoTodayCount() {
+  if (!Array.isArray(state.pomoLog)) return 0;
+  const today = new Date().toDateString();
+  return state.pomoLog.filter(s => new Date(s.ts).toDateString() === today).length;
+}
+function pomoRenderHistory() {
+  const list = document.getElementById("pomo-history-list");
+  const countEl = document.getElementById("pomo-today-count");
+  if (!list) return;
+  const today = new Date().toDateString();
+  const sessions = (Array.isArray(state.pomoLog) ? state.pomoLog : []).filter(s => new Date(s.ts).toDateString() === today);
+  if (countEl) countEl.textContent = sessions.length;
+  list.innerHTML = sessions.length
+    ? sessions.map(s => `<span class="pomo-history-pip" title="${new Date(s.ts).toLocaleTimeString()} · ${s.min} min"></span>`).join("")
+    : `<span class="pomo-history-empty">—</span>`;
+}
+function pomoRender() {
+  const p = pomoState();
+  const rem = pomoRemaining();
+  const disp = document.getElementById("pomo-display");
+  const phaseEl = document.getElementById("pomo-phase");
+  const toggle = document.getElementById("pomo-toggle");
+  const countEl = document.getElementById("pomo-count");
+  const timeEl = document.getElementById("pomo-time");
+  const btn = document.getElementById("pomo-btn");
+  const barFill = document.getElementById("pomo-bar-fill");
+  const panel = document.getElementById("pomo-panel");
+  if (disp) disp.textContent = pomoFmt(rem);
+  if (phaseEl) phaseEl.textContent = pomoPhaseLabel(p);
+  if (toggle) toggle.textContent = p.running ? T.pomoPause : T.pomoStart;
+  if (countEl) countEl.textContent = p.completed;
+  if (timeEl) timeEl.textContent = p.running ? pomoFmt(rem) : "";
+  if (btn) btn.classList.toggle("running", !!p.running);
+  if (panel) panel.classList.toggle("phase-break", p.phase !== "focus");
+  if (barFill) {
+    const total = pomoPhaseMin(p) * 60000 || 1;
+    barFill.style.width = Math.min(100, (1 - rem / total) * 100) + "%";
+  }
+  // Circular ring — 477.52 ≈ 2 * PI * 76
+  const ring = document.getElementById("pomo-ring-fg");
+  if (ring) {
+    const total = pomoPhaseMin(p) * 60000 || 1;
+    const C = 477.52;
+    const pct = Math.min(1, Math.max(0, 1 - rem / total));
+    ring.style.strokeDashoffset = String(C * pct);
+  }
+  const fIn = document.getElementById("pomo-focus-min");
+  const sIn = document.getElementById("pomo-short-min");
+  const lIn = document.getElementById("pomo-long-min");
+  const auto = document.getElementById("pomo-autostart");
+  const snd = document.getElementById("pomo-sound");
+  if (fIn && document.activeElement !== fIn) fIn.value = p.focusMin;
+  if (sIn && document.activeElement !== sIn) sIn.value = p.shortMin;
+  if (lIn && document.activeElement !== lIn) lIn.value = p.longMin;
+  if (auto) auto.checked = !!p.autoStart;
+  if (snd) { snd.textContent = p.soundOn ? "🔔" : "🔕"; snd.classList.toggle("off", !p.soundOn); }
+  pomoRenderHistory();
+}
+function initPomodoro() {
+  const btn = document.getElementById("pomo-btn");
+  const panel = document.getElementById("pomo-panel");
+  if (!btn || !panel) return;
+  const p = pomoState();
+  // Resume a running timer across reloads
+  if (p.running && p.endTs) {
+    if (p.endTs > Date.now()) pomoStartTicker();
+    else pomoComplete(); // finished while the tab was closed
+  }
+  btn.addEventListener("click", e => {
+    e.stopPropagation();
+    const open = panel.classList.toggle("open");
+    panel.setAttribute("aria-hidden", open ? "false" : "true");
+    if (open && window.Notification && Notification.permission === "default") {
+      Notification.requestPermission().catch(() => {});
+    }
+    pomoRender();
+  });
+  document.getElementById("pomo-toggle").addEventListener("click", pomoToggle);
+  document.getElementById("pomo-reset").addEventListener("click", pomoReset);
+  document.getElementById("pomo-skip").addEventListener("click", pomoAdvance);
+  const fIn = document.getElementById("pomo-focus-min");
+  const sIn = document.getElementById("pomo-short-min");
+  const snd = document.getElementById("pomo-sound");
+  if (fIn) fIn.addEventListener("change", () => {
+    const v = Math.max(1, Math.min(90, parseInt(fIn.value, 10) || 25));
+    const q = pomoState(); q.focusMin = v;
+    if (!q.running && q.phase === "focus") q.leftMs = v * 60000;
+    saveState(); pomoRender();
+  });
+  if (sIn) sIn.addEventListener("change", () => {
+    const v = Math.max(1, Math.min(60, parseInt(sIn.value, 10) || 5));
+    const q = pomoState(); q.shortMin = v;
+    if (!q.running && q.phase === "short") q.leftMs = v * 60000;
+    saveState(); pomoRender();
+  });
+  const lIn = document.getElementById("pomo-long-min");
+  if (lIn) lIn.addEventListener("change", () => {
+    const v = Math.max(5, Math.min(60, parseInt(lIn.value, 10) || 15));
+    const q = pomoState(); q.longMin = v;
+    if (!q.running && q.phase === "long") q.leftMs = v * 60000;
+    saveState(); pomoRender();
+  });
+  const auto = document.getElementById("pomo-autostart");
+  if (auto) auto.addEventListener("change", () => {
+    pomoState().autoStart = auto.checked;
+    saveState();
+  });
+  const clear = document.getElementById("pomo-history-clear");
+  if (clear) clear.addEventListener("click", () => {
+    if (!Array.isArray(state.pomoLog) || !state.pomoLog.length) return;
+    const today = new Date().toDateString();
+    state.pomoLog = state.pomoLog.filter(s => new Date(s.ts).toDateString() !== today);
+    pomoState().completed = 0;
+    saveState();
+    pomoRender();
+  });
+  if (snd) snd.addEventListener("click", () => { pomoState().soundOn = !pomoState().soundOn; saveState(); pomoRender(); });
+  document.addEventListener("click", e => {
+    if (panel.classList.contains("open") && !panel.contains(e.target) && !btn.contains(e.target)) {
+      panel.classList.remove("open"); panel.setAttribute("aria-hidden", "true");
+    }
+  });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && panel.classList.contains("open")) {
+      panel.classList.remove("open"); panel.setAttribute("aria-hidden", "true");
+    }
+  });
+  pomoRender();
+}
+
+/* ====================================================================
+   INIT
+   ==================================================================== */
+applyTheme();
+applyFocusMode();
+refreshXp();
+applyI18n();
+if (langLabel) langLabel.textContent = state.lang === "en" ? "EN" : "FR";
+if (langBtn) langBtn.setAttribute("title", T.toggleLang);
+document.documentElement.setAttribute("lang", state.lang === "en" ? "en" : "fr");
+renderSidebar();
+bindCollapseTitles();
+updateExamCountdown();
+updateDayIndicator();
+// Refresh countdown once an hour (covers day rollover during long sessions)
+setInterval(updateExamCountdown, 60 * 60 * 1000);
+
+if (state.lastActive && ALL_LESSONS.find(l => l.id === state.lastActive)) {
+  openLesson(state.lastActive);
+} else {
+  renderWelcome();
+}
+
+// Resume timed exercise if one was in progress
+if (parseInt(localStorage.getItem(MOCK_EXAM_KEY) || "0", 10) > Date.now()) {
+  document.body.classList.add("mock-running");
+  startMockTicker();
+}
+
+initPomodoro();
+
+/* ====================================================================
+   SCROLL PROGRESS BAR + JUMP TO TOP
+   ==================================================================== */
+const scrollBar = document.getElementById("scroll-progress");
+const jumpTopBtn = document.getElementById("jump-top");
+let scrollRaf = 0;
+function onScroll() {
+  if (scrollRaf) return;
+  scrollRaf = requestAnimationFrame(() => {
+    scrollRaf = 0;
+    const doc = document.documentElement;
+    const max = (doc.scrollHeight - doc.clientHeight) || 1;
+    const pct = Math.min(100, Math.max(0, (window.scrollY / max) * 100));
+    if (scrollBar) scrollBar.style.width = pct + "%";
+    if (jumpTopBtn) jumpTopBtn.classList.toggle("show", window.scrollY > 400);
+  });
+}
+window.addEventListener("scroll", onScroll, { passive: true });
+window.addEventListener("resize", onScroll, { passive: true });
+if (jumpTopBtn) jumpTopBtn.addEventListener("click", () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+onScroll();
+
