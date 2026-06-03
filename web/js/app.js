@@ -1364,7 +1364,7 @@ function refreshAchievements() {
   if (row.dataset.sig === sig) return;
   row.dataset.sig = sig;
   row.innerHTML = badges.map(b =>
-    `<span class="achieve-badge ${b.unlocked ? 'unlocked' : 'locked'}" title="${esc(b.unlocked ? b.label : T.achLocked + ' · ' + b.label)}">${b.emoji}</span>`
+    `<span class="achieve-badge ${b.unlocked ? 'unlocked' : 'locked'}" title="${esc(b.unlocked ? b.label : T.achLocked + ' · ' + b.label)}">${b.svg || ''}</span>`
   ).join("");
 }
 
@@ -2399,9 +2399,10 @@ function renderWelcome() {
     </div>` : "";
   const badges = computeBadges();
   const unlockedCount = badges.filter(b => b.unlocked).length;
+  const lockSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
   const badgesHtml = badges.map(b =>
     `<div class="wc-badge ${b.unlocked ? "unlocked" : "locked"}" title="${esc(b.label)}">
-      <span class="wc-badge-emoji">${b.unlocked ? b.emoji : "🔒"}</span>
+      <span class="wc-badge-emoji">${b.unlocked ? (b.svg || '') : lockSvg}</span>
       <span class="wc-badge-label">${esc(b.label)}</span>
     </div>`
   ).join("");
@@ -2419,8 +2420,11 @@ function renderWelcome() {
         ${refMeta.map(refCardHtml).join("")}
       </div>
       ${renderChallengeCard()}
-      <div style="display:flex;gap:8px;margin-top:18px;flex-wrap:wrap">
-        <button class="sidebar-action-btn" id="share-btn" style="flex:0 0 auto;padding:9px 16px">📸 ${state.lang === "en" ? "Share progress" : "Partager"}</button>
+      <div class="wc-share-row">
+        <button class="sidebar-action-btn wc-share-btn" id="share-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          <span>${state.lang === "en" ? "Share progress" : "Partager"}</span>
+        </button>
       </div>
       <div class="wc-achievements">
         <div class="wc-ach-head">
@@ -2703,11 +2707,18 @@ document.addEventListener("keydown", e => {
   }
   if (e.key === "t" || e.key === "T") {
     const lesson = ALL_LESSONS[idx];
-    if (lesson && ((lesson.exercises && lesson.exercises.length) || (lesson.problemes && lesson.problemes.length))) {
-      currentTab = currentTab === "cours" ? "exos" : "cours";
-      renderExArea(lesson);
-      bindCopyButtons();
-    }
+    if (!lesson) return;
+    const hasEx = !!(lesson.exercises && lesson.exercises.length);
+    const hasProbs = !!(lesson.problemes && lesson.problemes.length);
+    if (!hasEx && !hasProbs) return;
+    // Cycle: cours -> exos -> probs -> cours, skipping tabs the lesson doesn't have
+    const order = ["cours"];
+    if (hasEx) order.push("exos");
+    if (hasProbs) order.push("probs");
+    const i = order.indexOf(currentTab);
+    currentTab = order[(i + 1) % order.length];
+    renderExArea(lesson);
+    bindCopyButtons();
   }
   if (e.key === "b" || e.key === "B") {
     const lesson = ALL_LESSONS[idx];

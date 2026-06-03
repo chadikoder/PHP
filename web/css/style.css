@@ -5,38 +5,41 @@
    ============================================================ */
 
 /* ---------- 1. TOKENS ---------- */
-/* iOS / macOS-inspired palette — most-tested system colours, very legible,
-   non-saturated accents, neutral surfaces that don't strain the eyes. */
+/* Tailwind Zinc + vivid Indigo — neutral surfaces with a vibrant accent.
+   Sidebar gets a subtle indigo gradient overlay for "life" without losing readability. */
 :root{
-  /* Dark — true neutral (iOS Dark) */
-  --bg:         #1c1c1e;
-  --surface:    #2c2c2e;
-  --surface-2:  #3a3a3c;
-  --surface-3:  #48484a;
-  --sidebar-bg: #232325;        /* a half-step between bg and surface */
+  /* Dark — Zinc neutral with vivid indigo accent */
+  --bg:         #0a0a0b;
+  --surface:    #18181b;
+  --surface-2:  #27272a;
+  --surface-3:  #3f3f46;
+  --sidebar-bg: #131316;
   --border:     rgba(255,255,255,.07);
   --border-2:   rgba(255,255,255,.13);
 
-  --text:       #ebebf5;
+  --text:       #fafafa;
   --text-2:     #a1a1aa;
-  --text-3:     #6e6e76;
+  --text-3:     #71717a;
 
-  /* Accent — iOS system-blue */
-  --accent:     #0a84ff;
-  --accent-2:   #0066cc;
-  --accent-r:   10; --accent-g:132; --accent-b:255;
+  /* Accent — vivid indigo with magenta secondary for highlights */
+  --accent:     #818cf8;
+  --accent-2:   #6366f1;
+  --accent-r:   129; --accent-g:140; --accent-b:248;
+  --accent-glow:#a78bfa;
+  --accent-pink:#f472b6;
 
-  --good:       #30d158;
-  --warn:       #ff9f0a;
-  --bad:        #ff453a;
-  --info:       #64d2ff;
+  --good:       #4ade80;
+  --warn:       #facc15;
+  --bad:        #f87171;
+  --info:       #38bdf8;
 
-  --grad:       linear-gradient(135deg,#0a84ff,#0066cc);
-  --grad-good:  linear-gradient(135deg,#30d158,#1f9c45);
+  --grad:       linear-gradient(135deg,#818cf8,#6366f1 60%,#a78bfa);
+  --grad-good:  linear-gradient(135deg,#4ade80,#22c55e);
+  --grad-warm:  linear-gradient(135deg,#f472b6,#a78bfa);
   --shadow-sm:  0 1px 2px rgba(0,0,0,.4);
-  --shadow:     0 6px 22px -10px rgba(0,0,0,.5),0 2px 6px -2px rgba(0,0,0,.3);
-  --shadow-lg:  0 18px 48px -16px rgba(0,0,0,.6),0 6px 16px -6px rgba(0,0,0,.35);
-  --ring:       0 0 0 3px rgba(var(--accent-r),var(--accent-g),var(--accent-b),.25);
+  --shadow:     0 6px 22px -10px rgba(0,0,0,.55),0 2px 6px -2px rgba(0,0,0,.3);
+  --shadow-lg:  0 18px 48px -16px rgba(0,0,0,.65),0 6px 16px -6px rgba(0,0,0,.35);
+  --ring:       0 0 0 3px rgba(var(--accent-r),var(--accent-g),var(--accent-b),.28);
 
   --r:          10px;
   --r-sm:       8px;
@@ -48,33 +51,42 @@
 }
 
 [data-theme="light"]{
-  /* Light — iOS Light: cool neutral grey, true white surfaces */
-  --bg:         #f2f2f7;
+  --bg:         #fafafa;
   --surface:    #ffffff;
-  --surface-2:  #f6f6fa;
-  --surface-3:  #e5e5ea;
-  --sidebar-bg: #f7f7fa;
-  --border:     rgba(60,60,67,.10);
-  --border-2:   rgba(60,60,67,.20);
+  --surface-2:  #f4f4f5;
+  --surface-3:  #e4e4e7;
+  --sidebar-bg: #fcfcfd;
+  --border:     rgba(24,24,27,.07);
+  --border-2:   rgba(24,24,27,.13);
 
-  --text:       #1c1c1e;
-  --text-2:     #48484a;
-  --text-3:     #8e8e93;
+  --text:       #18181b;
+  --text-2:     #52525b;
+  --text-3:     #71717a;
 
-  --accent:     #007aff;
-  --accent-2:   #0062cc;
-  --accent-r:   0; --accent-g:122; --accent-b:255;
+  --accent:     #6366f1;
+  --accent-2:   #4f46e5;
+  --accent-r:   99; --accent-g:102; --accent-b:241;
+  --accent-glow:#8b5cf6;
+  --accent-pink:#ec4899;
 
-  --good:       #34c759;
-  --warn:       #ff9500;
-  --bad:        #ff3b30;
-  --info:       #5ac8fa;
+  --good:       #16a34a;
+  --warn:       #ca8a04;
+  --bad:        #dc2626;
+  --info:       #0284c7;
 
-  --grad:       linear-gradient(135deg,#007aff,#0062cc);
-  --grad-good:  linear-gradient(135deg,#34c759,#28a745);
-  --shadow-sm:  0 1px 2px rgba(0,0,0,.04);
-  --shadow:     0 4px 16px -6px rgba(0,0,0,.08),0 2px 6px -2px rgba(0,0,0,.04);
-  --shadow-lg:  0 16px 42px -14px rgba(0,0,0,.12),0 6px 14px -4px rgba(0,0,0,.06);
+  --grad:       linear-gradient(135deg,#6366f1,#4f46e5 60%,#8b5cf6);
+  --grad-good:  linear-gradient(135deg,#16a34a,#15803d);
+  --grad-warm:  linear-gradient(135deg,#ec4899,#8b5cf6);
+  --shadow-sm:  0 1px 2px rgba(24,24,27,.05);
+  --shadow:     0 4px 16px -6px rgba(24,24,27,.10),0 2px 6px -2px rgba(24,24,27,.05);
+  --shadow-lg:  0 16px 42px -14px rgba(24,24,27,.15),0 6px 14px -4px rgba(24,24,27,.07);
+}
+
+/* Sidebar gets a subtle indigo/purple top-glow for life — never solid colour */
+.sidebar{
+  background:
+    radial-gradient(120% 60% at 0% 0%,rgba(var(--accent-r),var(--accent-g),var(--accent-b),.07),transparent 60%),
+    var(--sidebar-bg);
 }
 
 /* Light-mode component polish — overrides for cards, headers, code, chips */
@@ -1388,7 +1400,7 @@ body.drawer-open{overflow:hidden}
   transition:border-color .15s var(--ease);
 }
 .pomo-toggle-full:hover{border-color:var(--border-2);color:var(--text)}
-@media(max-width:640px){.pomo-panel{right:8px;left:8px;width:auto;top:58px}}
+@media(max-width:640px){.pomo-panel{right:8px;left:auto;width:min(280px,calc(100vw - 16px));top:58px}}
 
 /* ============================================================
    18. MODAL ACTION BUTTONS (mark-done / view-sol / bookmark / conf)
@@ -2150,6 +2162,28 @@ header{background:rgba(11,17,32,.82);border-bottom:1px solid rgba(148,163,184,.0
 /* Responsive drop order — keeps essentials, never overflows the row */
 @media(max-width:1024px){.stat-group .stat:nth-child(3){display:none}}
 @media(max-width:920px){.pwa-install-btn span{display:none}.pwa-install-btn{width:30px;padding:0;justify-content:center}}
+/* On phones: install button is non-essential — move it into the sidebar action row instead of crowding the header */
+@media(max-width:720px){
+  .pwa-install-btn{display:none}
+  header .pwa-install-btn{display:none}
+}
+
+/* Mobile navbar — minimal essentials, even spacing */
+@media(max-width:720px){
+  header{gap:6px;padding:0 10px}
+  .logo span:not(.logo-icon){display:none}     /* hide "PHP Tracker" text, keep the logo icon */
+  .exam-countdown{padding:0 9px;font-size:11px}
+  .icon-btn{width:32px;height:32px}
+  .lang-btn{height:32px;padding:0 9px}
+  .pomo-trigger{height:32px;padding:0 9px}
+}
+@media(max-width:480px){
+  header{gap:4px;padding:0 8px}
+  .icon-btn{width:30px;height:30px}
+  .lang-btn{height:30px;padding:0 7px;font-size:11px}
+  .pomo-trigger{height:30px;padding:0 7px}
+  .exam-countdown{padding:0 7px;font-size:10.5px}
+}
 @media(max-width:860px){.stat-group .stat:nth-child(2){display:none}}
 @media(max-width:760px){.stat-group{display:none}}        /* drawer's progress card shows the same numbers */
 @media(max-width:560px){.exam-countdown{padding:0 9px;font-size:11px}}
@@ -2436,19 +2470,32 @@ header{flex-wrap:nowrap}
 /* ============================================================
    30. MOBILE REVIEW PASS 3 — small check, slim modal, consistent gaps
    ============================================================ */
-/* Mobile check: keep generous tap target + clear ring contrast */
+/* Mobile check: smaller, subtler ring (user-requested reduction) */
 @media(max-width:720px){
-  .ex-check{width:24px;height:24px;border-width:2px;flex:0 0 24px;border-color:var(--text-3)}
-  .ex-check::after{width:13px;height:13px}
-  .nav-check{width:24px;height:24px;border-width:2px;flex:0 0 24px;border-color:var(--text-3)}
-  .nav-check::after{width:12px;height:12px}
-}
-@media(max-width:480px){
-  .ex-check{width:22px;height:22px;border-width:1.8px;flex:0 0 22px}
+  .ex-check{width:22px;height:22px;border-width:1.6px;flex:0 0 22px;border-color:var(--text-3)}
   .ex-check::after{width:12px;height:12px}
-  .nav-check{width:22px;height:22px;border-width:1.8px;flex:0 0 22px}
+  .nav-check{width:22px;height:22px;border-width:1.6px;flex:0 0 22px;border-color:var(--text-3)}
   .nav-check::after{width:11px;height:11px}
 }
+@media(max-width:480px){
+  .ex-check{width:20px;height:20px;border-width:1.5px;flex:0 0 20px}
+  .ex-check::after{width:11px;height:11px}
+  .nav-check{width:20px;height:20px;border-width:1.5px;flex:0 0 20px}
+  .nav-check::after{width:10px;height:10px}
+}
+
+/* Welcome share row + button — proper styled, no inline */
+.wc-share-row{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+.wc-share-btn{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:10px 18px;border-radius:99px;
+  background:var(--surface);border:1px solid var(--border);color:var(--text-2);
+  font-size:12.5px;font-weight:600;cursor:pointer;
+  transition:all .15s var(--ease);
+}
+.wc-share-btn:hover{color:var(--text);border-color:var(--accent);background:var(--surface-2);transform:translateY(-1px)}
+.wc-share-btn svg{opacity:.7;transition:opacity .15s var(--ease)}
+.wc-share-btn:hover svg{opacity:1;color:var(--accent)}
 
 /* Slim mobile modal actions — no more giant column buttons. Two-up, 38px tall, neutral. */
 @media(max-width:600px){
