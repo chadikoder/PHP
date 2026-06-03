@@ -160,18 +160,40 @@
 [data-theme="light"] .pwa-install-btn{background:#ffffff}
 [data-theme="light"] .ex-modal-bookmark.active{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.32);color:#b45309}
 
-/* Smooth theme-swap — applies on every commonly-themed prop for ~280ms */
+/* Light-mode sidebar counters — the dark-theme greys were washing out on white */
+[data-theme="light"] .nav-tag{
+  background:rgba(15,23,42,.05);color:#475569;
+  border:1px solid rgba(15,23,42,.04);
+}
+[data-theme="light"] .nav-ex-count{
+  background:rgba(15,23,42,.05);color:#475569;
+  border:1px solid rgba(15,23,42,.04);font-weight:700;
+}
+[data-theme="light"] .nav-progress{background:rgba(15,23,42,.06)}
+[data-theme="light"] .nav-progress-fill{background:linear-gradient(90deg,#818cf8,#6366f1)}
+[data-theme="light"] .nav-item.fully-done .nav-ex-count{
+  background:rgba(16,185,129,.10);color:#047857;border-color:rgba(16,185,129,.18);
+}
+[data-theme="light"] .nav-item.fully-done .nav-progress-fill{background:linear-gradient(90deg,#34d399,#10b981)}
+[data-theme="light"] .nav-item.done .nav-tag{background:rgba(16,185,129,.10);color:#047857;border-color:rgba(16,185,129,.18)}
+[data-theme="light"] .nav-item.day-current .nav-tag{background:var(--accent);color:#fff;border-color:transparent}
+[data-theme="light"] .nav-item.day-locked .nav-tag{border:1px dashed rgba(15,23,42,.16);background:transparent;color:#94a3b8}
+
+/* Light-mode achievements + small chips */
+[data-theme="light"] .achieve-count{background:rgba(99,102,241,.10);color:#4f46e5}
+[data-theme="light"] .ex-diff.easy{background:rgba(16,185,129,.12);color:#047857}
+[data-theme="light"] .ex-diff.medium{background:rgba(245,158,11,.12);color:#b45309}
+[data-theme="light"] .ex-diff.hard{background:rgba(239,68,68,.10);color:#b91c1c}
+[data-theme="light"] .ex-diff.extreme{background:rgba(168,85,247,.12);color:#7e22ce}
+[data-theme="light"] .nav-check{border-color:#94a3b8}
+[data-theme="light"] .ex-check{border-color:#94a3b8}
+
+/* Smooth theme-swap — applies on every commonly-themed prop for ~400ms */
 html.theme-transitioning,
 html.theme-transitioning body,
 html.theme-transitioning *:not(.scroll-progress):not(.confetti-p):not(.progress-ring-fg):not(.pomo-ring-fg):not(.bar-fill):not(.progress-fill):not(.quick-card-bar-fill):not(.daily-fill):not(.weekly-goal-fill):not(.xp-bar-fill){
-  transition:background-color .28s var(--ease),border-color .28s var(--ease),color .28s var(--ease),box-shadow .28s var(--ease),fill .28s var(--ease),stroke .28s var(--ease) !important;
+  transition:background-color .4s var(--ease),border-color .4s var(--ease),color .4s var(--ease),box-shadow .4s var(--ease),fill .4s var(--ease),stroke .4s var(--ease) !important;
   transition-delay:0s !important;
-}
-
-/* Animate the View Transitions API crossfade nicely */
-@supports (view-transition-name: none) {
-  ::view-transition-old(root),
-  ::view-transition-new(root){animation-duration:.35s;animation-timing-function:cubic-bezier(.4,0,.2,1)}
 }
 
 /* Theme button icon swap should feel responsive — slight scale + fade */

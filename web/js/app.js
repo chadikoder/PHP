@@ -921,14 +921,11 @@ function renderExCard(lesson, ex) {
   const isBm = !!state.bookmarks[key];
   const hasNote = !!(state.notes && state.notes[key] && state.notes[key].trim());
   const diffLbl = { easy: T.diffEasy, medium: T.diffMedium, hard: T.diffHard, extreme: T.diffExtreme };
-  const diffIco = { easy: "🟢", medium: "🟡", hard: "🟠", extreme: "🔴" };
-  // Inline meta: emoji · #N · DIFF chip · note-dot — all on one tiny row above the title.
-  // Bookmark stays as its own small cell on the right, not a button-sized block.
+  // Meta: #N · DIFF chip · note-dot — chip colour already carries the difficulty signal
   return `<div class="ex-card ${exDone ? "done" : ""}" id="ex-${key}" data-lesson="${lesson.id}" data-num="${ex.num}" role="button" tabindex="0">
     <span class="ex-check ${exDone ? "done" : ""}" data-key="${key}" title="${T.markedAriaLabel}">${exDone ? "✓" : ""}</span>
     <div class="ex-info">
       <div class="ex-num">
-        <span class="ex-diff-ico" aria-hidden="true">${diffIco[ex.diff] || "⚪"}</span>
         <span>#${ex.num}</span>
         <span class="ex-diff ${ex.diff}">${diffLbl[ex.diff] || ex.diff}</span>
         ${hasNote ? `<span class="ex-note-dot" title="Notes" aria-hidden="true"></span>` : ""}
@@ -2105,15 +2102,12 @@ if (themeBtn) {
   themeBtn.addEventListener("click", () => {
     state.theme = state.theme === "light" ? "dark" : "light";
     saveState();
-    // Smooth transition: use the View Transitions API if supported, otherwise a class-based fade
-    const swap = () => applyTheme();
-    if (document.startViewTransition) {
-      document.startViewTransition(swap);
-    } else {
-      document.documentElement.classList.add("theme-transitioning");
-      swap();
-      setTimeout(() => document.documentElement.classList.remove("theme-transitioning"), 380);
-    }
+    // Always use the class-based transition so the swap feels the same on every browser
+    document.documentElement.classList.add("theme-transitioning");
+    // Force a reflow so the class is committed before the variables flip
+    void document.documentElement.offsetHeight;
+    applyTheme();
+    setTimeout(() => document.documentElement.classList.remove("theme-transitioning"), 480);
   });
 }
 
