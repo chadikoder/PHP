@@ -921,18 +921,30 @@ function renderExCard(lesson, ex) {
   const isBm = !!state.bookmarks[key];
   const hasNote = !!(state.notes && state.notes[key] && state.notes[key].trim());
   const diffLbl = { easy: T.diffEasy, medium: T.diffMedium, hard: T.diffHard, extreme: T.diffExtreme };
-  // Meta: #N · DIFF chip · note-dot — chip colour already carries the difficulty signal
+  // Stroke-only SVGs for indicators — clean professional, no emoji, no flat dots
+  const noteIco = hasNote ? `<svg class="ex-note-ico" aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><title>Notes</title><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg>` : "";
+  // Difficulty icon — sits on the same row as the chip
+  const diffSvg = {
+    easy:    `<svg class="ex-diff-svg" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg>`,
+    medium:  `<svg class="ex-diff-svg" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>`,
+    hard:    `<svg class="ex-diff-svg" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+    extreme: `<svg class="ex-diff-svg" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+  };
+  const bmIco = isBm
+    ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`
+    : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`;
   return `<div class="ex-card ${exDone ? "done" : ""}" id="ex-${key}" data-lesson="${lesson.id}" data-num="${ex.num}" role="button" tabindex="0">
     <span class="ex-check ${exDone ? "done" : ""}" data-key="${key}" title="${T.markedAriaLabel}">${exDone ? "✓" : ""}</span>
     <div class="ex-info">
       <div class="ex-num">
+        <span class="ex-diff-ico-wrap ${ex.diff}">${diffSvg[ex.diff] || ""}</span>
         <span>#${ex.num}</span>
         <span class="ex-diff ${ex.diff}">${diffLbl[ex.diff] || ex.diff}</span>
-        ${hasNote ? `<span class="ex-note-dot" title="Notes" aria-hidden="true"></span>` : ""}
+        ${noteIco}
       </div>
       <div class="ex-title">${esc(t(ex.title))}</div>
     </div>
-    <button class="ex-bookmark ${isBm ? "active" : ""}" data-key="${key}" title="${isBm ? T.removeBookmark : T.addBookmark}">${isBm ? "🔖" : "🏷️"}</button>
+    <button class="ex-bookmark ${isBm ? "active" : ""}" data-key="${key}" title="${isBm ? T.removeBookmark : T.addBookmark}" aria-label="${isBm ? T.removeBookmark : T.addBookmark}">${bmIco}</button>
     <span class="ex-open-arrow" aria-hidden="true">›</span>
   </div>`;
 }
@@ -2102,12 +2114,39 @@ if (themeBtn) {
   themeBtn.addEventListener("click", () => {
     state.theme = state.theme === "light" ? "dark" : "light";
     saveState();
-    // Always use the class-based transition so the swap feels the same on every browser
-    document.documentElement.classList.add("theme-transitioning");
-    // Force a reflow so the class is committed before the variables flip
-    void document.documentElement.offsetHeight;
-    applyTheme();
-    setTimeout(() => document.documentElement.classList.remove("theme-transitioning"), 480);
+    // Circular clip-path reveal that originates from the theme button's centre.
+    // Uses the View Transitions API where available (Chrome/Edge); falls back
+    // to the class-based crossfade on Firefox/Safari.
+    const rect = themeBtn.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    const maxR = Math.hypot(
+      Math.max(x, window.innerWidth - x),
+      Math.max(y, window.innerHeight - y)
+    );
+    if (document.startViewTransition) {
+      const vt = document.startViewTransition(() => applyTheme());
+      vt.ready.then(() => {
+        document.documentElement.animate(
+          {
+            clipPath: [
+              `circle(0px at ${x}px ${y}px)`,
+              `circle(${maxR}px at ${x}px ${y}px)`,
+            ],
+          },
+          {
+            duration: 520,
+            easing: "cubic-bezier(.4,0,.2,1)",
+            pseudoElement: "::view-transition-new(root)",
+          }
+        );
+      }).catch(() => {});
+    } else {
+      document.documentElement.classList.add("theme-transitioning");
+      void document.documentElement.offsetHeight;
+      applyTheme();
+      setTimeout(() => document.documentElement.classList.remove("theme-transitioning"), 480);
+    }
   });
 }
 
