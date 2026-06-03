@@ -181,14 +181,9 @@
   <main id="main"></main>
 </div>
 
-<div class="shortcuts-hint">
-  <kbd>/</kbd> <span data-i18n="hintSearch">chercher</span> <span>·</span>
-  <kbd>←</kbd><kbd>→</kbd> <span data-i18n="hintNav">naviguer</span> <span>·</span>
-  <kbd>T</kbd> <span data-i18n="hintCourseEx">cours/exos</span> <span>·</span>
-  <kbd>D</kbd> <span data-i18n="hintDone">fait</span> <span>·</span>
-  <kbd>R</kbd> <span data-i18n="hintRandom">aléatoire</span> <span>·</span>
-  <kbd>Esc</kbd> <span data-i18n="hintClose">fermer</span>
-</div>
+<button class="shortcuts-hint" id="shortcuts-fab" title="Raccourcis (?)" aria-label="Keyboard shortcuts">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+</button>
 
 <!-- Modal (used by reset, export, import) -->
 <div class="modal-backdrop" id="modal-backdrop" aria-hidden="true">
@@ -259,10 +254,16 @@
     <label><span data-i18n="pomoFocusMin">Focus (min)</span><input type="number" id="pomo-focus-min" min="1" max="90" value="25"></label>
     <label><span data-i18n="pomoBreakMin">Pause (min)</span><input type="number" id="pomo-short-min" min="1" max="60" value="5"></label>
     <label><span data-i18n="pomoLongMin">Longue (min)</span><input type="number" id="pomo-long-min" min="5" max="60" value="15"></label>
-    <button class="pomo-sound" id="pomo-sound" data-i18n-title="pomoSound" title="Sound">🔔</button>
   </div>
   <div class="pomo-toggle-row">
-    <label><input type="checkbox" id="pomo-autostart"><span data-i18n="pomoAuto">Auto-démarrer la pause</span></label>
+    <button class="pomo-sound-row" id="pomo-sound" data-i18n-title="pomoSound" title="Sound">
+      <span class="pomo-sound-ico" id="pomo-sound-ico">🔔</span>
+      <span class="pomo-sound-label" data-i18n="pomoSoundLbl">Son</span>
+      <span class="pomo-sound-state" id="pomo-sound-state">ON</span>
+    </button>
+  </div>
+  <div class="pomo-toggle-row">
+    <label class="pomo-toggle-full"><span data-i18n="pomoAuto">Auto-démarrer la pause</span><input type="checkbox" id="pomo-autostart"></label>
   </div>
   <div class="pomo-history" id="pomo-history">
     <div class="pomo-history-head">

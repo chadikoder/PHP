@@ -183,6 +183,7 @@ const T_DICT = {
   pomoSkip:      { fr: "Passer la phase",      en: "Skip phase" },
   pomoResetT:    { fr: "Réinitialiser",        en: "Reset" },
   pomoSound:     { fr: "Activer / couper le son", en: "Toggle sound" },
+  pomoSoundLbl:  { fr: "Son",                  en: "Sound" },
   pomoFocusDone: { fr: "Concentration terminée — fais une pause ! 🍵", en: "Focus done — take a break! 🍵" },
   pomoBreakDone: { fr: "Pause terminée — au travail ! 💪", en: "Break over — back to work! 💪" },
   // Notes
@@ -920,14 +921,17 @@ function renderExCard(lesson, ex) {
   const isBm = !!state.bookmarks[key];
   const hasNote = !!(state.notes && state.notes[key] && state.notes[key].trim());
   const diffLbl = { easy: T.diffEasy, medium: T.diffMedium, hard: T.diffHard, extreme: T.diffExtreme };
+  // Layout: [ ✓ check ] [ ex-info: meta-row (#N + diff chip) + title ] [ 🔖 bookmark cell ]
   return `<div class="ex-card ${exDone ? "done" : ""}" id="ex-${key}" data-lesson="${lesson.id}" data-num="${ex.num}" role="button" tabindex="0">
     <span class="ex-check ${exDone ? "done" : ""}" data-key="${key}" title="${T.markedAriaLabel}">${exDone ? "✓" : ""}</span>
     <div class="ex-info">
-      <div class="ex-num">#${ex.num}</div>
+      <div class="ex-num">
+        <span>#${ex.num}</span>
+        <span class="ex-diff ${ex.diff}">${diffLbl[ex.diff] || ex.diff}</span>
+        ${hasNote ? `<span class="ex-note-dot" title="Notes" aria-hidden="true"></span>` : ""}
+      </div>
       <div class="ex-title">${esc(t(ex.title))}</div>
     </div>
-    ${hasNote ? `<span class="ex-note-dot" title="Notes" aria-hidden="true"></span>` : ""}
-    <span class="ex-diff ${ex.diff}">${diffLbl[ex.diff] || ex.diff}</span>
     <button class="ex-bookmark ${isBm ? "active" : ""}" data-key="${key}" title="${isBm ? T.removeBookmark : T.addBookmark}">${isBm ? "🔖" : "🏷️"}</button>
     <span class="ex-open-arrow" aria-hidden="true">›</span>
   </div>`;
@@ -2826,7 +2830,13 @@ function pomoRender() {
   if (sIn && document.activeElement !== sIn) sIn.value = p.shortMin;
   if (lIn && document.activeElement !== lIn) lIn.value = p.longMin;
   if (auto) auto.checked = !!p.autoStart;
-  if (snd) { snd.textContent = p.soundOn ? "🔔" : "🔕"; snd.classList.toggle("off", !p.soundOn); }
+  if (snd) {
+    snd.classList.toggle("off", !p.soundOn);
+    const ico = document.getElementById("pomo-sound-ico");
+    const stateEl = document.getElementById("pomo-sound-state");
+    if (ico) ico.textContent = p.soundOn ? "🔔" : "🔕";
+    if (stateEl) stateEl.textContent = p.soundOn ? "ON" : "OFF";
+  }
   pomoRenderHistory();
 }
 function initPomodoro() {
@@ -2955,4 +2965,8 @@ if (jumpTopBtn) jumpTopBtn.addEventListener("click", () => {
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
 onScroll();
+
+// Floating shortcuts help button → opens the same modal as `?`
+const scFab = document.getElementById("shortcuts-fab");
+if (scFab) scFab.addEventListener("click", openShortcutsModal);
 
