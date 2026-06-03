@@ -964,9 +964,8 @@ function renderExCard(lesson, ex) {
   return `<div class="ex-card ${exDone ? "done" : ""}" id="ex-${key}" data-lesson="${lesson.id}" data-num="${ex.num}" role="button" tabindex="0">
     <span class="ex-check ${exDone ? "done" : ""}" data-key="${key}" title="${T.markedAriaLabel}">${exDone ? "✓" : ""}</span>
     <span class="ex-meta">
-      <span class="ex-diff-ico-wrap ${ex.diff}">${diffSvg[ex.diff] || ""}</span>
       <span class="ex-num-text">#${ex.num}</span>
-      <span class="ex-diff ${ex.diff}">${diffLbl[ex.diff] || ex.diff}</span>
+      <span class="ex-diff ${ex.diff}">${diffSvg[ex.diff] || ""}<span class="ex-diff-lbl">${diffLbl[ex.diff] || ex.diff}</span></span>
       ${noteIco}
     </span>
     <div class="ex-title">${esc(t(ex.title))}</div>
