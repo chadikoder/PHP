@@ -1066,8 +1066,10 @@ body.drawer-open{overflow:hidden}
 .ex-check{
   width:24px;height:24px;border-radius:50%;
   border:2px solid var(--border-2);background:transparent;
-  display:flex;align-items:center;justify-content:center;
-  font-size:0;line-height:1;flex-shrink:0;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:0;line-height:1;flex:0 0 24px;cursor:pointer;
+  align-self:center;            /* stays a 24px circle no matter the card height */
+  box-sizing:border-box;
   transition:border-color .15s var(--ease),background .15s var(--ease),box-shadow .15s var(--ease),transform .12s var(--ease);
   color:#fff;position:relative;
 }
@@ -1093,16 +1095,22 @@ body.drawer-open{overflow:hidden}
 /* Hide the legacy ✓ text from the DOM — the SVG mask renders the mark now */
 .ex-check{font-size:0}
 .ex-check>*{display:none}
-.ex-info{flex:1;min-width:0}
-.ex-num{
-  display:flex;align-items:center;gap:7px;
+/* Single-row card layout: [✓check] · [meta cell] · [title cell flex-grow] · [bookmark] */
+.ex-info{flex:1;min-width:0}  /* legacy — kept for safety, no longer rendered */
+.ex-meta{
+  display:inline-flex;align-items:center;gap:6px;flex-shrink:0;
   font-size:10.5px;font-weight:700;color:var(--text-3);letter-spacing:.5px;
-  margin-bottom:2px;
 }
-.ex-num .ex-diff{margin-left:0}
+.ex-num-text{display:inline-block;font-variant-numeric:tabular-nums}
+.ex-meta .ex-diff{margin-left:0}
 .ex-diff-ico{font-size:9px;line-height:1;display:inline-flex;align-items:center}
 .ex-diff-emoji{font-size:13px;line-height:1;display:inline-flex;align-items:center;flex-shrink:0}
-.ex-title{font-size:13.5px;font-weight:600;color:var(--text);line-height:1.35}
+.ex-title{
+  flex:1 1 0;min-width:0;
+  font-size:13.5px;font-weight:600;color:var(--text);line-height:1.35;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.ex-num{display:inline-flex;align-items:center;gap:7px;font-size:10.5px;font-weight:700;color:var(--text-3);letter-spacing:.5px}
 .ex-desc{font-size:12px;color:var(--text-3);margin-top:3px;line-height:1.5}
 .ex-card.done .ex-title{color:var(--text-3);text-decoration:line-through;text-decoration-color:var(--good)}
 
@@ -2587,10 +2595,11 @@ header{flex-wrap:nowrap}
 }
 .nav-item.active::before{box-shadow:none}
 
-/* Day-current J-tag — keep accent but no animation rainbow */
+/* Day-current J-tag — accent fill + subtle pulse so the "you are here" beat returns */
 .nav-item.day-current .nav-tag{
   background:var(--accent);color:#fff;
-  box-shadow:none;animation:none;
+  box-shadow:0 0 0 0 rgba(var(--accent-r),var(--accent-g),var(--accent-b),.45);
+  animation:dayPulse 2.2s var(--ease-out) infinite;
 }
 
 /* Sidebar action btns — neutral neutral */
@@ -2707,11 +2716,12 @@ button,a,.nav-item,.ex-card,.quick-card,.tab,.ex-filter-btn,.conf-btn{
 @media(max-width:560px){
   .ex-card{align-items:center;padding:11px 12px;gap:10px}
 
-  /* Big check cell: 40x40 circle hit target */
+  /* Check cell: stays a perfect circle on phone — 28px is plenty for thumbs without dominating */
   .ex-card .ex-check{
-    width:40px;height:40px;flex-shrink:0;border-width:2px;
+    width:28px;height:28px;flex:0 0 28px;border-width:2px;
+    align-self:center;box-sizing:border-box;
   }
-  .ex-card .ex-check::after{width:16px;height:16px}
+  .ex-card .ex-check::after{width:14px;height:14px}
 
   .ex-info{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
   .ex-num{
@@ -2723,11 +2733,12 @@ button,a,.nav-item,.ex-card,.quick-card,.tab,.ex-filter-btn,.conf-btn{
   .ex-card .ex-diff{font-size:9px;padding:2px 7px;line-height:1.4;flex-shrink:0}
   .ex-diff-emoji{font-size:14px}
 
-  /* Big bookmark cell: 40x40 square hit target */
+  /* Bookmark cell: 34px square — comfortable tap target without dominating the card */
   .ex-card .ex-bookmark{
-    flex:0 0 40px;width:40px;height:40px;padding:0;
-    display:flex;align-items:center;justify-content:center;
-    border-radius:10px;font-size:18px;opacity:.55;
+    flex:0 0 34px;width:34px;height:34px;padding:0;
+    display:inline-flex;align-items:center;justify-content:center;
+    align-self:center;box-sizing:border-box;
+    border-radius:9px;font-size:16px;opacity:.55;
     background:var(--surface-2);border:1px solid var(--border);
     transition:opacity .15s var(--ease),background .15s var(--ease),border-color .15s var(--ease);
   }
@@ -2741,8 +2752,9 @@ button,a,.nav-item,.ex-card,.quick-card,.tab,.ex-filter-btn,.conf-btn{
 
 @media(max-width:380px){
   .ex-card{padding:10px 10px;gap:8px}
-  .ex-card .ex-check{width:38px;height:38px}
-  .ex-card .ex-bookmark{flex:0 0 38px;width:38px;height:38px;font-size:17px}
+  .ex-card .ex-check{width:26px;height:26px;flex:0 0 26px;align-self:center}
+  .ex-card .ex-check::after{width:13px;height:13px}
+  .ex-card .ex-bookmark{flex:0 0 32px;width:32px;height:32px;font-size:15px}
   .ex-title{font-size:13px}
   .ex-card .ex-diff{font-size:8.5px;padding:1px 6px}
 }

@@ -960,15 +960,13 @@ function renderExCard(lesson, ex) {
     : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`;
   return `<div class="ex-card ${exDone ? "done" : ""}" id="ex-${key}" data-lesson="${lesson.id}" data-num="${ex.num}" role="button" tabindex="0">
     <span class="ex-check ${exDone ? "done" : ""}" data-key="${key}" title="${T.markedAriaLabel}">${exDone ? "✓" : ""}</span>
-    <div class="ex-info">
-      <div class="ex-num">
-        <span class="ex-diff-ico-wrap ${ex.diff}">${diffSvg[ex.diff] || ""}</span>
-        <span>#${ex.num}</span>
-        <span class="ex-diff ${ex.diff}">${diffLbl[ex.diff] || ex.diff}</span>
-        ${noteIco}
-      </div>
-      <div class="ex-title">${esc(t(ex.title))}</div>
-    </div>
+    <span class="ex-meta">
+      <span class="ex-diff-ico-wrap ${ex.diff}">${diffSvg[ex.diff] || ""}</span>
+      <span class="ex-num-text">#${ex.num}</span>
+      <span class="ex-diff ${ex.diff}">${diffLbl[ex.diff] || ex.diff}</span>
+      ${noteIco}
+    </span>
+    <div class="ex-title">${esc(t(ex.title))}</div>
     <button class="ex-bookmark ${isBm ? "active" : ""}" data-key="${key}" title="${isBm ? T.removeBookmark : T.addBookmark}" aria-label="${isBm ? T.removeBookmark : T.addBookmark}">${bmIco}</button>
     <span class="ex-open-arrow" aria-hidden="true">›</span>
   </div>`;
