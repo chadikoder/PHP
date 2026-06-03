@@ -40,9 +40,9 @@ const T_DICT = {
   plan7:         { fr: "📘 Plan 7 jours",      en: "📘 7-day Plan" },
   modePlan:      { fr: "📅 Plan",              en: "📅 Plan" },
   modeRef:       { fr: "📖 Référence",         en: "📖 Reference" },
-  basic:         { fr: "🟢 PHP Basic",         en: "🟢 PHP Basic" },
-  intermediate:  { fr: "🟡 PHP Intermediate",  en: "🟡 PHP Intermediate" },
-  advanced:      { fr: "🔴 PHP Advanced",      en: "🔴 PHP Advanced" },
+  basic:         { fr: "PHP Basic",            en: "PHP Basic" },
+  intermediate:  { fr: "PHP Intermediate",     en: "PHP Intermediate" },
+  advanced:      { fr: "PHP Advanced",         en: "PHP Advanced" },
   resetBtn:      { fr: "Réinitialiser",         en: "Reset progress" },
   resetBtnText:  { fr: "Réinitialiser la progression", en: "Reset progress" },
   exportBtn:     { fr: "Exporter",              en: "Export" },
@@ -1274,6 +1274,29 @@ function refreshProgress() {
 /* ====================================================================
    ACHIEVEMENTS
    ==================================================================== */
+// Reusable inline SVG strings (small icons) for the achievement set.
+// Each is a 13x13 stroke-only icon coloured by currentColor.
+const ACH_SVG = {
+  cap:      `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.66 4.03 3 6 3s6-1.34 6-3v-5"/></svg>`,
+  bolt:     `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+  ten:      `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6L9 18 M5 9l4-3 M14 6h5l-2 4a3 3 0 1 1-3 3"/></svg>`,
+  pin:      `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L9 7l-5 1 5 4-2 7 5-4 5 4-2-7 5-4-5-1z"/></svg>`,
+  half:     `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3 a9 9 0 0 1 0 18 z" fill="currentColor"/></svg>`,
+  star:     `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+  medal:    `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="15" r="6"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/><path d="M7.21 9.5L6 1l6 4 6-4-1.21 8.5"/></svg>`,
+  flag:     `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>`,
+  clock:    `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 14 15"/><line x1="9" y1="3" x2="15" y2="3"/></svg>`,
+  stopwatch:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="14" r="7"/><polyline points="12 11 12 14 14 14"/><line x1="9" y1="2" x2="15" y2="2"/><line x1="20.5" y1="6" x2="18.5" y2="8"/></svg>`,
+  note:     `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg>`,
+  bookmark: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`,
+  rating:   `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="10"/></svg>`,
+  trend:    `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>`,
+  sparkle:  `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>`,
+  target:   `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`,
+  trophy:   `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>`,
+  muscle:   `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h6a4 4 0 0 1 4 4v0a3 3 0 0 1-3 3h-1l3 6a3 3 0 0 1-3 3h-3v-4a4 4 0 0 0-4-4H4v-5a3 3 0 0 1 3-3z"/></svg>`,
+};
+
 function computeBadges() {
   const doneLessons = Object.keys(state.completed).length;
   const doneEx = Object.keys(state.exDone).length;
@@ -1290,25 +1313,25 @@ function computeBadges() {
   })();
   const lvl = xpLevel(state.xp || 0);
   return [
-    { id: "first-lesson", emoji: "🎓", label: T.ach1,        unlocked: doneLessons >= 1 },
-    { id: "first-exo",    emoji: "⚡", label: T.achEx1,       unlocked: doneEx >= 1 },
-    { id: "exo-10",       emoji: "🔟", label: T.achEx10,      unlocked: doneEx >= 10 },
-    { id: "bookmark",     emoji: "📌", label: T.achBm,        unlocked: doneBm >= 1 },
-    { id: "halfway",      emoji: "🌗", label: T.ach2,         unlocked: doneLessons >= Math.ceil(TOTAL / 2) },
-    { id: "streak-7",     emoji: "⭐", label: T.ach4,         unlocked: streak >= 7 },
-    { id: "exo-50",       emoji: "🥇", label: T.achEx50,      unlocked: doneEx >= 50 },
-    { id: "day-7",        emoji: "🏁", label: T.achDay7,      unlocked: day7Done },
-    { id: "pomo-1",       emoji: "🍅", label: T.ach_pomo1,    unlocked: pomoCount >= 1 },
-    { id: "pomo-20",      emoji: "⏱️", label: T.ach_pomo20,   unlocked: pomoCount >= 20 },
-    { id: "notes-10",     emoji: "📝", label: T.ach_notes,    unlocked: notesCount >= 10 },
-    { id: "bm-10",        emoji: "🔖", label: T.ach_bm10,     unlocked: doneBm >= 10 },
-    { id: "conf-10",      emoji: "🚦", label: T.ach_conf10,   unlocked: confCount >= 10 },
-    { id: "week-goal",    emoji: "📈", label: T.ach_week,     unlocked: weeklyHit },
-    { id: "lvl-5",        emoji: "🌟", label: T.ach_lvl5,     unlocked: lvl >= 5 },
-    { id: "lvl-10",       emoji: "✨", label: T.ach_lvl10,    unlocked: lvl >= 10 },
-    { id: "chal-3",       emoji: "🎯", label: T.ach_chal3,    unlocked: chalDone >= 3 },
-    { id: "all-lessons",  emoji: "🏆", label: T.ach3,         unlocked: doneLessons >= TOTAL },
-    { id: "all-exos",     emoji: "💪", label: T.ach5,         unlocked: doneEx >= TOTAL_EXERCISES },
+    { id: "first-lesson", svg: ACH_SVG.cap,       label: T.ach1,        unlocked: doneLessons >= 1 },
+    { id: "first-exo",    svg: ACH_SVG.bolt,      label: T.achEx1,      unlocked: doneEx >= 1 },
+    { id: "exo-10",       svg: ACH_SVG.ten,       label: T.achEx10,     unlocked: doneEx >= 10 },
+    { id: "bookmark",     svg: ACH_SVG.pin,       label: T.achBm,       unlocked: doneBm >= 1 },
+    { id: "halfway",      svg: ACH_SVG.half,      label: T.ach2,        unlocked: doneLessons >= Math.ceil(TOTAL / 2) },
+    { id: "streak-7",     svg: ACH_SVG.star,      label: T.ach4,        unlocked: streak >= 7 },
+    { id: "exo-50",       svg: ACH_SVG.medal,     label: T.achEx50,     unlocked: doneEx >= 50 },
+    { id: "day-7",        svg: ACH_SVG.flag,      label: T.achDay7,     unlocked: day7Done },
+    { id: "pomo-1",       svg: ACH_SVG.clock,     label: T.ach_pomo1,   unlocked: pomoCount >= 1 },
+    { id: "pomo-20",      svg: ACH_SVG.stopwatch, label: T.ach_pomo20,  unlocked: pomoCount >= 20 },
+    { id: "notes-10",     svg: ACH_SVG.note,      label: T.ach_notes,   unlocked: notesCount >= 10 },
+    { id: "bm-10",        svg: ACH_SVG.bookmark,  label: T.ach_bm10,    unlocked: doneBm >= 10 },
+    { id: "conf-10",      svg: ACH_SVG.rating,    label: T.ach_conf10,  unlocked: confCount >= 10 },
+    { id: "week-goal",    svg: ACH_SVG.trend,     label: T.ach_week,    unlocked: weeklyHit },
+    { id: "lvl-5",        svg: ACH_SVG.star,      label: T.ach_lvl5,    unlocked: lvl >= 5 },
+    { id: "lvl-10",       svg: ACH_SVG.sparkle,   label: T.ach_lvl10,   unlocked: lvl >= 10 },
+    { id: "chal-3",       svg: ACH_SVG.target,    label: T.ach_chal3,   unlocked: chalDone >= 3 },
+    { id: "all-lessons",  svg: ACH_SVG.trophy,    label: T.ach3,        unlocked: doneLessons >= TOTAL },
+    { id: "all-exos",     svg: ACH_SVG.muscle,    label: T.ach5,        unlocked: doneEx >= TOTAL_EXERCISES },
   ];
 }
 

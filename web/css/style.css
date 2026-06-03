@@ -5,81 +5,76 @@
    ============================================================ */
 
 /* ---------- 1. TOKENS ---------- */
-/* Reading-comfort palette inspired by One Dark + Solarized.
-   Dark: warm dark grey-blue, soft off-cream text (no pure white).
-   Light: very-soft cream-leaning grey, deep but not black text. */
+/* iOS / macOS-inspired palette — most-tested system colours, very legible,
+   non-saturated accents, neutral surfaces that don't strain the eyes. */
 :root{
-  /* Dark — warm grey-blue base with low contrast highlights */
-  --bg:        #181b22;       /* warmer than pure slate */
-  --surface:   #1f232c;
-  --surface-2: #262b35;
-  --surface-3: #2e333f;
-  --border:    rgba(220,226,236,.05);
-  --border-2:  rgba(220,226,236,.10);
+  /* Dark — true neutral (iOS Dark) */
+  --bg:         #1c1c1e;
+  --surface:    #2c2c2e;
+  --surface-2:  #3a3a3c;
+  --surface-3:  #48484a;
+  --sidebar-bg: #232325;        /* a half-step between bg and surface */
+  --border:     rgba(255,255,255,.07);
+  --border-2:   rgba(255,255,255,.13);
 
-  /* Text — soft warm white, mid-grey, low-grey — never #fff */
-  --text:      #d4d8e0;
-  --text-2:    #9aa1ae;
-  --text-3:    #6b727d;
+  --text:       #ebebf5;
+  --text-2:     #a1a1aa;
+  --text-3:     #6e6e76;
 
-  /* Accent — soft periwinkle indigo (less retinal burn) */
-  --accent:    #8a93e0;
-  --accent-2:  #6d76d0;
-  --accent-r:  138; --accent-g:147; --accent-b:224;
+  /* Accent — iOS system-blue */
+  --accent:     #0a84ff;
+  --accent-2:   #0066cc;
+  --accent-r:   10; --accent-g:132; --accent-b:255;
 
-  /* Semantic — desaturated so they don't scream */
-  --good:      #4ec98a;
-  --warn:      #d9a55c;
-  --bad:       #e07b7b;
-  --info:      #7ab8e0;
+  --good:       #30d158;
+  --warn:       #ff9f0a;
+  --bad:        #ff453a;
+  --info:       #64d2ff;
 
-  /* Gradients & shadows — warm, low-contrast */
-  --grad:      linear-gradient(135deg,#8a93e0,#6d76d0);
-  --grad-good: linear-gradient(135deg,#4ec98a,#3ba968);
-  --shadow-sm: 0 1px 2px rgba(8,11,16,.35);
-  --shadow:    0 6px 20px -8px rgba(8,11,16,.5),0 2px 6px -2px rgba(8,11,16,.3);
-  --shadow-lg: 0 16px 42px -14px rgba(8,11,16,.58),0 6px 14px -4px rgba(8,11,16,.32);
-  --ring:      0 0 0 3px rgba(var(--accent-r),var(--accent-g),var(--accent-b),.22);
+  --grad:       linear-gradient(135deg,#0a84ff,#0066cc);
+  --grad-good:  linear-gradient(135deg,#30d158,#1f9c45);
+  --shadow-sm:  0 1px 2px rgba(0,0,0,.4);
+  --shadow:     0 6px 22px -10px rgba(0,0,0,.5),0 2px 6px -2px rgba(0,0,0,.3);
+  --shadow-lg:  0 18px 48px -16px rgba(0,0,0,.6),0 6px 16px -6px rgba(0,0,0,.35);
+  --ring:       0 0 0 3px rgba(var(--accent-r),var(--accent-g),var(--accent-b),.25);
 
-  /* Geometry */
-  --r:         10px;
-  --r-sm:      8px;
-  --r-xs:      6px;
-  --header-h:  60px;
+  --r:          10px;
+  --r-sm:       8px;
+  --r-xs:       6px;
+  --header-h:   60px;
 
-  /* Motion */
-  --ease:      cubic-bezier(.4,0,.2,1);
-  --ease-out:  cubic-bezier(.16,1,.3,1);
+  --ease:       cubic-bezier(.4,0,.2,1);
+  --ease-out:   cubic-bezier(.16,1,.3,1);
 }
 
 [data-theme="light"]{
-  /* Light — cream-tinted grey for the bg, neutral white surface, soft slate text */
-  --bg:        #f1f3f6;       /* cooler-cream rest base */
-  --surface:   #fbfcfd;       /* not pure white */
-  --surface-2: #eaedf3;
-  --surface-3: #dfe3eb;
-  --border:    rgba(40,48,66,.07);
-  --border-2:  rgba(40,48,66,.13);
+  /* Light — iOS Light: cool neutral grey, true white surfaces */
+  --bg:         #f2f2f7;
+  --surface:    #ffffff;
+  --surface-2:  #f6f6fa;
+  --surface-3:  #e5e5ea;
+  --sidebar-bg: #f7f7fa;
+  --border:     rgba(60,60,67,.10);
+  --border-2:   rgba(60,60,67,.20);
 
-  /* Text — deep slate, not black; mid-slate; low-slate */
-  --text:      #283042;
-  --text-2:    #525c6f;
-  --text-3:    #8b95a8;
+  --text:       #1c1c1e;
+  --text-2:     #48484a;
+  --text-3:     #8e8e93;
 
-  --accent:    #5b63d8;
-  --accent-2:  #4a51c7;
-  --accent-r:  91; --accent-g:99; --accent-b:216;
+  --accent:     #007aff;
+  --accent-2:   #0062cc;
+  --accent-r:   0; --accent-g:122; --accent-b:255;
 
-  --good:      #15a249;
-  --warn:      #c97a0a;
-  --bad:       #d33232;
-  --info:      #1c87cd;
+  --good:       #34c759;
+  --warn:       #ff9500;
+  --bad:        #ff3b30;
+  --info:       #5ac8fa;
 
-  --grad:      linear-gradient(135deg,#5b63d8,#4a51c7);
-  --grad-good: linear-gradient(135deg,#15a249,#107a37);
-  --shadow-sm: 0 1px 2px rgba(40,48,66,.04);
-  --shadow:    0 4px 16px -6px rgba(40,48,66,.09),0 2px 6px -2px rgba(40,48,66,.05);
-  --shadow-lg: 0 16px 42px -14px rgba(40,48,66,.13),0 6px 14px -4px rgba(40,48,66,.06);
+  --grad:       linear-gradient(135deg,#007aff,#0062cc);
+  --grad-good:  linear-gradient(135deg,#34c759,#28a745);
+  --shadow-sm:  0 1px 2px rgba(0,0,0,.04);
+  --shadow:     0 4px 16px -6px rgba(0,0,0,.08),0 2px 6px -2px rgba(0,0,0,.04);
+  --shadow-lg:  0 16px 42px -14px rgba(0,0,0,.12),0 6px 14px -4px rgba(0,0,0,.06);
 }
 
 /* Light-mode component polish — overrides for cards, headers, code, chips */
@@ -1070,7 +1065,7 @@ body.drawer-open{overflow:hidden}
 .ex-card:hover .ex-open-arrow{opacity:1;color:var(--accent);transform:translateX(2px)}
 .ex-check{
   width:24px;height:24px;border-radius:50%;
-  border:1.8px solid var(--text-3);background:transparent;
+  border:2px solid var(--border-2);background:transparent;
   display:flex;align-items:center;justify-content:center;
   font-size:0;line-height:1;flex-shrink:0;cursor:pointer;
   transition:border-color .15s var(--ease),background .15s var(--ease),box-shadow .15s var(--ease),transform .12s var(--ease);
@@ -2433,18 +2428,18 @@ header{flex-wrap:nowrap}
 /* ============================================================
    30. MOBILE REVIEW PASS 3 — small check, slim modal, consistent gaps
    ============================================================ */
-/* The check circle was being rendered way too big on phone — clamp it hard */
+/* Mobile check: keep generous tap target + clear ring contrast */
 @media(max-width:720px){
-  .ex-check{width:22px;height:22px;border-width:1.6px;flex:0 0 22px}
-  .ex-check::after{width:12px;height:12px}
-  .nav-check{width:22px;height:22px;border-width:1.6px;flex:0 0 22px}
-  .nav-check::after{width:11px;height:11px}
+  .ex-check{width:24px;height:24px;border-width:2px;flex:0 0 24px;border-color:var(--text-3)}
+  .ex-check::after{width:13px;height:13px}
+  .nav-check{width:24px;height:24px;border-width:2px;flex:0 0 24px;border-color:var(--text-3)}
+  .nav-check::after{width:12px;height:12px}
 }
 @media(max-width:480px){
-  .ex-check{width:20px;height:20px;border-width:1.5px;flex:0 0 20px}
-  .ex-check::after{width:11px;height:11px}
-  .nav-check{width:20px;height:20px;border-width:1.5px;flex:0 0 20px}
-  .nav-check::after{width:10px;height:10px}
+  .ex-check{width:22px;height:22px;border-width:1.8px;flex:0 0 22px}
+  .ex-check::after{width:12px;height:12px}
+  .nav-check{width:22px;height:22px;border-width:1.8px;flex:0 0 22px}
+  .nav-check::after{width:11px;height:11px}
 }
 
 /* Slim mobile modal actions — no more giant column buttons. Two-up, 38px tall, neutral. */
@@ -2508,9 +2503,9 @@ header{flex-wrap:nowrap}
 .ex-filter-btn .lico{opacity:.7;transition:opacity .15s var(--ease)}
 .ex-filter-btn b{
   font-size:10.5px;font-weight:700;font-variant-numeric:tabular-nums;
-  padding:1px 6px;border-radius:99px;
+  padding:2px 7px;border-radius:99px;
   background:var(--surface-2);color:var(--text-3);
-  margin-left:1px;
+  margin-left:6px;
 }
 .ex-filter-btn.active{
   background:var(--grad);color:#fff;border-color:transparent;
@@ -2607,6 +2602,47 @@ header{flex-wrap:nowrap}
 
 /* Reset btn keeps a soft danger tone on hover, neutral by default */
 .reset-btn{background:transparent;border-color:var(--border);color:var(--text-3)}
+
+/* Sidebar uses its own surface tone so it reads as a separate plane */
+.sidebar{background:var(--sidebar-bg)}
+
+/* Pomodoro ring background — use border colour so the edge is subtle, not a hard ring */
+.pomo-ring-bg{stroke:var(--border-2)}
+[data-theme="light"] .pomo-ring-bg{stroke:rgba(60,60,67,.12)}
+.progress-ring-bg{stroke:var(--border-2)}
+[data-theme="light"] .progress-ring-bg{stroke:rgba(60,60,67,.12)}
+
+/* Achievement badges — SVG icon chips (no emoji, no rainbow) */
+.achieve-row{display:flex;flex-wrap:wrap;gap:6px;padding:0 2px}
+.achieve-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:28px;height:28px;border-radius:8px;
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--text-3);font-size:0;line-height:1;cursor:default;
+  transition:transform .18s var(--ease),background .15s var(--ease),color .15s var(--ease),border-color .15s var(--ease);
+  filter:none;opacity:1;
+}
+.achieve-badge svg{display:block}
+.achieve-badge.unlocked{
+  background:rgba(var(--accent-r),var(--accent-g),var(--accent-b),.12);
+  border-color:rgba(var(--accent-r),var(--accent-g),var(--accent-b),.32);
+  color:var(--accent);
+}
+.achieve-badge.unlocked:hover{transform:translateY(-1px) scale(1.05)}
+.achieve-badge.locked{opacity:.55}
+
+/* Welcome-page badge row — match the same SVG chip pattern */
+.wc-badge{display:flex;align-items:center;gap:9px;padding:11px 13px;border-radius:var(--r-sm)}
+.wc-badge .wc-badge-emoji{
+  width:28px;height:28px;border-radius:8px;flex-shrink:0;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:var(--surface-2);color:var(--text-3);font-size:0;line-height:1;
+}
+.wc-badge.unlocked .wc-badge-emoji{
+  background:rgba(var(--accent-r),var(--accent-g),var(--accent-b),.12);
+  color:var(--accent);
+}
+.wc-badge .wc-badge-emoji svg{display:block}
 
 /* ============================================================
    29. MOBILE UX PASS 2 — exercise card layout, tap feel, safe-area
