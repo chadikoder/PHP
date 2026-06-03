@@ -1176,12 +1176,13 @@ body.drawer-open{overflow:hidden}
 }
 .ex-modal-close:hover{background:var(--bad);border-color:var(--bad);color:#fff;transform:scale(1.06)}
 .ex-modal-head{
-  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  display:flex;flex-direction:column;gap:6px;
   padding:18px 60px 14px 22px;border-bottom:1px solid var(--border);
   background:var(--surface);
 }
+.ex-modal-meta{display:inline-flex;align-items:center;gap:9px;flex-wrap:wrap}
 .ex-modal-num{font-size:11px;font-weight:800;color:var(--text-3);letter-spacing:.6px;flex-shrink:0}
-.ex-modal-title{font-size:17px;font-weight:700;color:var(--text);margin:0;flex:1;min-width:200px;line-height:1.35}
+.ex-modal-title{font-size:17px;font-weight:700;color:var(--text);margin:0;line-height:1.35}
 .ex-modal-diff{
   display:inline-flex;align-items:center;gap:5px;
   font-size:10px;font-weight:800;padding:4px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.4px;flex-shrink:0;
@@ -2163,11 +2164,17 @@ header{background:rgba(11,17,32,.82);border-bottom:1px solid rgba(148,163,184,.0
 
 /* Responsive drop order — keeps essentials, never overflows the row */
 @media(max-width:1024px){.stat-group .stat:nth-child(3){display:none}}
-@media(max-width:1100px){.pwa-install-btn span{display:none}.pwa-install-btn{width:30px;padding:0;justify-content:center}}
-/* Hide install pill in the header on anything narrower than a full desktop — it always crowded the J chip */
-@media(max-width:980px){
-  .pwa-install-btn{display:none!important}
-  header .pwa-install-btn{display:none!important}
+/* Install pill: text + icon on wide, icon-only at narrow.
+   Stays visible at every breakpoint (user wants it kept). No overlap because the spacer/flex layout takes care of gaps. */
+@media(max-width:1100px){
+  .pwa-install-btn span{display:none}
+  .pwa-install-btn{width:30px;height:30px;padding:0;justify-content:center;flex-shrink:0}
+}
+@media(max-width:720px){
+  .pwa-install-btn{width:28px;height:28px}
+}
+@media(max-width:480px){
+  .pwa-install-btn{width:26px;height:26px}
 }
 
 /* Mobile navbar — minimal essentials, even spacing */
