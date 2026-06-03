@@ -2489,6 +2489,126 @@ header{flex-wrap:nowrap}
 }
 
 /* ============================================================
+   31. INLINE SVG LABELS — used in tabs / filters / buttons / labels
+   ============================================================ */
+.lico{flex-shrink:0;vertical-align:middle;opacity:.85}
+.tab{display:inline-flex;align-items:center;gap:7px}
+.tab .lico{opacity:.7;transition:opacity .15s var(--ease)}
+.tab.active .lico{opacity:1}
+
+.ex-filter{align-items:center}
+.ex-filter-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 12px;border-radius:99px;
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--text-2);font-size:11.5px;font-weight:600;
+  transition:all .15s var(--ease);
+}
+.ex-filter-btn:hover{color:var(--text);border-color:var(--border-2)}
+.ex-filter-btn .lico{opacity:.7;transition:opacity .15s var(--ease)}
+.ex-filter-btn b{
+  font-size:10.5px;font-weight:700;font-variant-numeric:tabular-nums;
+  padding:1px 6px;border-radius:99px;
+  background:var(--surface-2);color:var(--text-3);
+  margin-left:1px;
+}
+.ex-filter-btn.active{
+  background:var(--grad);color:#fff;border-color:transparent;
+  box-shadow:0 4px 12px -2px rgba(var(--accent-r),var(--accent-g),var(--accent-b),.35);
+}
+.ex-filter-btn.active .lico{opacity:1}
+.ex-filter-btn.active b{background:rgba(255,255,255,.18);color:#fff}
+.ex-filter-btn.diff-easy .lico{color:var(--good)}
+.ex-filter-btn.diff-medium .lico{color:var(--warn)}
+.ex-filter-btn.diff-hard .lico{color:#fb923c}
+.ex-filter-btn.diff-extreme .lico{color:#a855f7}
+.ex-filter-btn.active.diff-easy,
+.ex-filter-btn.active.diff-medium,
+.ex-filter-btn.active.diff-hard,
+.ex-filter-btn.active.diff-extreme{background:var(--grad)}
+
+/* w3-link gets icon + external SVG cleanly */
+.w3-link{display:inline-flex;align-items:center;gap:6px}
+.w3-link .lico{opacity:.7}
+
+/* Mock-exam button SVG icon (play / stop) sits next to label */
+.mock-exam-btn{display:inline-flex;align-items:center;gap:7px;justify-content:center}
+.mock-exam-btn .lico{opacity:1}
+
+/* Daily-goal + weekly-goal labels — SVG icon + label */
+.daily-label,.weekly-goal-label{display:inline-flex;align-items:center;gap:5px}
+.daily-label .lico{color:var(--accent);opacity:1}
+.weekly-goal-label .lico{color:var(--info);opacity:.85}
+.daily-edit{display:inline-flex;align-items:center;justify-content:center;color:var(--text-3)}
+
+/* Modal sol button — SVG bulb sits left of label */
+.ex-modal-sol-btn{display:inline-flex;align-items:center;gap:7px}
+.ex-modal-sol-btn .lico{opacity:1}
+
+/* Modal done button — SVG checkmark in the ico slot */
+.ex-modal-done-btn{display:inline-flex;align-items:center;gap:7px}
+.ex-modal-done-btn .ico{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px}
+.ex-modal-done-btn.done .ico{color:currentColor}
+
+/* ============================================================
+   32. SIDEBAR REFRESH — quieter colours, single accent, more readable
+   ============================================================ */
+/* Less saturated progress-card background, neutralise the radial tint */
+.progress-card{
+  background:var(--surface-2);
+  border:1px solid var(--border);
+}
+.progress-pct{background:none;color:var(--text);-webkit-text-fill-color:var(--text)}
+.progress-ring-text{background:none;color:var(--text);-webkit-text-fill-color:var(--text)}
+.progress-fill{box-shadow:none}
+
+/* XP level chip — quieter, smaller accent ring */
+.xp-level{
+  background:rgba(var(--accent-r),var(--accent-g),var(--accent-b),.10);
+  border:1px solid rgba(var(--accent-r),var(--accent-g),var(--accent-b),.25);
+  color:var(--accent);font-size:10px;padding:2px 7px 2px 5px;
+}
+.xp-level .lvl-num{font-size:11px}
+.xp-bar-fill{box-shadow:none}
+
+/* Daily / weekly bar fills — flatter, no inner glow */
+.daily-fill,.weekly-goal-fill{box-shadow:none}
+
+/* Achievement badges — neutralise, no rainbow */
+.achieve-badge{font-size:16px;opacity:.28;filter:saturate(.5) brightness(.85)}
+.achieve-badge.unlocked{opacity:1;filter:none}
+.achieve-count{
+  background:var(--surface);border:1px solid var(--border);color:var(--text-2);font-weight:700;
+}
+
+/* Section title (Plan 7 jours, PHP Basic, etc.) — slightly lighter */
+.section-title.collapsible{color:var(--text-2);font-weight:600}
+.section-title.collapsible:hover{background:var(--surface-2);color:var(--text)}
+
+/* Nav-item active — subtler highlight, no shadow on the left bar */
+.nav-item.active{
+  background:rgba(var(--accent-r),var(--accent-g),var(--accent-b),.08);
+  border-color:rgba(var(--accent-r),var(--accent-g),var(--accent-b),.18);
+}
+.nav-item.active::before{box-shadow:none}
+
+/* Day-current J-tag — keep accent but no animation rainbow */
+.nav-item.day-current .nav-tag{
+  background:var(--accent);color:#fff;
+  box-shadow:none;animation:none;
+}
+
+/* Sidebar action btns — neutral neutral */
+.sidebar-action-btn{
+  background:var(--surface);border-color:var(--border);
+  color:var(--text-2);
+}
+.sidebar-action-btn:hover{background:var(--surface-2);border-color:var(--border-2);color:var(--text)}
+
+/* Reset btn keeps a soft danger tone on hover, neutral by default */
+.reset-btn{background:transparent;border-color:var(--border);color:var(--text-3)}
+
+/* ============================================================
    29. MOBILE UX PASS 2 — exercise card layout, tap feel, safe-area
    ============================================================ */
 

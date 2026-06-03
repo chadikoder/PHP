@@ -61,12 +61,12 @@ const T_DICT = {
   lessonCount:   { fr: "leçons",               en: "lessons" },
   // Lesson
   why:           { fr: "🎯 Pourquoi —",        en: "🎯 Why —" },
-  mockExam:      { fr: "🏁 Exercice chronométré", en: "🏁 Timed exercise" },
-  startMock:     { fr: "▶ Lancer l'exercice (120 min)", en: "▶ Start exercise (120 min)" },
+  mockExam:      { fr: "Exercice chronométré", en: "Timed exercise" },
+  startMock:     { fr: "Lancer l'exercice (120 min)", en: "Start exercise (120 min)" },
   mockRunning:   { fr: "Exercice en cours — ne ferme pas la page", en: "Exercise running — do not close the page" },
-  mockFinished:  { fr: "Exercice terminé !",   en: "Exercise finished!" },
-  mockStop:      { fr: "⏹ Arrêter",            en: "⏹ Stop" },
-  w3Source:      { fr: "📖 Source W3Schools ↗",en: "📖 W3Schools source ↗" },
+  mockFinished:  { fr: "Exercice terminé",     en: "Exercise finished" },
+  mockStop:      { fr: "Arrêter",              en: "Stop" },
+  w3Source:      { fr: "Source W3Schools",     en: "W3Schools source" },
   markDone:      { fr: "Marquer terminé",      en: "Mark done" },
   marked:        { fr: "✓ Terminé",            en: "✓ Done" },
   markedAriaLabel: { fr: "Marquer comme terminé", en: "Mark as done" },
@@ -76,16 +76,17 @@ const T_DICT = {
   end:           { fr: "Fin",                  en: "End" },
   noLesson:      { fr: "Aucune leçon",         en: "No lesson" },
   noMoreLessons: { fr: "Plus de leçons",       en: "No more lessons" },
-  // Tabs
-  tabCourse:     { fr: "📖 Cours",             en: "📖 Course" },
-  tabExos:       { fr: "✍️ Exercices",          en: "✍️ Exercises" },
-  // Exercise filters
+  // Tabs (icons added in renderExArea)
+  tabCourse:     { fr: "Cours",                en: "Course" },
+  tabExos:       { fr: "Exercices",            en: "Exercises" },
+  tabProbs:      { fr: "Problèmes",            en: "Problems" },
+  // Exercise filters (icons rendered next to labels in renderExArea)
   filterAll:     { fr: "Tous",                 en: "All" },
-  filterEasy:    { fr: "🟢 Facile",            en: "🟢 Easy" },
-  filterMedium:  { fr: "🟡 Moyen",             en: "🟡 Medium" },
-  filterHard:    { fr: "🟠 Difficile",         en: "🟠 Hard" },
-  filterExtreme: { fr: "🔴 Extrême",           en: "🔴 Extreme" },
-  filterBookmark:{ fr: "📌 Signets",            en: "📌 Bookmarks" },
+  filterEasy:    { fr: "Facile",               en: "Easy" },
+  filterMedium:  { fr: "Moyen",                en: "Medium" },
+  filterHard:    { fr: "Difficile",            en: "Hard" },
+  filterExtreme: { fr: "Extrême",              en: "Extreme" },
+  filterBookmark:{ fr: "Signets",              en: "Bookmarks" },
   done:          { fr: "terminés",             en: "done" },
   noExos:        { fr: "Aucun exercice dans cette catégorie", en: "No exercises in this category" },
   diffEasy:      { fr: "Facile",               en: "Easy" },
@@ -94,8 +95,8 @@ const T_DICT = {
   diffExtreme:   { fr: "Extrême",              en: "Extreme" },
   addBookmark:   { fr: "Ajouter un signet",    en: "Add bookmark" },
   removeBookmark:{ fr: "Retirer le signet",    en: "Remove bookmark" },
-  viewSol:       { fr: "💡 Voir solution",      en: "💡 View solution" },
-  hideSol:       { fr: "▲ Cacher",              en: "▲ Hide" },
+  viewSol:       { fr: "Voir solution",         en: "View solution" },
+  hideSol:       { fr: "Cacher",                en: "Hide" },
   // Quiz
   quizTitle:     { fr: "🎯 Mini-quiz — vérifie tes acquis", en: "🎯 Mini quiz — check what stuck" },
   quizSub:       { fr: "Clique sur la bonne réponse. Pas de score : c'est pour s'entraîner.", en: "Click the right answer. No score — it's for practice." },
@@ -146,7 +147,7 @@ const T_DICT = {
   achUnlocked:   { fr: "Succès débloqué :",    en: "Achievement unlocked:" },
   achLocked:     { fr: "🔒 À débloquer",       en: "🔒 Locked" },
   // Random practice
-  randomBtn:     { fr: "🎲 Aléatoire",         en: "🎲 Random" },
+  randomBtn:     { fr: "Aléatoire",            en: "Random" },
   randomTitle:   { fr: "Exercice aléatoire (touche R)", en: "Random exercise (press R)" },
   allExosDone:   { fr: "Tous les exercices sont faits ! 🎉", en: "All exercises done! 🎉" },
   // Daily goal
@@ -164,7 +165,7 @@ const T_DICT = {
   confShaky:     { fr: "Hésitant",             en: "Shaky" },
   confNo:        { fr: "Aucune idée",          en: "No idea" },
   confLabel:     { fr: "Niveau de confiance",  en: "Confidence" },
-  filterWeak:    { fr: "🚦 À revoir",          en: "🚦 To review" },
+  filterWeak:    { fr: "À revoir",             en: "To review" },
   noWeak:        { fr: "Rien à revoir ici — bien joué !", en: "Nothing to review here — nice!" },
   // Pomodoro
   pomodoro:      { fr: "Pomodoro",             en: "Pomodoro" },
@@ -187,7 +188,7 @@ const T_DICT = {
   pomoFocusDone: { fr: "Concentration terminée — fais une pause ! 🍵", en: "Focus done — take a break! 🍵" },
   pomoBreakDone: { fr: "Pause terminée — au travail ! 💪", en: "Break over — back to work! 💪" },
   // Notes
-  notesLabel:    { fr: "📝 Notes",                en: "📝 Notes" },
+  notesLabel:    { fr: "Notes",                en: "Notes" },
   notesPlaceholder: { fr: "Tes notes sur cet exercice (rappels, pièges, idées)…", en: "Your notes for this exercise (reminders, gotchas, ideas)…" },
   notesSaved:    { fr: "✓ enregistré",            en: "✓ saved" },
   // Focus mode
@@ -316,6 +317,35 @@ function saveState() {
 
 function esc(s) {
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+/* SVG icon library — stroke-only icons used across labels (tabs / filters / buttons).
+   Kept small so they can sit inline with text without crowding. */
+const SVGI = {
+  book:       `<svg class="lico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`,
+  pencil:     `<svg class="lico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>`,
+  puzzle:     `<svg class="lico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568c.47.47.706 1.087.706 1.704s-.235 1.233-.706 1.704l-1.611 1.611a.98.98 0 0 1-.837.276c-.47-.07-.802-.48-.968-.925a2.501 2.501 0 1 0-3.214 3.214c.446.166.855.497.925.968a.98.98 0 0 1-.276.837l-1.61 1.61a2.404 2.404 0 0 1-3.41 0l-1.568-1.568a1.026 1.026 0 0 0-.877-.29 2.501 2.501 0 1 1-2.59-2.589.987.987 0 0 0 .29-.876l-1.568-1.568a2.404 2.404 0 0 1 0-3.408l1.61-1.611a.98.98 0 0 1 .838-.276c.47.07.802.48.968.925a2.501 2.501 0 1 0 3.214-3.214c-.446-.166-.855-.497-.925-.968a.98.98 0 0 1 .276-.837l1.61-1.61a2.404 2.404 0 0 1 3.408 0l1.568 1.568c.23.23.556.338.877.29a2.5 2.5 0 1 1 2.589 2.589Z"/></svg>`,
+  leaf:       `<svg class="lico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg>`,
+  flame:      `<svg class="lico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>`,
+  bolt:       `<svg class="lico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+  alert:      `<svg class="lico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+  bookmark:   `<svg class="lico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`,
+  shuffle:    `<svg class="lico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>`,
+  filter:     `<svg class="lico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>`,
+  triangle:   `<svg class="lico" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>`,
+  square:     `<svg class="lico" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="1"/></svg>`,
+  light:      `<svg class="lico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>`,
+  external:   `<svg class="lico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`,
+  target:     `<svg class="lico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`,
+  notes:      `<svg class="lico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+  trending:   `<svg class="lico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>`,
+};
+function diffIcoSvg(diff) {
+  if (diff === "easy") return SVGI.leaf;
+  if (diff === "medium") return SVGI.flame;
+  if (diff === "hard") return SVGI.bolt;
+  if (diff === "extreme") return SVGI.alert;
+  return "";
 }
 
 // Strip diacritics so search matches "heritage" against "héritage" and vice versa.
@@ -599,7 +629,7 @@ function openLesson(id) {
       </div>
       <div class="lesson-actions">
         ${id === "day-7" ? `<span class="tag" style="background:rgba(245,158,11,.12);color:var(--warn);font-weight:700">${T.mockExam}</span>` : ""}
-        ${W3_URLS[id] ? `<a class="w3-link" href="${W3_URLS[id]}" target="_blank" rel="noopener noreferrer">${T.w3Source}</a>` : ""}
+        ${W3_URLS[id] ? `<a class="w3-link" href="${W3_URLS[id]}" target="_blank" rel="noopener noreferrer">${SVGI.book}<span>${T.w3Source}</span>${SVGI.external}</a>` : ""}
         <button class="complete-btn ${done ? "done" : ""}" id="toggle-done">${done ? T.marked : T.markDone}</button>
       </div>
     </div>
@@ -674,22 +704,21 @@ function renderExArea(lesson) {
   const emptyMsg = exFilter === "weak" ? T.noWeak : T.noExos;
 
   const tabsHtml = `
-    <div class="tab ${currentTab === "cours" ? "active" : ""}" data-tab="cours">${T.tabCourse}</div>
-    ${hasEx ? `<div class="tab ${currentTab === "exos" ? "active" : ""}" data-tab="exos">${T.tabExos} <b style="font-variant-numeric:tabular-nums;margin-left:4px">${doneEx}/${exsRaw.length}</b></div>` : ""}
-    ${hasProbs ? `<div class="tab tab-probs ${currentTab === "probs" ? "active" : ""}" data-tab="probs">Problèmes <b style="font-variant-numeric:tabular-nums;margin-left:4px">${doneP}/${probsRaw.length}</b></div>` : ""}
+    <div class="tab ${currentTab === "cours" ? "active" : ""}" data-tab="cours">${SVGI.book} <span>${T.tabCourse}</span></div>
+    ${hasEx ? `<div class="tab ${currentTab === "exos" ? "active" : ""}" data-tab="exos">${SVGI.pencil} <span>${T.tabExos}</span> <b style="font-variant-numeric:tabular-nums;margin-left:4px">${doneEx}/${exsRaw.length}</b></div>` : ""}
+    ${hasProbs ? `<div class="tab tab-probs ${currentTab === "probs" ? "active" : ""}" data-tab="probs">${SVGI.puzzle} <span>${T.tabProbs}</span> <b style="font-variant-numeric:tabular-nums;margin-left:4px">${doneP}/${probsRaw.length}</b></div>` : ""}
   `;
 
   const listTabHtml = (hasEx || hasProbs) && (currentTab === "exos" || currentTab === "probs") ? `
     <div class="tab-content active" id="tab-${currentTab}">
       <div class="ex-filter">
-        <button class="ex-filter-btn ${exFilter === "all" ? "active" : ""}" data-filter="all">${T.filterAll} (${total})</button>
-        <button class="ex-filter-btn ${exFilter === "easy" ? "active" : ""}" data-filter="easy">${T.filterEasy} (${activeList.filter(e => e.diff === "easy").length})</button>
-        <button class="ex-filter-btn ${exFilter === "medium" ? "active" : ""}" data-filter="medium">${T.filterMedium} (${activeList.filter(e => e.diff === "medium").length})</button>
-        <button class="ex-filter-btn ${exFilter === "hard" ? "active" : ""}" data-filter="hard">${T.filterHard} (${activeList.filter(e => e.diff === "hard").length})</button>
-        <button class="ex-filter-btn ${exFilter === "extreme" ? "active" : ""}" data-filter="extreme">${T.filterExtreme} (${activeList.filter(e => e.diff === "extreme").length})</button>
-        <button class="ex-filter-btn ${exFilter === "bookmark" ? "active" : ""}" data-filter="bookmark">${T.filterBookmark} (${bmCount})</button>
-        <button class="ex-filter-btn ${exFilter === "weak" ? "active" : ""}" data-filter="weak">${T.filterWeak} (${weakCount})</button>
-        <button class="ex-filter-btn random-btn" id="random-ex-btn" title="${T.randomTitle}">${T.randomBtn}</button>
+        <button class="ex-filter-btn ${exFilter === "all" ? "active" : ""}" data-filter="all">${SVGI.filter}<span>${T.filterAll}</span><b>${total}</b></button>
+        <button class="ex-filter-btn diff-easy ${exFilter === "easy" ? "active" : ""}" data-filter="easy">${SVGI.leaf}<span>${T.filterEasy}</span><b>${activeList.filter(e => e.diff === "easy").length}</b></button>
+        <button class="ex-filter-btn diff-medium ${exFilter === "medium" ? "active" : ""}" data-filter="medium">${SVGI.flame}<span>${T.filterMedium}</span><b>${activeList.filter(e => e.diff === "medium").length}</b></button>
+        <button class="ex-filter-btn diff-hard ${exFilter === "hard" ? "active" : ""}" data-filter="hard">${SVGI.bolt}<span>${T.filterHard}</span><b>${activeList.filter(e => e.diff === "hard").length}</b></button>
+        <button class="ex-filter-btn diff-extreme ${exFilter === "extreme" ? "active" : ""}" data-filter="extreme">${SVGI.alert}<span>${T.filterExtreme}</span><b>${activeList.filter(e => e.diff === "extreme").length}</b></button>
+        <button class="ex-filter-btn ${exFilter === "bookmark" ? "active" : ""}" data-filter="bookmark">${SVGI.bookmark}<span>${T.filterBookmark}</span><b>${bmCount}</b></button>
+        <button class="ex-filter-btn ${exFilter === "weak" ? "active" : ""}" data-filter="weak"><span>${T.filterWeak}</span><b>${weakCount}</b></button>
       </div>
       <div class="ex-counter">
         <b>${done}</b>/${total} ${T.done}
@@ -805,10 +834,6 @@ function renderExArea(lesson) {
       bindCopyButtons();
     });
   });
-
-  // Random practice button
-  const randomBtn = area.querySelector("#random-ex-btn");
-  if (randomBtn) randomBtn.addEventListener("click", jumpToRandomExercise);
 
   // Bookmark toggle (kept on the card so users can bookmark without opening)
   area.querySelectorAll(".ex-card .ex-bookmark").forEach(bm => {
@@ -974,11 +999,12 @@ function _exRenderActions(key) {
   const conf = state.confidence[key] || "";
   const isBm = !!state.bookmarks[key];
   const isDone = !!state.exDone[key];
+  const checkSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>`;
   return `
     <button class="ex-modal-btn ex-modal-done-btn ${isDone ? "done" : ""}" id="ex-modal-done-btn" title="${T.markedAriaLabel}">
-      <span class="ico">${isDone ? "✓" : ""}</span>${isDone ? T.markedAriaLabel : T.markedAriaLabel}
+      <span class="ico">${isDone ? checkSvg : ""}</span><span>${T.markedAriaLabel}</span>
     </button>
-    <button class="ex-modal-btn ex-modal-sol-btn" id="ex-modal-sol-btn">${T.viewSol}</button>
+    <button class="ex-modal-btn ex-modal-sol-btn" id="ex-modal-sol-btn">${SVGI.light}<span>${T.viewSol}</span></button>
     <div class="ex-modal-spacer"></div>
     <div class="ex-modal-conf" id="ex-modal-conf" title="${T.confLabel}">
       <button class="conf-btn got ${conf === "got" ? "active" : ""}" data-conf="got" title="${T.confGot}">😎</button>
@@ -1020,7 +1046,9 @@ function _exWireActions(lesson, ex, key) {
     const showing = !solBox.hidden;
     solBox.hidden = showing;
     solBtn.classList.toggle("open", !showing);
-    solBtn.textContent = !showing ? T.hideSol : T.viewSol;
+    solBtn.innerHTML = (!showing
+      ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg><span>${T.hideSol}</span>`
+      : `${SVGI.light}<span>${T.viewSol}</span>`);
     if (!showing) bindCopyButtons();
   });
 
@@ -1362,8 +1390,10 @@ function updateDailyGoal() {
   el.classList.toggle("reached", reached);
   el.innerHTML = `
     <div class="daily-head">
-      <span class="daily-label">🎯 ${T.dailyGoal}</span>
-      <button class="daily-edit" id="daily-edit" title="${T.editGoal}">✏️</button>
+      <span class="daily-label">${SVGI.target}<span>${T.dailyGoal}</span></span>
+      <button class="daily-edit" id="daily-edit" title="${T.editGoal}" aria-label="${T.editGoal}">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+      </button>
     </div>
     <div class="daily-ring-row">
       <span class="daily-count"><b>${done}</b><small>/${goal}</small></span>
@@ -2038,7 +2068,6 @@ function openShortcutsModal() {
       ["/", T.scSearch],
       ["←  →", T.scPrevNext],
       ["T", T.scTabSwap],
-      ["R", T.scRandom],
       ["B", T.scBookmarks],
     ]},
     { group: T.scGroupActions, items: [
@@ -2091,7 +2120,7 @@ function updateWeeklyGoal() {
   const pct = Math.min(100, Math.round((done / goal) * 100));
   el.classList.toggle("reached", done >= goal);
   el.innerHTML = `
-    <span class="weekly-goal-label">📈 ${T.weeklyLabel}</span>
+    <span class="weekly-goal-label">${SVGI.trending}<span>${T.weeklyLabel}</span></span>
     <span class="weekly-goal-bar"><span class="weekly-goal-fill" style="width:${pct}%"></span></span>
     <span><b>${done}</b>/${goal}</span>
   `;
@@ -2554,7 +2583,7 @@ function renderMockExamCard() {
         <div class="mock-sub">${T.mockExam}</div>
       </div>
       <span class="mock-exam-countdown" id="mock-countdown">--:--</span>
-      <button class="mock-exam-btn stop" id="mock-stop">${T.mockStop}</button>
+      <button class="mock-exam-btn stop" id="mock-stop">${SVGI.square}<span>${T.mockStop}</span></button>
     </div>`;
   }
   return `<div class="mock-exam-card">
@@ -2562,7 +2591,7 @@ function renderMockExamCard() {
       <div class="mock-title">${T.mockExam}</div>
       <div class="mock-sub">${MOCK_EXAM_MINUTES} min</div>
     </div>
-    <button class="mock-exam-btn" id="mock-start">${T.startMock}</button>
+    <button class="mock-exam-btn" id="mock-start">${SVGI.triangle}<span>${T.startMock}</span></button>
   </div>`;
 }
 
@@ -2641,10 +2670,6 @@ document.addEventListener("keydown", e => {
   if (e.key === "s" || e.key === "S") {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     openShareCard();
-    return;
-  }
-  if (e.key === "r" || e.key === "R") {
-    jumpToRandomExercise();
     return;
   }
   if (!state.lastActive) return;
