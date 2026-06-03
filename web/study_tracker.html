@@ -60,12 +60,22 @@
   <button class="pwa-install-btn" id="pwa-install" type="button" title="Installer l'app"><span>⬇</span> Installer</button>
   <div class="spacer"></div>
   <div class="stat-group" aria-label="Statistics">
-    <div class="stat" id="stat-lessons-wrap"><span>📚</span><b id="stat-lessons">0</b><span class="stat-lbl" data-i18n="lessonsShort">lessons</span></div>
-    <div class="stat" id="stat-exercises-wrap"><span>✍️</span><b id="stat-exercises">0</b><span class="stat-lbl" data-i18n="exosShort">exos</span></div>
-    <div class="stat" id="stat-streak-wrap"><span>🔥</span><b id="stat-streak">0</b><span class="stat-lbl" data-i18n="dShort">d</span></div>
+    <div class="stat" id="stat-lessons-wrap" title="Leçons">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <b id="stat-lessons">0</b><span class="stat-lbl" data-i18n="lessonsShort">lessons</span>
+    </div>
+    <div class="stat" id="stat-exercises-wrap" title="Exercices">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+      <b id="stat-exercises">0</b><span class="stat-lbl" data-i18n="exosShort">exos</span>
+    </div>
+    <div class="stat" id="stat-streak-wrap" title="Streak">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4.09 12.97a.5.5 0 0 0 .39.81H11l-2 8 8.91-10.97a.5.5 0 0 0-.39-.81H13l2-8z"/></svg>
+      <b id="stat-streak">0</b><span class="stat-lbl" data-i18n="dShort">d</span>
+    </div>
   </div>
   <button class="icon-btn pomo-trigger" id="pomo-btn" title="Pomodoro" aria-label="Pomodoro timer">
-    <span class="pomo-ico">🍅</span><span class="pomo-time" id="pomo-time"></span>
+    <svg class="pomo-ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 14 15"/><line x1="9" y1="3" x2="15" y2="3"/></svg>
+    <span class="pomo-time" id="pomo-time"></span>
   </button>
   <button class="lang-btn" id="lang-btn" title="Switch language" aria-label="Switch language">
     <svg class="lang-globe" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
@@ -246,8 +256,12 @@
   <div class="pomo-bar"><span class="pomo-bar-fill" id="pomo-bar-fill"></span></div>
   <div class="pomo-controls">
     <button class="pomo-btn-main" id="pomo-toggle">Start</button>
-    <button class="pomo-btn-mini" id="pomo-skip" data-i18n-title="pomoSkip" title="Skip">⏭</button>
-    <button class="pomo-btn-mini" id="pomo-reset" data-i18n-title="pomoResetT" title="Reset">↺</button>
+    <button class="pomo-btn-mini" id="pomo-skip" data-i18n-title="pomoSkip" title="Skip" aria-label="Skip phase">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+    </button>
+    <button class="pomo-btn-mini" id="pomo-reset" data-i18n-title="pomoResetT" title="Reset" aria-label="Reset">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+    </button>
   </div>
   <div class="pomo-meta"><b id="pomo-count">0</b> <span data-i18n="pomoDone">pomodoros aujourd'hui</span></div>
   <div class="pomo-settings">

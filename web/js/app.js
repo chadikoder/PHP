@@ -921,11 +921,14 @@ function renderExCard(lesson, ex) {
   const isBm = !!state.bookmarks[key];
   const hasNote = !!(state.notes && state.notes[key] && state.notes[key].trim());
   const diffLbl = { easy: T.diffEasy, medium: T.diffMedium, hard: T.diffHard, extreme: T.diffExtreme };
-  // Layout: [ ✓ check ] [ ex-info: meta-row (#N + diff chip) + title ] [ 🔖 bookmark cell ]
+  const diffIco = { easy: "🟢", medium: "🟡", hard: "🟠", extreme: "🔴" };
+  // Inline meta: emoji · #N · DIFF chip · note-dot — all on one tiny row above the title.
+  // Bookmark stays as its own small cell on the right, not a button-sized block.
   return `<div class="ex-card ${exDone ? "done" : ""}" id="ex-${key}" data-lesson="${lesson.id}" data-num="${ex.num}" role="button" tabindex="0">
     <span class="ex-check ${exDone ? "done" : ""}" data-key="${key}" title="${T.markedAriaLabel}">${exDone ? "✓" : ""}</span>
     <div class="ex-info">
       <div class="ex-num">
+        <span class="ex-diff-ico" aria-hidden="true">${diffIco[ex.diff] || "⚪"}</span>
         <span>#${ex.num}</span>
         <span class="ex-diff ${ex.diff}">${diffLbl[ex.diff] || ex.diff}</span>
         ${hasNote ? `<span class="ex-note-dot" title="Notes" aria-hidden="true"></span>` : ""}
@@ -2102,7 +2105,15 @@ if (themeBtn) {
   themeBtn.addEventListener("click", () => {
     state.theme = state.theme === "light" ? "dark" : "light";
     saveState();
-    applyTheme();
+    // Smooth transition: use the View Transitions API if supported, otherwise a class-based fade
+    const swap = () => applyTheme();
+    if (document.startViewTransition) {
+      document.startViewTransition(swap);
+    } else {
+      document.documentElement.classList.add("theme-transitioning");
+      swap();
+      setTimeout(() => document.documentElement.classList.remove("theme-transitioning"), 380);
+    }
   });
 }
 
@@ -2220,19 +2231,33 @@ function renderWelcome() {
 
   // Build day-card metadata with progress per day + which is "next up"
   const firstOpenDay = DAYS.findIndex(d => !state.completed[d.id]);
+  // Monoline SVG icons — neutral, professional, theme-aware via currentColor
+  const SVG = (path) => `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`;
+  const ICO = {
+    basics:    SVG(`<polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>`),
+    functions: SVG(`<path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1"/><path d="M16 21h1a2 2 0 0 0 2-2v-5a2 2 0 0 1 2-2 2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"/>`),
+    forms:     SVG(`<rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>`),
+    auth:      SVG(`<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="11" r="1.5"/><line x1="12" y1="12.5" x2="12" y2="15.5"/>`),
+    db:        SVG(`<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v6c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12v6c0 1.66 4.03 3 9 3s9-1.34 9-3v-6"/>`),
+    upload:    SVG(`<path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>`),
+    oop:       SVG(`<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>`),
+    leaf:      SVG(`<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/>`),
+    layers:    SVG(`<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>`),
+    zap:       SVG(`<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>`),
+  };
   const dayMeta = [
-    { id: "day-1", ico: "🧱", title: { fr: "PHP Basics",            en: "PHP Basics" },           sub: { fr: "Syntaxe · types · loops", en: "Syntax · types · loops" } },
-    { id: "day-2", ico: "🧮", title: { fr: "Functions / Arrays",    en: "Functions / Arrays" },   sub: { fr: "fns · arrays · dates",    en: "fns · arrays · dates" } },
-    { id: "day-3", ico: "📝", title: { fr: "Formulaires",           en: "Forms" },                sub: { fr: "forms · regex · validation", en: "forms · regex · validation" } },
-    { id: "day-4", ico: "🔐", title: { fr: "Sessions / Auth",       en: "Sessions / Auth" },      sub: { fr: "cookies · sessions",      en: "cookies · sessions" } },
-    { id: "day-5", ico: "🗄️", title: { fr: "MySQL / PDO",          en: "MySQL / PDO" },          sub: { fr: "DB · PDO · prepared",     en: "DB · PDO · prepared" } },
-    { id: "day-6", ico: "📦", title: { fr: "Uploads / CSV",         en: "Uploads / CSV" },        sub: { fr: "files · upload · CSV",   en: "files · upload · CSV" } },
-    { id: "day-7", ico: "🏁", title: { fr: "OOP + Exercice",        en: "OOP + Exercise" },       sub: { fr: "OOP · examen blanc",      en: "OOP · mock exam" } },
+    { id: "day-1", ico: ICO.basics,    title: { fr: "PHP Basics",            en: "PHP Basics" },           sub: { fr: "Syntaxe · types · loops", en: "Syntax · types · loops" } },
+    { id: "day-2", ico: ICO.functions, title: { fr: "Functions / Arrays",    en: "Functions / Arrays" },   sub: { fr: "fns · arrays · dates",    en: "fns · arrays · dates" } },
+    { id: "day-3", ico: ICO.forms,     title: { fr: "Formulaires",           en: "Forms" },                sub: { fr: "forms · regex · validation", en: "forms · regex · validation" } },
+    { id: "day-4", ico: ICO.auth,      title: { fr: "Sessions / Auth",       en: "Sessions / Auth" },      sub: { fr: "cookies · sessions",      en: "cookies · sessions" } },
+    { id: "day-5", ico: ICO.db,        title: { fr: "MySQL / PDO",           en: "MySQL / PDO" },          sub: { fr: "DB · PDO · prepared",     en: "DB · PDO · prepared" } },
+    { id: "day-6", ico: ICO.upload,    title: { fr: "Uploads / CSV",         en: "Uploads / CSV" },        sub: { fr: "files · upload · CSV",   en: "files · upload · CSV" } },
+    { id: "day-7", ico: ICO.oop,       title: { fr: "OOP + Exercice",        en: "OOP + Exercise" },       sub: { fr: "OOP · examen blanc",      en: "OOP · mock exam" } },
   ];
   const refMeta = [
-    { id: "w3-intro", ico: "🟢", title: { fr: "PHP Basic",        en: "PHP Basic" },        sub: { fr: "14 leçons · W3Schools",  en: "14 lessons · W3Schools" } },
-    { id: "w3-forms", ico: "🟡", title: { fr: "PHP Intermediate", en: "PHP Intermediate" }, sub: { fr: "10 leçons · W3Schools",  en: "10 lessons · W3Schools" } },
-    { id: "w3-oop",   ico: "🔴", title: { fr: "PHP Advanced",     en: "PHP Advanced" },     sub: { fr: "10 leçons · W3Schools",  en: "10 lessons · W3Schools" } },
+    { id: "w3-intro", ico: ICO.leaf,    title: { fr: "PHP Basic",        en: "PHP Basic" },        sub: { fr: "14 leçons · W3Schools",  en: "14 lessons · W3Schools" } },
+    { id: "w3-forms", ico: ICO.layers,  title: { fr: "PHP Intermediate", en: "PHP Intermediate" }, sub: { fr: "10 leçons · W3Schools",  en: "10 lessons · W3Schools" } },
+    { id: "w3-oop",   ico: ICO.zap,     title: { fr: "PHP Advanced",     en: "PHP Advanced" },     sub: { fr: "10 leçons · W3Schools",  en: "10 lessons · W3Schools" } },
   ];
 
   function dayCardHtml(m, planIdx) {
