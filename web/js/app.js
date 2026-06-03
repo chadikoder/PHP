@@ -1133,11 +1133,13 @@ function openExModal(lesson, ex) {
   _exModalLastFocus = document.activeElement;
 
   const diffLbl = { easy: T.diffEasy, medium: T.diffMedium, hard: T.diffHard, extreme: T.diffExtreme };
+  const diffIcoMap = { easy: SVGI.leaf, medium: SVGI.flame, hard: SVGI.bolt, extreme: SVGI.alert };
   document.getElementById("ex-modal-num").textContent = "#" + ex.num;
   document.getElementById("ex-modal-title").textContent = t(ex.title);
   const diffEl = document.getElementById("ex-modal-diff");
   diffEl.className = "ex-modal-diff " + ex.diff;
-  diffEl.textContent = diffLbl[ex.diff] || ex.diff;
+  // Render the diff SVG icon side-by-side with the chip label so the snippet sits next to the emoji
+  diffEl.innerHTML = `${diffIcoMap[ex.diff] || ""}<span>${diffLbl[ex.diff] || ex.diff}</span>`;
   document.getElementById("ex-modal-body").innerHTML = t(ex.desc || "");
 
   document.getElementById("ex-modal-actions").innerHTML = _exRenderActions(key);

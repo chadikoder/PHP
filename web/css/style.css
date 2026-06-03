@@ -1183,8 +1183,10 @@ body.drawer-open{overflow:hidden}
 .ex-modal-num{font-size:11px;font-weight:800;color:var(--text-3);letter-spacing:.6px;flex-shrink:0}
 .ex-modal-title{font-size:17px;font-weight:700;color:var(--text);margin:0;flex:1;min-width:200px;line-height:1.35}
 .ex-modal-diff{
+  display:inline-flex;align-items:center;gap:5px;
   font-size:10px;font-weight:800;padding:4px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.4px;flex-shrink:0;
 }
+.ex-modal-diff svg{width:11px;height:11px;flex-shrink:0}
 .ex-modal-diff.easy{background:rgba(52,211,153,.14);color:var(--good)}
 .ex-modal-diff.medium{background:rgba(251,191,36,.14);color:var(--warn)}
 .ex-modal-diff.hard{background:rgba(248,113,113,.14);color:var(--bad)}
@@ -2161,11 +2163,11 @@ header{background:rgba(11,17,32,.82);border-bottom:1px solid rgba(148,163,184,.0
 
 /* Responsive drop order — keeps essentials, never overflows the row */
 @media(max-width:1024px){.stat-group .stat:nth-child(3){display:none}}
-@media(max-width:920px){.pwa-install-btn span{display:none}.pwa-install-btn{width:30px;padding:0;justify-content:center}}
-/* On phones: install button is non-essential — move it into the sidebar action row instead of crowding the header */
-@media(max-width:720px){
-  .pwa-install-btn{display:none}
-  header .pwa-install-btn{display:none}
+@media(max-width:1100px){.pwa-install-btn span{display:none}.pwa-install-btn{width:30px;padding:0;justify-content:center}}
+/* Hide install pill in the header on anything narrower than a full desktop — it always crowded the J chip */
+@media(max-width:980px){
+  .pwa-install-btn{display:none!important}
+  header .pwa-install-btn{display:none!important}
 }
 
 /* Mobile navbar — minimal essentials, even spacing */
@@ -2470,18 +2472,18 @@ header{flex-wrap:nowrap}
 /* ============================================================
    30. MOBILE REVIEW PASS 3 — small check, slim modal, consistent gaps
    ============================================================ */
-/* Mobile check: smaller, subtler ring (user-requested reduction) */
+/* Mobile check: small + subtle (user-requested further reduction) */
 @media(max-width:720px){
-  .ex-check{width:22px;height:22px;border-width:1.6px;flex:0 0 22px;border-color:var(--text-3)}
-  .ex-check::after{width:12px;height:12px}
-  .nav-check{width:22px;height:22px;border-width:1.6px;flex:0 0 22px;border-color:var(--text-3)}
-  .nav-check::after{width:11px;height:11px}
+  .ex-check{width:20px;height:20px;border-width:1.5px;flex:0 0 20px;border-color:var(--text-3)}
+  .ex-check::after{width:11px;height:11px}
+  .nav-check{width:20px;height:20px;border-width:1.5px;flex:0 0 20px;border-color:var(--text-3)}
+  .nav-check::after{width:10px;height:10px}
 }
 @media(max-width:480px){
-  .ex-check{width:20px;height:20px;border-width:1.5px;flex:0 0 20px}
-  .ex-check::after{width:11px;height:11px}
-  .nav-check{width:20px;height:20px;border-width:1.5px;flex:0 0 20px}
-  .nav-check::after{width:10px;height:10px}
+  .ex-check{width:18px;height:18px;border-width:1.4px;flex:0 0 18px}
+  .ex-check::after{width:10px;height:10px}
+  .nav-check{width:18px;height:18px;border-width:1.4px;flex:0 0 18px}
+  .nav-check::after{width:9px;height:9px}
 }
 
 /* Welcome share row + button — proper styled, no inline */
