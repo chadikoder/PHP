@@ -2723,13 +2723,18 @@ button,a,.nav-item,.ex-card,.quick-card,.tab,.ex-filter-btn,.conf-btn{
   }
   .ex-card .ex-check::after{width:14px;height:14px}
 
+  /* Legacy column (old layout) — harmless when ex-info isn't rendered. New layout uses .ex-meta + .ex-title inline. */
   .ex-info{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
-  .ex-num{
-    display:inline-flex;align-items:center;gap:7px;font-size:10px;
-    color:var(--text-3);letter-spacing:.4px;font-weight:700;
+  .ex-num{display:inline-flex;align-items:center;gap:7px;font-size:10px;color:var(--text-3);letter-spacing:.4px;font-weight:700}
+  /* New single-row layout: meta cell + title cell side-by-side, both centred on the card axis */
+  .ex-meta{display:inline-flex;align-items:center;gap:7px;font-size:10px;flex-shrink:0;
+    color:var(--text-3);letter-spacing:.4px;font-weight:700;align-self:center;flex-wrap:nowrap}
+  .ex-meta .ex-diff{font-size:9px;padding:2px 7px;line-height:1.4;flex-shrink:0}
+  .ex-title{
+    flex:1 1 0;min-width:0;align-self:center;
+    font-size:13px;line-height:1.35;font-weight:600;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   }
-  .ex-title{font-size:13.5px;line-height:1.35;font-weight:600;
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .ex-card .ex-diff{font-size:9px;padding:2px 7px;line-height:1.4;flex-shrink:0}
   .ex-diff-emoji{font-size:14px}
 
