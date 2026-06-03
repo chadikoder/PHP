@@ -10,13 +10,15 @@ function t(v) {
   if (typeof v === "string") return v;
   if (typeof v !== "object") return String(v);
   if (Array.isArray(v)) return v.map(t).join("");
-  const lang = (state && state.lang) || "fr";
-  return v[lang] || v.fr || v.en || "";
+  const lang = (state && state.lang) || "en";
+  return v[lang] || v.en || v.fr || "";
 }
 
 const T_DICT = {
   // Header / chrome
   menu:          { fr: "Ouvrir le menu",       en: "Open menu" },
+  installBtn:    { fr: "Installer",            en: "Install" },
+  installApp:    { fr: "Installer l'app",      en: "Install the app" },
   toggleTheme:   { fr: "Basculer thème",       en: "Toggle theme" },
   toLight:       { fr: "Passer en mode clair", en: "Switch to light mode" },
   toDark:        { fr: "Passer en mode sombre",en: "Switch to dark mode" },
@@ -174,6 +176,7 @@ const T_DICT = {
   pomoLong:      { fr: "Pause longue",         en: "Long break" },
   pomoStart:     { fr: "Démarrer",             en: "Start" },
   pomoPause:     { fr: "Pause",                en: "Pause" },
+  pomoTitle:     { fr: "Pomodoro",             en: "Pomodoro" },
   pomoDone:      { fr: "pomodoros aujourd'hui",en: "pomodoros today" },
   pomoFocusMin:  { fr: "Focus (min)",          en: "Focus (min)" },
   pomoBreakMin:  { fr: "Pause (min)",          en: "Break (min)" },
@@ -308,7 +311,7 @@ function loadState() {
 }
 
 function defaultState() {
-  return { completed: {}, exDone: {}, bookmarks: {}, lastActive: null, theme: "dark", lang: "fr", sectionsCollapsed: {}, achSeen: null, dailyGoal: 10, weeklyGoal: 50, confidence: {}, masteredSeen: {}, goalReachedDate: null, pomo: null, quizAnswers: {}, navMode: "plan", notes: {}, focusMode: false, pomoLog: [], xp: 0, challengeSeed: null, challengeDone: {}, reviewSeen: {}, xpClaims: {}, welcomeHintDismissed: false };
+  return { completed: {}, exDone: {}, bookmarks: {}, lastActive: null, theme: "dark", lang: "en", sectionsCollapsed: {}, achSeen: null, dailyGoal: 10, weeklyGoal: 50, confidence: {}, masteredSeen: {}, goalReachedDate: null, pomo: null, quizAnswers: {}, navMode: "plan", notes: {}, focusMode: false, pomoLog: [], xp: 0, challengeSeed: null, challengeDone: {}, reviewSeen: {}, xpClaims: {}, welcomeHintDismissed: false };
 }
 
 function saveState() {
@@ -2926,6 +2929,10 @@ function pomoRender() {
   if (timeEl) timeEl.textContent = p.running ? pomoFmt(rem) : "";
   if (btn) btn.classList.toggle("running", !!p.running);
   if (panel) panel.classList.toggle("phase-break", p.phase !== "focus");
+  const sidePomo = document.getElementById("sidebar-pomo-btn");
+  const sidePomoTime = document.getElementById("sidebar-pomo-time");
+  if (sidePomo) sidePomo.classList.toggle("running", !!p.running);
+  if (sidePomoTime) sidePomoTime.textContent = p.running ? pomoFmt(rem) : "";
   if (barFill) {
     const total = pomoPhaseMin(p) * 60000 || 1;
     barFill.style.width = Math.min(100, (1 - rem / total) * 100) + "%";
@@ -2975,6 +2982,8 @@ function initPomodoro() {
     }
     pomoRender();
   });
+  const sidePomo = document.getElementById("sidebar-pomo-btn");
+  if (sidePomo) sidePomo.addEventListener("click", e => { e.stopPropagation(); btn.click(); });
   document.getElementById("pomo-toggle").addEventListener("click", pomoToggle);
   document.getElementById("pomo-reset").addEventListener("click", pomoReset);
   document.getElementById("pomo-skip").addEventListener("click", pomoAdvance);

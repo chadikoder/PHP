@@ -1,6 +1,6 @@
 // Tiny offline-first service worker for the PHP tracker.
 // Cache-first for own static assets, network-first for everything else.
-const CACHE = "php-tracker-v3";
+const CACHE = "php-tracker-v4";
 const PRECACHE = [
   "./study_tracker.html",
   "./css/style.css",

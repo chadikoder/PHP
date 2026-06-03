@@ -1940,7 +1940,7 @@ body.focus-mode .focus-btn .focus-on{display:inline}
   .exam-countdown .exam-lbl{display:none}
   .focus-btn{display:none}              /* freed real estate; F key still works */
   .pwa-install-btn{padding:6px 10px;font-size:11px}
-  .pwa-install-btn span{display:none}   /* icon only when shown on phone */
+  .pwa-install-btn .pwa-install-lbl{display:none}   /* icon only on narrow phones */
 }
 @media(max-width:560px){
   .exam-countdown{display:none}         /* day count in sidebar progress card anyway */
@@ -2157,6 +2157,7 @@ header{gap:10px;height:var(--header-h);padding:0 16px}
 }
 .pwa-install-btn:hover{color:var(--accent);border-color:var(--accent);background:var(--surface-2);transform:none}
 .pwa-install-btn span{font-size:11px}
+.pwa-install-btn .pwa-install-lbl{font-size:11.5px;font-weight:600}
 
 /* Quieter header background — soft glass effect both themes */
 header{background:rgba(11,17,32,.82);border-bottom:1px solid rgba(148,163,184,.07)}
@@ -2167,7 +2168,7 @@ header{background:rgba(11,17,32,.82);border-bottom:1px solid rgba(148,163,184,.0
 /* Install pill: text + icon on wide, icon-only at narrow.
    Stays visible at every breakpoint (user wants it kept). No overlap because the spacer/flex layout takes care of gaps. */
 @media(max-width:1100px){
-  .pwa-install-btn span{display:none}
+  .pwa-install-btn .pwa-install-lbl{display:none}
   .pwa-install-btn{width:30px;height:30px;padding:0;justify-content:center;flex-shrink:0}
 }
 @media(max-width:720px){
@@ -2942,3 +2943,90 @@ button,a,.nav-item,.ex-card,.quick-card,.tab,.ex-filter-btn,.conf-btn{
 /* Reduce daily-edit pencil visual weight */
 .daily-edit{padding:3px 6px;border-radius:6px}
 @media(max-width:480px){.daily-label{font-size:11px}.daily-count{font-size:11px}.daily-count b{font-size:13px}}
+
+/* ============================================================
+   30. MOBILE UX REFINEMENTS — touch targets, type scale, FAB,
+       pomo relocation, extended safe-area
+   ============================================================ */
+
+/* Sidebar pomo entry — only visible on phones (replaces header pomo) */
+.sidebar-pomo-btn{display:none;width:100%;align-items:center;gap:8px;
+  padding:11px 12px;margin:6px 0 2px;border-radius:10px;
+  background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);
+  font-size:12.5px;font-weight:600;letter-spacing:.2px;cursor:pointer;
+  transition:all .15s var(--ease);min-height:44px;
+}
+.sidebar-pomo-btn:hover{color:var(--text);border-color:var(--accent);background:rgba(var(--accent-r),var(--accent-g),var(--accent-b),.06)}
+.sidebar-pomo-btn svg{flex-shrink:0;opacity:.85}
+.sidebar-pomo-btn .sidebar-pomo-time{margin-left:auto;font-variant-numeric:tabular-nums;font-size:12px;color:var(--accent);font-weight:700}
+.sidebar-pomo-btn.running{border-color:rgba(var(--accent-r),var(--accent-g),var(--accent-b),.45);background:rgba(var(--accent-r),var(--accent-g),var(--accent-b),.10);color:var(--text)}
+
+/* On phones: hide header pomo entry, show sidebar one */
+@media(max-width:560px){
+  .pomo-trigger{display:none!important}
+  .sidebar-pomo-btn{display:inline-flex}
+}
+
+/* Touch-target bumps — keep at least 40px on phones, monotonic */
+@media(max-width:560px){
+  .icon-btn{width:40px;height:40px}
+  .lang-btn{height:40px;padding:0 11px;min-width:48px}
+  .pwa-install-btn{width:40px;height:40px}
+  .menu-btn{width:42px;height:42px}
+  .sidebar-action-btn{min-height:46px;font-size:12.5px}
+  .reset-btn{min-height:46px}
+  .search-wrap input{min-height:46px;font-size:14px}
+  .ex-card{min-height:60px}
+  .nav-mode-btn{min-height:42px}
+  .nav-item{min-height:46px}
+  .quick-card{min-height:64px}
+  .modal-btn{min-height:46px}
+}
+
+/* Header height bumps to accommodate larger buttons */
+@media(max-width:560px){
+  header{height:calc(56px + env(safe-area-inset-top));gap:6px}
+  :root{--header-h:56px}
+}
+
+/* Typography pass — bump body text in lesson area to stay readable */
+@media(max-width:560px){
+  .lesson-body, .section-card p, .block-note, .block-warn, .block-bad, .block-tip, .block-try{
+    font-size:14.5px;line-height:1.65;
+  }
+  .ex-title{font-size:14px;line-height:1.4}
+  .ex-num-text{font-size:11px}
+  .lesson-title{font-size:22px;line-height:1.2}
+  .quick-card .big{font-size:16px}
+  .quick-card .sub{font-size:13px}
+}
+
+/* Card breathing room */
+@media(max-width:560px){
+  .quick-cards{gap:12px}
+  .ex-cards{gap:10px}
+  .nav-section{gap:4px}
+}
+
+/* FAB polish — bigger tap area, stronger shadow */
+.jump-top{box-shadow:0 6px 20px -6px rgba(0,0,0,.45),0 2px 6px rgba(0,0,0,.18)}
+[data-theme="light"] .jump-top{box-shadow:0 6px 22px -8px rgba(15,23,42,.18),0 1px 3px rgba(15,23,42,.06)}
+@media(max-width:720px){
+  .jump-top{width:48px;height:48px;right:16px;bottom:max(20px,env(safe-area-inset-bottom))}
+  .jump-top svg{width:20px;height:20px}
+}
+@media(max-width:480px){
+  .jump-top{width:46px;height:46px}
+}
+
+/* Extra safe-area for header (already partial), plus drawer top padding so notch doesn't crowd search */
+@media(max-width:560px){
+  .sidebar{padding-top:calc(16px + env(safe-area-inset-top))}
+}
+
+/* Install pill restore label on tablet so the text label sits beside the icon */
+@media(min-width:561px) and (max-width:1100px){
+  .pwa-install-btn{width:auto;height:34px;padding:0 12px;gap:6px}
+  .pwa-install-btn .pwa-install-lbl{display:inline;font-size:11.5px}
+}
+.pwa-install-btn .pwa-install-lbl{font-weight:600}
