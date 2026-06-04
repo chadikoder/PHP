@@ -2,7 +2,7 @@
 // Network-first for the HTML shell so deploys roll out fast.
 // Cache-first for static assets — bump CACHE to push new JS/CSS/images.
 // Google Fonts get their own runtime cache so repeat visits don't hit the network.
-const CACHE = "php-tracker-v15";
+const CACHE = "php-tracker-v16";
 const FONT_CACHE = "php-tracker-fonts-v1";
 const PRECACHE = [
   "./study_tracker.html",
@@ -68,7 +68,9 @@ self.addEventListener("fetch", e => {
   }
 
   // Lesson JSON: stale-while-revalidate so opens feel instant on repeat visits
-  // while the cache stays fresh in the background.
+  // while the cache stays fresh in the background. Falls back to a synthetic
+  // 503 when both cache and network fail — otherwise respondWith would reject
+  // the FetchEvent and leave the page hanging on a skeleton forever.
   if (url.pathname.includes("/data/") && url.pathname.endsWith(".json")) {
     e.respondWith(
       caches.open(CACHE).then(c =>
@@ -76,8 +78,11 @@ self.addEventListener("fetch", e => {
           const network = fetch(req).then(resp => {
             if (resp && resp.ok) c.put(req, resp.clone()).catch(() => {});
             return resp;
-          }).catch(() => cached);
-          return cached || network;
+          }).catch(() => null);
+          return cached || network.then(r => r || new Response(
+            JSON.stringify({ error: "offline" }),
+            { status: 503, headers: { "Content-Type": "application/json" } }
+          ));
         })
       )
     );

@@ -3068,6 +3068,9 @@ button,a,.nav-item,.ex-card,.quick-card,.tab,.ex-filter-btn,.conf-btn{
 }
 
 /* Skeleton shown in #ex-area while a lesson's detail JSON is loading */
+.lesson-err{padding:18px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2);color:var(--text-2);font-size:13.5px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.lesson-err .btn-retry{padding:8px 14px;border-radius:8px;background:var(--accent);color:#fff;border:0;font-weight:600;font-size:13px;cursor:pointer;transition:transform .12s var(--ease)}
+.lesson-err .btn-retry:hover{transform:translateY(-1px)}
 .lesson-skel{padding:6px 0 24px;display:flex;flex-direction:column;gap:14px}
 .lesson-skel .skel-line{height:14px;border-radius:6px;background:linear-gradient(90deg,var(--surface-2) 0%,var(--surface) 50%,var(--surface-2) 100%);background-size:200% 100%;animation:skel-shimmer 1.2s ease-in-out infinite}
 .lesson-skel .skel-line.w90{width:90%}

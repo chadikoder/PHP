@@ -609,7 +609,7 @@ document.querySelectorAll(".nav-mode-btn").forEach(btn => {
 const __hydrated = new Set();
 const __hydrating = new Map();
 function hydrateLesson(id) {
-  if (__hydrated.has(id)) return Promise.resolve();
+  if (__hydrated.has(id)) return Promise.resolve(true);
   const inflight = __hydrating.get(id);
   if (inflight) return inflight;
   const p = fetch("../web/data/" + id + ".json")
@@ -623,8 +623,9 @@ function hydrateLesson(id) {
         if (detail.problemes) lesson.problemes = detail.problemes;
       }
       __hydrated.add(id);
+      return true;
     })
-    .catch(() => {})
+    .catch(() => false)
     .finally(() => { __hydrating.delete(id); });
   __hydrating.set(id, p);
   return p;
@@ -698,9 +699,22 @@ function openLesson(id) {
       '<div class="skel-line w90"></div><div class="skel-line w60"></div>' +
       '</div>';
   }
-  hydrateLesson(id).then(() => {
+  hydrateLesson(id).then(ok => {
     // The user may have navigated away while we were fetching.
     if (state.lastActive !== id) return;
+    if (!ok) {
+      // Network + cache both failed — surface a retry button instead of
+      // leaving the skeleton spinning indefinitely.
+      const a = document.getElementById("ex-area");
+      if (a) a.innerHTML =
+        '<div class="lesson-err">' +
+        '<p>' + (state.lang === "en" ? "Couldn’t load this lesson." : "Impossible de charger cette leçon.") + '</p>' +
+        '<button class="btn-retry" id="retry-hydrate">' + (state.lang === "en" ? "Retry" : "Réessayer") + '</button>' +
+        '</div>';
+      const r = document.getElementById("retry-hydrate");
+      if (r) r.addEventListener("click", () => openLesson(id));
+      return;
+    }
     renderExArea(lesson);
     bindCopyButtons();
     // Warm the cache for the most likely next opens (prev/next) when idle.
