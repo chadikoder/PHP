@@ -316,9 +316,17 @@ function defaultState() {
 }
 
 let _saveTimer = 0;
+let _lastSavedJson = "";
 function _flushSave() {
   _saveTimer = 0;
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  try {
+    const json = JSON.stringify(state);
+    if (json === _lastSavedJson) return;          // skip redundant writes
+    localStorage.setItem(STORAGE_KEY, json);
+    _lastSavedJson = json;
+  } catch (e) {
+    // QuotaExceeded or serialization error — don't crash the app
+  }
 }
 function saveState() {
   if (_saveTimer) return;
@@ -3009,12 +3017,17 @@ function pomoTodayCount() {
   const today = new Date().toDateString();
   return state.pomoLog.filter(s => new Date(s.ts).toDateString() === today).length;
 }
+let _pomoHistoryLastSig = "";
 function pomoRenderHistory() {
   const list = document.getElementById("pomo-history-list");
   const countEl = document.getElementById("pomo-today-count");
   if (!list) return;
   const today = new Date().toDateString();
   const sessions = (Array.isArray(state.pomoLog) ? state.pomoLog : []).filter(s => new Date(s.ts).toDateString() === today);
+  // Skip the innerHTML rebuild when nothing changed (pomoRender fires every 500 ms while running).
+  const sig = today + "|" + sessions.length;
+  if (sig === _pomoHistoryLastSig) return;
+  _pomoHistoryLastSig = sig;
   if (countEl) countEl.textContent = sessions.length;
   list.innerHTML = sessions.length
     ? sessions.map(s => `<span class="pomo-history-pip" title="${new Date(s.ts).toLocaleTimeString()} · ${s.min} min"></span>`).join("")
