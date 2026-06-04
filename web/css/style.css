@@ -1127,8 +1127,12 @@ body.drawer-open{overflow:hidden}
 .ex-card.done .ex-title{color:var(--text-3);text-decoration:line-through;text-decoration-color:var(--good)}
 
 .ex-diff{
+  display:inline-flex;align-items:center;gap:5px;
   font-size:9.5px;font-weight:800;padding:3px 9px;border-radius:99px;text-transform:uppercase;letter-spacing:.4px;
+  line-height:1;
 }
+.ex-diff .ex-diff-svg{width:11px;height:11px;flex-shrink:0;display:block}
+.ex-diff .ex-diff-lbl{display:inline-block;line-height:1}
 .ex-diff.easy{background:rgba(52,211,153,.12);color:var(--good)}
 .ex-diff.medium{background:rgba(251,191,36,.12);color:var(--warn)}
 .ex-diff.hard{background:rgba(248,113,113,.12);color:var(--bad)}
@@ -3039,3 +3043,5 @@ button,a,.nav-item,.ex-card,.quick-card,.tab,.ex-filter-btn,.conf-btn{
   .pwa-install-btn .pwa-install-lbl{display:inline;font-size:11.5px}
 }
 .pwa-install-btn .pwa-install-lbl{font-weight:600}
+.pwa-install-btn .pwa-install-ico{flex-shrink:0;display:block}
+.pwa-install-btn{align-items:center;display:inline-flex;gap:6px}
