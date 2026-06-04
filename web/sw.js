@@ -1,6 +1,6 @@
 // Tiny offline-first service worker for the PHP tracker.
 // Cache-first for own static assets, network-first for everything else.
-const CACHE = "php-tracker-v7";
+const CACHE = "php-tracker-v8";
 const PRECACHE = [
   "./study_tracker.html",
   "./css/style.css",
@@ -29,18 +29,24 @@ self.addEventListener("fetch", e => {
   const url = new URL(req.url);
   // Only handle same-origin requests
   if (url.origin !== self.location.origin) return;
+  // Ignore the ?v= cache-buster when matching so the same asset doesn't pile
+  // up under multiple cache keys, and old versions still serve offline.
   e.respondWith(
-    caches.match(req).then(cached => {
+    caches.match(req, { ignoreSearch: true }).then(cached => {
       if (cached) {
-        // Refresh in the background
-        fetch(req).then(fresh => caches.open(CACHE).then(c => c.put(req, fresh.clone()))).catch(() => {});
+        // Refresh in the background — only cache successful responses
+        fetch(req).then(fresh => {
+          if (fresh && fresh.ok) caches.open(CACHE).then(c => c.put(req, fresh.clone()));
+        }).catch(() => {});
         return cached;
       }
       return fetch(req).then(resp => {
-        const copy = resp.clone();
-        caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
+        if (resp && resp.ok) {
+          const copy = resp.clone();
+          caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
+        }
         return resp;
-      }).catch(() => caches.match("./study_tracker.html"));
+      }).catch(() => caches.match("./study_tracker.html", { ignoreSearch: true }));
     })
   );
 });

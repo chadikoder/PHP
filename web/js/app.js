@@ -19,6 +19,7 @@ const T_DICT = {
   menu:          { fr: "Ouvrir le menu",       en: "Open menu" },
   installBtn:    { fr: "Installer",            en: "Install" },
   installApp:    { fr: "Installer l'app",      en: "Install the app" },
+  skipToMain:    { fr: "Aller au contenu",     en: "Skip to content" },
   toggleTheme:   { fr: "Basculer thème",       en: "Toggle theme" },
   toLight:       { fr: "Passer en mode clair", en: "Switch to light mode" },
   toDark:        { fr: "Passer en mode sombre",en: "Switch to dark mode" },
