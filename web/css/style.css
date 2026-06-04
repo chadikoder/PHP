@@ -1072,7 +1072,7 @@ body.drawer-open{overflow:hidden}
   background:var(--surface);border:1px solid var(--border);
   transition:all .15s var(--ease);position:relative;cursor:pointer;
 }
-.ex-card:hover{border-color:var(--accent);transform:translateX(3px);box-shadow:var(--shadow-sm)}
+.ex-card:hover{border-color:var(--accent);box-shadow:var(--shadow-sm)}
 .ex-open-arrow{font-size:18px;color:var(--text-3);opacity:.5;transition:all .15s var(--ease);flex-shrink:0}
 .ex-card:hover .ex-open-arrow{opacity:1;color:var(--accent);transform:translateX(2px)}
 .ex-check{
