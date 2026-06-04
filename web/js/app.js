@@ -315,15 +315,19 @@ function defaultState() {
   return { completed: {}, exDone: {}, bookmarks: {}, lastActive: null, theme: "dark", lang: "en", sectionsCollapsed: {}, achSeen: null, dailyGoal: 10, weeklyGoal: 50, confidence: {}, masteredSeen: {}, goalReachedDate: null, pomo: null, quizAnswers: {}, navMode: "plan", notes: {}, focusMode: false, pomoLog: [], xp: 0, challengeSeed: null, challengeDone: {}, reviewSeen: {}, xpClaims: {}, welcomeHintDismissed: false };
 }
 
-let _saveQueued = false;
-function saveState() {
-  if (_saveQueued) return;
-  _saveQueued = true;
-  queueMicrotask(() => {
-    _saveQueued = false;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  });
+let _saveTimer = 0;
+function _flushSave() {
+  _saveTimer = 0;
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
 }
+function saveState() {
+  if (_saveTimer) return;
+  _saveTimer = setTimeout(_flushSave, 200);
+}
+// Flush pending writes on page hide so a freshly-toggled checkbox isn't lost
+// when the user closes the tab or backgrounds the app on mobile.
+window.addEventListener("pagehide", () => { if (_saveTimer) { clearTimeout(_saveTimer); _flushSave(); } });
+window.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden" && _saveTimer) { clearTimeout(_saveTimer); _flushSave(); } });
 
 function esc(s) {
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -717,12 +721,24 @@ function toggleDone(id) {
     unclaimXp("lesson:" + id);
   } else {
     state.completed[id] = Date.now();
-    celebrate();
     claimXp("lesson:" + id, 25, "Lesson done");
-    checkChallenge();
+  }
+  // Cheap synchronous feedback on the button so the click feels instant.
+  const btn = document.getElementById("toggle-done");
+  if (btn) {
+    btn.classList.toggle("done", !wasDone);
+    btn.textContent = wasDone ? T.markDone : T.marked;
   }
   saveState();
-  openLesson(id);
+  // Defer the heavy stuff (confetti, challenge check, full lesson re-render)
+  // to the next frame so the browser can paint the button state change first.
+  requestAnimationFrame(() => {
+    if (!wasDone) {
+      celebrate();
+      checkChallenge();
+    }
+    openLesson(id);
+  });
 }
 
 /* ====================================================================
@@ -880,13 +896,21 @@ function renderExArea(lesson) {
         const ex = [...(lesson.exercises||[]), ...(lesson.problemes||[])].find(x => x.num === num);
         if (ex) claimXp("ex:" + key, xpFromDiff(ex.diff), "Exo " + ex.diff);
       }
+      // Cheap synchronous feedback: flip the card's own classes so the user
+      // sees the tick land before we do the heavy re-render in the next frame.
+      const card = document.getElementById("ex-" + key);
+      if (card) card.classList.toggle("done", !wasDone);
+      chk.classList.toggle("done", !wasDone);
+      chk.textContent = wasDone ? "" : "✓";
       saveState();
-      checkLessonMastery(lesson);
-      checkDailyGoal();
-      if (!wasDone) checkChallenge();
-      updateSidebarActive();
-      renderExArea(lesson);
-      bindCopyButtons();
+      requestAnimationFrame(() => {
+        checkLessonMastery(lesson);
+        checkDailyGoal();
+        if (!wasDone) checkChallenge();
+        updateSidebarActive();
+        renderExArea(lesson);
+        bindCopyButtons();
+      });
     });
   });
 
@@ -895,10 +919,12 @@ function renderExArea(lesson) {
     bm.addEventListener("click", e => {
       e.stopPropagation();
       const key = bm.dataset.key;
-      if (state.bookmarks[key]) delete state.bookmarks[key];
-      else state.bookmarks[key] = Date.now();
+      const on = !state.bookmarks[key];
+      if (on) state.bookmarks[key] = Date.now();
+      else delete state.bookmarks[key];
+      bm.classList.toggle("active", on);
       saveState();
-      renderExArea(lesson);
+      requestAnimationFrame(() => renderExArea(lesson));
     });
   });
 
@@ -1860,6 +1886,14 @@ const pwaInstallBtn = document.getElementById("pwa-install");
 if ("serviceWorker" in navigator && location.protocol !== "file:") {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("../web/sw.js").catch(() => {});
+  });
+  // When a freshly installed SW takes control (clients.claim), reload once so
+  // the page actually runs the new JS/CSS instead of waiting for a manual refresh.
+  let _swReloaded = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (_swReloaded) return;
+    _swReloaded = true;
+    window.location.reload();
   });
 }
 window.addEventListener("beforeinstallprompt", e => {
