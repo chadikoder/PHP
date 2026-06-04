@@ -2,7 +2,7 @@
 // Network-first for the HTML shell so deploys roll out fast.
 // Cache-first for static assets — bump CACHE to push new JS/CSS/images.
 // Google Fonts get their own runtime cache so repeat visits don't hit the network.
-const CACHE = "php-tracker-v13";
+const CACHE = "php-tracker-v14";
 const FONT_CACHE = "php-tracker-fonts-v1";
 const PRECACHE = [
   "./study_tracker.html",
@@ -11,6 +11,7 @@ const PRECACHE = [
   "./js/data.js",
   "./image/php-svgrepo-com.svg",
   "./manifest.webmanifest",
+  "./data/day-1.json",
 ];
 
 self.addEventListener("install", e => {
@@ -61,6 +62,23 @@ self.addEventListener("fetch", e => {
       }).catch(() =>
         caches.match(req, { ignoreSearch: true })
           .then(hit => hit || caches.match("./study_tracker.html", { ignoreSearch: true }))
+      )
+    );
+    return;
+  }
+
+  // Lesson JSON: stale-while-revalidate so opens feel instant on repeat visits
+  // while the cache stays fresh in the background.
+  if (url.pathname.includes("/data/") && url.pathname.endsWith(".json")) {
+    e.respondWith(
+      caches.open(CACHE).then(c =>
+        c.match(req).then(cached => {
+          const network = fetch(req).then(resp => {
+            if (resp && resp.ok) c.put(req, resp.clone()).catch(() => {});
+            return resp;
+          }).catch(() => cached);
+          return cached || network;
+        })
       )
     );
     return;

@@ -3075,3 +3075,14 @@ button,a,.nav-item,.ex-card,.quick-card,.tab,.ex-filter-btn,.conf-btn{
 .lesson-skel .skel-line.w60{width:60%}
 .lesson-skel .skel-line.w50{width:50%}
 @keyframes skel-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* Boot skeleton — visible the moment HTML+CSS arrive, replaced by JS once app boots */
+.boot-skel{padding:32px 6px;display:flex;flex-direction:column;gap:18px;max-width:1100px}
+.boot-skel-title{height:36px;width:55%;border-radius:10px;background:var(--surface-2)}
+.boot-skel-sub{height:14px;width:75%;border-radius:6px;background:var(--surface-2);opacity:.7}
+.boot-skel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:8px}
+.boot-skel-grid > div{height:104px;border-radius:14px;background:var(--surface-2);animation:skel-shimmer 1.4s ease-in-out infinite;background:linear-gradient(90deg,var(--surface-2) 0%,var(--surface) 50%,var(--surface-2) 100%);background-size:200% 100%}
+
+/* Skip rendering off-screen lesson content — huge scroll-perf win on long days */
+.ex-cards{contain:layout style;content-visibility:auto;contain-intrinsic-size:1px 600px}
+.lesson-body > .section-card{content-visibility:auto;contain-intrinsic-size:1px 400px}

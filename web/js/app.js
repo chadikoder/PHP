@@ -315,8 +315,14 @@ function defaultState() {
   return { completed: {}, exDone: {}, bookmarks: {}, lastActive: null, theme: "dark", lang: "en", sectionsCollapsed: {}, achSeen: null, dailyGoal: 10, weeklyGoal: 50, confidence: {}, masteredSeen: {}, goalReachedDate: null, pomo: null, quizAnswers: {}, navMode: "plan", notes: {}, focusMode: false, pomoLog: [], xp: 0, challengeSeed: null, challengeDone: {}, reviewSeen: {}, xpClaims: {}, welcomeHintDismissed: false };
 }
 
+let _saveQueued = false;
 function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  if (_saveQueued) return;
+  _saveQueued = true;
+  queueMicrotask(() => {
+    _saveQueued = false;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  });
 }
 
 function esc(s) {
@@ -334,14 +340,12 @@ const SVGI = {
   bolt:       `<svg class="lico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
   alert:      `<svg class="lico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
   bookmark:   `<svg class="lico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`,
-  shuffle:    `<svg class="lico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>`,
   filter:     `<svg class="lico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>`,
   triangle:   `<svg class="lico" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>`,
   square:     `<svg class="lico" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="1"/></svg>`,
   light:      `<svg class="lico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>`,
   external:   `<svg class="lico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`,
   target:     `<svg class="lico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`,
-  notes:      `<svg class="lico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
   trending:   `<svg class="lico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>`,
 };
 function diffIcoSvg(diff) {
@@ -695,6 +699,12 @@ function openLesson(id) {
     if (state.lastActive !== id) return;
     renderExArea(lesson);
     bindCopyButtons();
+    // Warm the cache for the most likely next opens (prev/next) when idle.
+    const ric = window.requestIdleCallback || (cb => setTimeout(cb, 600));
+    ric(() => {
+      if (prev && !__hydrated.has(prev.id)) hydrateLesson(prev.id);
+      if (next && !__hydrated.has(next.id)) hydrateLesson(next.id);
+    });
   });
   bindReviewStrip();
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1541,40 +1551,46 @@ function jumpToRandomExercise() {
    SEARCH
    ==================================================================== */
 const searchInput = document.getElementById("search");
+let _searchTimer = 0;
+function _runSearch(q) {
+  if (!q) { renderSidebar(); return; }
+  const filter = arr => arr.filter(l => {
+    const hay = normalize(
+      t(l.title) + " " + t(l.sub || "") + " " +
+      (l.tags || []).map(t).join(" ") + " " +
+      (l.sections || []).map(s => t(s.h) + " " + t(s.p || "")).join(" ") + " " +
+      [...(l.exercises || []), ...(l.problemes || [])].map(x => t(x.title) + " " + t(x.desc || "")).join(" ")
+    );
+    return hay.includes(q);
+  });
+  const days = filter(DAYS);
+  const basic = filter(GIO.filter(l => (l.level || "basic") === "basic"));
+  const inter = filter(GIO.filter(l => l.level === "intermediate"));
+  const adv = filter(GIO.filter(l => l.level === "advanced"));
+  const fill = (id, list) =>
+    document.getElementById(id).innerHTML = list.length
+      ? list.map(navItem).join("")
+      : `<div class="empty-search">${T.noLesson}</div>`;
+  fill("nav-days", days);
+  fill("nav-basic", basic);
+  fill("nav-intermediate", inter);
+  fill("nav-advanced", adv);
+  document.querySelectorAll(".nav-track").forEach(tr => { tr.hidden = false; });
+  document.querySelectorAll(".nav-section").forEach(s => { s.style.display = ""; });
+  document.querySelectorAll(".collapsible").forEach(el => {
+    el.classList.remove("collapsed");
+    const arrow = el.querySelector(".collapse-arrow");
+    if (arrow) arrow.style.transform = "";
+  });
+  bindNav();
+}
 if (searchInput) {
   searchInput.addEventListener("input", e => {
     const q = normalize(e.target.value.trim());
-    if (!q) { renderSidebar(); return; }
-    const filter = arr => arr.filter(l => {
-      const hay = normalize(
-        t(l.title) + " " + t(l.sub || "") + " " +
-        (l.tags || []).map(t).join(" ") + " " +
-        (l.sections || []).map(s => t(s.h) + " " + t(s.p || "")).join(" ") + " " +
-        [...(l.exercises || []), ...(l.problemes || [])].map(x => t(x.title) + " " + t(x.desc || "")).join(" ")
-      );
-      return hay.includes(q);
-    });
-    const days = filter(DAYS);
-    const basic = filter(GIO.filter(l => (l.level || "basic") === "basic"));
-    const inter = filter(GIO.filter(l => l.level === "intermediate"));
-    const adv = filter(GIO.filter(l => l.level === "advanced"));
-    const fill = (id, list) =>
-      document.getElementById(id).innerHTML = list.length
-        ? list.map(navItem).join("")
-        : `<div class="empty-search">${T.noLesson}</div>`;
-    fill("nav-days", days);
-    fill("nav-basic", basic);
-    fill("nav-intermediate", inter);
-    fill("nav-advanced", adv);
-    // Reveal everything so a collapsed section can't hide its matches
-    document.querySelectorAll(".nav-track").forEach(tr => { tr.hidden = false; });
-    document.querySelectorAll(".nav-section").forEach(s => { s.style.display = ""; });
-    document.querySelectorAll(".collapsible").forEach(el => {
-      el.classList.remove("collapsed");
-      const arrow = el.querySelector(".collapse-arrow");
-      if (arrow) arrow.style.transform = "";
-    });
-    bindNav();
+    clearTimeout(_searchTimer);
+    // Run empty-search instantly so backspace-to-clear feels snappy.
+    if (!q) { _runSearch(""); return; }
+    _searchTimer = setTimeout(() => _runSearch(q), 120);
   });
 }
 
