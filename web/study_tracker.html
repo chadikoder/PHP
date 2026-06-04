@@ -22,11 +22,13 @@
 <link rel="canonical" href="https://chadikoder.github.io/PHP/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all';this.onload=null">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"></noscript>
 <link rel="icon" type="image/svg+xml" href="../web/image/php-svgrepo-com.svg">
 <link rel="manifest" href="../web/manifest.webmanifest">
-<link rel="preload" as="script" href="../web/js/data.js?v=20260604c">
-<link rel="preload" as="script" href="../web/js/app.js?v=20260604c">
+<link rel="preload" as="script" href="../web/js/data.js?v=20260604c" fetchpriority="high">
+<link rel="preload" as="script" href="../web/js/app.js?v=20260604c" fetchpriority="high">
 <script>
 (function(){
   try{
@@ -49,7 +51,7 @@
     <span class="menu-ico"></span>
   </button>
   <a class="logo" href="#" aria-label="Home">
-    <span class="logo-icon"><img src="../web/image/php-svgrepo-com.svg" alt="" /></span>
+    <span class="logo-icon"><img src="../web/image/php-svgrepo-com.svg" alt="" width="20" height="20" decoding="async" /></span>
     <span><b class="accent">PHP</b> Tracker</span>
   </a>
   <div class="exam-countdown" id="exam-countdown" title="">
