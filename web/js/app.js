@@ -1542,12 +1542,11 @@ if (searchInput) {
    ==================================================================== */
 function xpFromDiff(d) { return d === "extreme" ? 25 : d === "hard" ? 15 : d === "medium" ? 10 : 5; }
 function xpLevel(xp) {
-  // Smooth curve: level n requires xp ≥ 50 * n * (n + 1) / 2 (triangular)
-  // Solve for n: n = floor((-1 + sqrt(1 + 8 * xp / 50)) / 2) + 1
-  if (xp <= 0) return 1;
-  return Math.floor((-1 + Math.sqrt(1 + (8 * xp) / 50)) / 2) + 1;
+  // Level n starts at 25*n*(n+1) XP: lvl 0 = 0–49, lvl 1 = 50–149, lvl 2 = 150–299, …
+  if (xp <= 0) return 0;
+  return Math.floor((-1 + Math.sqrt(1 + (8 * xp) / 50)) / 2);
 }
-function xpForLevel(n) { return 50 * (n * (n - 1)) / 2; }   // start of level n
+function xpForLevel(n) { return 50 * (n * (n + 1)) / 2; }   // start of level n
 // Idempotent XP — claim records the amount per key so unclaim can refund the exact value.
 // Use for actions that can be reversed (lesson done / exercise done). For one-way actions
 // like pomodoro complete or daily-goal, call awardXp directly.
