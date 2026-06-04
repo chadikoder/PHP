@@ -1898,8 +1898,10 @@ function renderAnalytics() {
 let _pwaDeferred = null;
 const pwaInstallBtn = document.getElementById("pwa-install");
 if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  // Register after load + idle so the SW install doesn't compete with first paint.
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("../web/sw.js").catch(() => {});
+    const ric = window.requestIdleCallback || (cb => setTimeout(cb, 1200));
+    ric(() => navigator.serviceWorker.register("../web/sw.js").catch(() => {}));
   });
   // When a freshly installed SW takes control (clients.claim), reload once so
   // the page actually runs the new JS/CSS instead of waiting for a manual refresh.
