@@ -1006,12 +1006,14 @@ function _exRenderActions(key) {
     </button>
     <button class="ex-modal-btn ex-modal-sol-btn" id="ex-modal-sol-btn">${SVGI.light}<span>${T.viewSol}</span></button>
     <div class="ex-modal-spacer"></div>
-    <div class="ex-modal-conf" id="ex-modal-conf" title="${T.confLabel}">
-      <button class="conf-btn got ${conf === "got" ? "active" : ""}" data-conf="got" title="${T.confGot}">😎</button>
-      <button class="conf-btn shaky ${conf === "shaky" ? "active" : ""}" data-conf="shaky" title="${T.confShaky}">😐</button>
-      <button class="conf-btn no ${conf === "no" ? "active" : ""}" data-conf="no" title="${T.confNo}">😵</button>
+    <div class="ex-modal-rate-row">
+      <div class="ex-modal-conf" id="ex-modal-conf" title="${T.confLabel}">
+        <button class="conf-btn got ${conf === "got" ? "active" : ""}" data-conf="got" title="${T.confGot}">😎</button>
+        <button class="conf-btn shaky ${conf === "shaky" ? "active" : ""}" data-conf="shaky" title="${T.confShaky}">😐</button>
+        <button class="conf-btn no ${conf === "no" ? "active" : ""}" data-conf="no" title="${T.confNo}">😵</button>
+      </div>
+      <button class="ex-modal-btn-icon ex-modal-bookmark ${isBm ? "active" : ""}" id="ex-modal-bookmark" title="${isBm ? T.removeBookmark : T.addBookmark}">${isBm ? "🔖" : "🏷️"}</button>
     </div>
-    <button class="ex-modal-btn-icon ex-modal-bookmark ${isBm ? "active" : ""}" id="ex-modal-bookmark" title="${isBm ? T.removeBookmark : T.addBookmark}">${isBm ? "🔖" : "🏷️"}</button>
   `;
 }
 

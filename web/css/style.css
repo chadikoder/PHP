@@ -3039,3 +3039,15 @@ button,a,.nav-item,.ex-card,.quick-card,.tab,.ex-filter-btn,.conf-btn{
   .pwa-install-btn .pwa-install-lbl{display:inline;font-size:11.5px}
 }
 .pwa-install-btn .pwa-install-lbl{font-weight:600}
+
+/* Keep confidence emojis + bookmark/tag button on the same row */
+.ex-modal-rate-row{
+  display:flex;align-items:center;gap:8px;flex:1 1 100%;flex-wrap:nowrap;
+}
+.ex-modal-rate-row .ex-modal-conf{flex:1 1 auto;min-width:0}
+.ex-modal-rate-row .ex-modal-btn-icon{flex:0 0 auto}
+@media(max-width:600px){
+  .ex-modal-rate-row{gap:8px}
+  .ex-modal-rate-row .ex-modal-conf{flex:1 1 auto;justify-content:space-around;order:0}
+  .ex-modal-rate-row .ex-modal-btn-icon{flex:0 0 42px;width:42px;height:42px;order:1}
+}
