@@ -3066,3 +3066,12 @@ button,a,.nav-item,.ex-card,.quick-card,.tab,.ex-filter-btn,.conf-btn{
   .ex-modal-rate-row .ex-modal-conf{flex:1 1 auto;justify-content:space-around;order:0}
   .ex-modal-rate-row .ex-modal-btn-icon{flex:0 0 42px;width:42px;height:42px;order:1}
 }
+
+/* Skeleton shown in #ex-area while a lesson's detail JSON is loading */
+.lesson-skel{padding:6px 0 24px;display:flex;flex-direction:column;gap:14px}
+.lesson-skel .skel-line{height:14px;border-radius:6px;background:linear-gradient(90deg,var(--surface-2) 0%,var(--surface) 50%,var(--surface-2) 100%);background-size:200% 100%;animation:skel-shimmer 1.2s ease-in-out infinite}
+.lesson-skel .skel-line.w90{width:90%}
+.lesson-skel .skel-line.w70{width:70%}
+.lesson-skel .skel-line.w60{width:60%}
+.lesson-skel .skel-line.w50{width:50%}
+@keyframes skel-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}

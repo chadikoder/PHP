@@ -595,6 +595,34 @@ document.querySelectorAll(".nav-mode-btn").forEach(btn => {
 });
 
 /* ====================================================================
+   LAZY HYDRATION — slim data.js holds metadata only; full content
+   (sections, exercise desc/sol, quizzes) is fetched per-lesson on demand.
+   ==================================================================== */
+const __hydrated = new Set();
+const __hydrating = new Map();
+function hydrateLesson(id) {
+  if (__hydrated.has(id)) return Promise.resolve();
+  const inflight = __hydrating.get(id);
+  if (inflight) return inflight;
+  const p = fetch("../web/data/" + id + ".json")
+    .then(r => r.ok ? r.json() : Promise.reject(r.status))
+    .then(detail => {
+      const lesson = ALL_LESSONS.find(l => l.id === id);
+      if (lesson) {
+        if (detail.sections)  lesson.sections  = detail.sections;
+        if (detail.quiz)      lesson.quiz      = detail.quiz;
+        if (detail.exercises) lesson.exercises = detail.exercises;
+        if (detail.problemes) lesson.problemes = detail.problemes;
+      }
+      __hydrated.add(id);
+    })
+    .catch(() => {})
+    .finally(() => { __hydrating.delete(id); });
+  __hydrating.set(id, p);
+  return p;
+}
+
+/* ====================================================================
    OPEN LESSON
    ==================================================================== */
 function openLesson(id) {
@@ -653,8 +681,21 @@ function openLesson(id) {
   });
 
   main.classList.add("main-animate-in");
-  renderExArea(lesson);
-  bindCopyButtons();
+  // Show a skeleton in the body area while we fetch the detail JSON.
+  const area = document.getElementById("ex-area");
+  if (area && !__hydrated.has(id)) {
+    area.innerHTML =
+      '<div class="lesson-skel" aria-hidden="true">' +
+      '<div class="skel-line w70"></div><div class="skel-line w50"></div>' +
+      '<div class="skel-line w90"></div><div class="skel-line w60"></div>' +
+      '</div>';
+  }
+  hydrateLesson(id).then(() => {
+    // The user may have navigated away while we were fetching.
+    if (state.lastActive !== id) return;
+    renderExArea(lesson);
+    bindCopyButtons();
+  });
   bindReviewStrip();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -1954,11 +1995,12 @@ function bindReviewStrip() {
     const num = parseInt(strip.dataset.num, 10);
     strip.querySelector("[data-action=open]").addEventListener("click", () => {
       const lesson = ALL_LESSONS.find(l => l.id === lessonId);
-      const ex = lesson && [...(lesson.exercises||[]), ...(lesson.problemes||[])].find(x => x.num === num);
-      if (lesson && ex) {
-        if (state.lastActive !== lessonId) openLesson(lessonId);
-        setTimeout(() => openExModal(lesson, ex), 100);
-      }
+      if (!lesson) return;
+      if (state.lastActive !== lessonId) openLesson(lessonId);
+      hydrateLesson(lessonId).then(() => {
+        const ex = [...(lesson.exercises||[]), ...(lesson.problemes||[])].find(x => x.num === num);
+        if (ex) openExModal(lesson, ex);
+      });
     });
     strip.querySelector("[data-action=dismiss]").addEventListener("click", () => {
       _reviewDismissed.add(key);
