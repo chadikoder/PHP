@@ -1,6 +1,7 @@
 // Tiny offline-first service worker for the PHP tracker.
-// Cache-first for own static assets, network-first for everything else.
-const CACHE = "php-tracker-v9";
+// Network-first for the HTML shell so deploys roll out fast.
+// Cache-first for static assets — bump CACHE to push new JS/CSS/images.
+const CACHE = "php-tracker-v10";
 const PRECACHE = [
   "./study_tracker.html",
   "./css/style.css",
@@ -27,26 +28,39 @@ self.addEventListener("fetch", e => {
   const req = e.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
-  // Only handle same-origin requests
   if (url.origin !== self.location.origin) return;
-  // Ignore the ?v= cache-buster when matching so the same asset doesn't pile
-  // up under multiple cache keys, and old versions still serve offline.
+
+  const isHTML = req.mode === "navigate" || req.destination === "document";
+
+  if (isHTML) {
+    // Network-first: get the freshest shell when online, fall back to cache offline.
+    e.respondWith(
+      fetch(req).then(resp => {
+        if (resp && resp.ok) {
+          const copy = resp.clone();
+          caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
+        }
+        return resp;
+      }).catch(() =>
+        caches.match(req, { ignoreSearch: true })
+          .then(hit => hit || caches.match("./study_tracker.html", { ignoreSearch: true }))
+      )
+    );
+    return;
+  }
+
+  // Static assets: cache-first, no background revalidation.
+  // Updates ship via a new CACHE version above + precache addAll on install.
   e.respondWith(
     caches.match(req, { ignoreSearch: true }).then(cached => {
-      if (cached) {
-        // Refresh in the background — only cache successful responses
-        fetch(req).then(fresh => {
-          if (fresh && fresh.ok) caches.open(CACHE).then(c => c.put(req, fresh.clone()));
-        }).catch(() => {});
-        return cached;
-      }
+      if (cached) return cached;
       return fetch(req).then(resp => {
         if (resp && resp.ok) {
           const copy = resp.clone();
           caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
         }
         return resp;
-      }).catch(() => caches.match("./study_tracker.html", { ignoreSearch: true }));
+      }).catch(() => cached);
     })
   );
 });
