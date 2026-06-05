@@ -459,12 +459,32 @@ function updateSidebarActive() {
     const exTotal = exAll.length;
     const exDone = exAll.filter(e => state.exDone[lesson.id + "-" + e.num]).length;
     el.classList.toggle("fully-done", exTotal > 0 && exDone === exTotal);
-    const fill = el.querySelector(".nav-progress-fill");
     const count = el.querySelector(".nav-ex-count");
-    if (fill) fill.style.width = exTotal ? Math.round(exDone / exTotal * 100) + "%" : "0%";
-    if (count) count.textContent = exDone + "/" + exTotal;
+    if (count) applyExCount(count, exDone, exTotal);
   });
   refreshProgress();
+}
+
+/* Counter pill becomes a self-contained progress chip — fills up as exos are
+ * completed, swaps to "Done" with a check at 100 %, ghosts out when untouched. */
+function applyExCount(el, done, total) {
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  const remaining = total - done;
+  el.style.setProperty("--ex-pct", pct + "%");
+  el.dataset.pct = pct;
+  el.dataset.remaining = remaining;
+  el.classList.toggle("is-empty", pct === 0);
+  el.classList.toggle("is-partial", pct > 0 && pct < 80);
+  el.classList.toggle("is-near", pct >= 80 && pct < 100);
+  el.classList.toggle("is-done", pct === 100);
+  if (pct === 100) {
+    el.innerHTML = `<svg class="ex-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="5 12 10 17 19 7"/></svg><span class="ex-num">${total}</span>`;
+  } else {
+    el.innerHTML = `<span class="ex-num">${done}<span class="ex-slash">/</span>${total}</span><span class="ex-left" aria-hidden="true">−${remaining}</span>`;
+  }
+  el.setAttribute("aria-label",
+    pct === 100 ? `${total}/${total} exercices terminés`
+                : `${done} sur ${total} exercices · ${remaining} restant${remaining > 1 ? "s" : ""}`);
 }
 
 function navItem(l) {
@@ -487,6 +507,18 @@ function navItem(l) {
       else if (firstOpenIdx !== -1 && idx > firstOpenIdx) dayCls = "day-locked";
     }
   }
+  const pct = exTotal ? Math.round((exDone / exTotal) * 100) : 0;
+  const remaining = exTotal - exDone;
+  let stateCls = "is-empty";
+  if (pct === 100) stateCls = "is-done";
+  else if (pct >= 80) stateCls = "is-near";
+  else if (pct > 0) stateCls = "is-partial";
+  const countInner = pct === 100
+    ? `<svg class="ex-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="5 12 10 17 19 7"/></svg><span class="ex-num">${exTotal}</span>`
+    : `<span class="ex-num">${exDone}<span class="ex-slash">/</span>${exTotal}</span><span class="ex-left" aria-hidden="true">−${remaining}</span>`;
+  const ariaLbl = pct === 100
+    ? `${exTotal}/${exTotal} exercices terminés`
+    : `${exDone} sur ${exTotal} exercices · ${remaining} restant${remaining > 1 ? "s" : ""}`;
   return `<div class="nav-item ${done ? "done" : ""} ${active ? "active" : ""} ${fullyDone ? "fully-done" : ""} ${dayCls}" data-id="${l.id}" title="${esc(fullTitle)}">
     <span class="nav-check">${done ? "✓" : ""}</span>
     <span class="nav-tag">${l.code}</span>
@@ -494,8 +526,7 @@ function navItem(l) {
     ${exTotal > 0 ? `
     <span class="nav-ex-wrap">
       <span class="nav-star" aria-hidden="true">⭐</span>
-      <span class="nav-progress"><span class="nav-progress-fill" style="width:${exTotal ? Math.round(exDone / exTotal * 100) : 0}%"></span></span>
-      <span class="nav-ex-count">${exDone}/${exTotal}</span>
+      <span class="nav-ex-count ${stateCls}" style="--ex-pct:${pct}%" data-pct="${pct}" data-remaining="${remaining}" aria-label="${esc(ariaLbl)}">${countInner}</span>
     </span>` : ""}
   </div>`;
 }
