@@ -122,7 +122,6 @@ const T_DICT = {
   hintNav:       { fr: "naviguer",             en: "navigate" },
   hintCourseEx:  { fr: "cours/exos",           en: "course/exos" },
   hintDone:      { fr: "fait",                 en: "done" },
-  hintRandom:    { fr: "aléatoire",            en: "random" },
   hintClose:     { fr: "fermer",               en: "close" },
   // Reset modal
   resetTitle:    { fr: "Réinitialiser la progression ?", en: "Reset all progress?" },
@@ -150,10 +149,6 @@ const T_DICT = {
   achDay7:       { fr: "Jour 7 atteint",       en: "Reached Day 7" },
   achUnlocked:   { fr: "Succès débloqué :",    en: "Achievement unlocked:" },
   achLocked:     { fr: "🔒 À débloquer",       en: "🔒 Locked" },
-  // Random practice
-  randomBtn:     { fr: "Aléatoire",            en: "Random" },
-  randomTitle:   { fr: "Exercice aléatoire (touche R)", en: "Random exercise (press R)" },
-  allExosDone:   { fr: "Tous les exercices sont faits ! 🎉", en: "All exercises done! 🎉" },
   // Daily goal
   dailyGoal:     { fr: "Objectif du jour",     en: "Daily goal" },
   dailyDone:     { fr: "aujourd'hui",          en: "today" },
@@ -213,7 +208,6 @@ const T_DICT = {
   scPrevNext:    { fr: "Leçon précédente / suivante", en: "Previous / next lesson" },
   scTabSwap:     { fr: "Basculer cours / exos",   en: "Toggle course / exercises" },
   scMarkDone:    { fr: "Marquer la leçon comme terminée", en: "Mark lesson as done" },
-  scRandom:      { fr: "Exercice aléatoire",      en: "Random exercise" },
   scBookmarks:   { fr: "Filtrer signets",         en: "Filter bookmarks" },
   scFocus:       { fr: "Mode focus",              en: "Focus mode" },
   scShortcuts:   { fr: "Ouvrir cette aide",       en: "Open this help" },
@@ -255,6 +249,18 @@ const T = new Proxy(T_DICT, { get(o, k) { return t(o[k]); } });
 const EXAM_DATE = new Date(2026, 6, 9); // Month is 0-indexed: 6 = July
 const MOCK_EXAM_MINUTES = 120;
 const MOCK_EXAM_KEY = "sawa_php_mock_exam_end";
+const MAX_STATE_CHARS = 1500000;
+const VALID_LESSON_IDS = new Set(ALL_LESSONS.map(l => l.id));
+const VALID_EX_KEYS = new Set();
+ALL_LESSONS.forEach(l => {
+  [...(l.exercises || []), ...(l.problemes || [])].forEach(e => VALID_EX_KEYS.add(l.id + "-" + e.num));
+});
+const VALID_XP_CLAIMS = new Set([
+  ...[...VALID_LESSON_IDS].map(id => "lesson:" + id),
+  ...[...VALID_EX_KEYS].map(key => "ex:" + key)
+]);
+const COLLAPSE_KEYS = new Set(["days", "basic", "intermediate", "advanced"]);
+const CONF_VALUES = new Set(["got", "shaky", "no"]);
 
 let state = loadState();
 let currentTab = "cours";
@@ -306,17 +312,132 @@ const W3_URLS = {
 
 const LESSON_BY_ID = new Map(ALL_LESSONS.map(l => [l.id, l]));
 const LESSON_INDEX_BY_ID = new Map(ALL_LESSONS.map((l, i) => [l.id, i]));
+const _reviewDismissed = new Set();   // session-scoped — fresh on reload
 
 function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return defaultState();
-    return Object.assign(defaultState(), JSON.parse(raw));
+    if (raw.length > MAX_STATE_CHARS) {
+      localStorage.removeItem(STORAGE_KEY);
+      try { sessionStorage.setItem("php_tracker_state_reset_reason", "oversize"); } catch {}
+      return defaultState();
+    }
+    return normalizeState(JSON.parse(raw));
   } catch { return defaultState(); }
 }
 
 function defaultState() {
   return { completed: {}, exDone: {}, bookmarks: {}, lastActive: null, theme: "dark", lang: "en", sectionsCollapsed: {}, achSeen: null, dailyGoal: 10, weeklyGoal: 50, confidence: {}, masteredSeen: {}, goalReachedDate: null, pomo: null, quizAnswers: {}, navMode: "plan", notes: {}, focusMode: false, pomoLog: [], xp: 0, challengeSeed: null, challengeDone: {}, reviewSeen: {}, xpClaims: {}, welcomeHintDismissed: false };
+}
+
+function sanitizeRecord(obj, { valid = null, max = 500, value = v => v } = {}) {
+  const out = {};
+  if (!obj || typeof obj !== "object" || Array.isArray(obj)) return out;
+  let count = 0;
+  for (const k in obj) {
+    if (!Object.prototype.hasOwnProperty.call(obj, k)) continue;
+    if (valid && !valid.has(k)) continue;
+    const v = value(obj[k], k);
+    if (v === undefined) continue;
+    out[k] = v;
+    count++;
+    if (count >= max) break;
+  }
+  return out;
+}
+
+function cleanTimestamp(v) {
+  const n = Number(v);
+  return Number.isFinite(n) && n > 0 ? n : undefined;
+}
+
+function normalizeState(raw) {
+  const state = Object.assign(defaultState(), raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {});
+  state.completed = sanitizeRecord(state.completed, { valid: VALID_LESSON_IDS, max: TOTAL, value: cleanTimestamp });
+  state.exDone = sanitizeRecord(state.exDone, { valid: VALID_EX_KEYS, max: TOTAL_EXERCISES, value: cleanTimestamp });
+  state.bookmarks = sanitizeRecord(state.bookmarks, { valid: VALID_EX_KEYS, max: TOTAL_EXERCISES, value: cleanTimestamp });
+  state.confidence = sanitizeRecord(state.confidence, {
+    valid: VALID_EX_KEYS,
+    max: TOTAL_EXERCISES,
+    value: v => CONF_VALUES.has(v) ? v : undefined
+  });
+  state.notes = sanitizeRecord(state.notes, {
+    valid: VALID_EX_KEYS,
+    max: TOTAL_EXERCISES,
+    value: v => typeof v === "string" && v.trim() ? v.slice(0, 4000) : undefined
+  });
+  state.sectionsCollapsed = sanitizeRecord(state.sectionsCollapsed, {
+    valid: COLLAPSE_KEYS,
+    max: COLLAPSE_KEYS.size,
+    value: v => v ? true : undefined
+  });
+  state.masteredSeen = sanitizeRecord(state.masteredSeen, {
+    valid: VALID_LESSON_IDS,
+    max: TOTAL,
+    value: v => v ? true : undefined
+  });
+  state.quizAnswers = sanitizeRecord(state.quizAnswers, {
+    max: 400,
+    value: (v, k) => VALID_LESSON_IDS.has(String(k).split("-q")[0]) && /^[a-z]$/.test(String(v)) ? String(v) : undefined
+  });
+  state.challengeDone = sanitizeRecord(state.challengeDone, {
+    max: 90,
+    value: cleanTimestamp
+  });
+  state.xpClaims = sanitizeRecord(state.xpClaims, {
+    valid: VALID_XP_CLAIMS,
+    max: VALID_XP_CLAIMS.size,
+    value: v => {
+      const n = Number(v);
+      return Number.isFinite(n) && n > 0 ? n : undefined;
+    }
+  });
+  state.reviewSeen = sanitizeRecord(state.reviewSeen, {
+    max: 10,
+    value: v => sanitizeRecord(v, { valid: VALID_EX_KEYS, max: TOTAL_EXERCISES, value: x => x ? 1 : undefined })
+  });
+  if (state.achSeen != null && (typeof state.achSeen !== "object" || Array.isArray(state.achSeen))) state.achSeen = null;
+  if (state.pomo != null && (typeof state.pomo !== "object" || Array.isArray(state.pomo))) state.pomo = null;
+  else if (state.pomo) {
+    const phase = ["focus", "short", "long"].includes(state.pomo.phase) ? state.pomo.phase : "focus";
+    const endTs = Number(state.pomo.endTs);
+    const leftMs = Number(state.pomo.leftMs);
+    state.pomo = {
+      phase,
+      running: !!state.pomo.running && Number.isFinite(endTs) && endTs > Date.now(),
+      endTs: Number.isFinite(endTs) ? endTs : null,
+      leftMs: Number.isFinite(leftMs) && leftMs >= 0 ? leftMs : null,
+      focusMin: Math.max(1, Math.min(90, parseInt(state.pomo.focusMin, 10) || 25)),
+      shortMin: Math.max(1, Math.min(60, parseInt(state.pomo.shortMin, 10) || 5)),
+      longMin: Math.max(5, Math.min(60, parseInt(state.pomo.longMin, 10) || 15)),
+      completed: Math.max(0, parseInt(state.pomo.completed, 10) || 0),
+      cycle: Math.max(0, parseInt(state.pomo.cycle, 10) || 0),
+      soundOn: state.pomo.soundOn !== false,
+      autoStart: !!state.pomo.autoStart
+    };
+  }
+  if (!Array.isArray(state.pomoLog)) state.pomoLog = [];
+  else state.pomoLog = state.pomoLog
+    .filter(s => s && typeof s === "object" && Number.isFinite(Number(s.ts)))
+    .map(s => ({ ts: Number(s.ts), min: Math.max(1, Math.min(90, parseInt(s.min, 10) || 25)) }));
+  for (const k in state.reviewSeen) {
+    if (!state.reviewSeen[k] || typeof state.reviewSeen[k] !== "object" || Array.isArray(state.reviewSeen[k])) {
+      delete state.reviewSeen[k];
+    }
+  }
+  if (state.theme !== "light") state.theme = "dark";
+  if (state.lang !== "fr") state.lang = "en";
+  if (state.navMode !== "ref") state.navMode = "plan";
+  if (typeof state.lastActive !== "string") state.lastActive = null;
+  if (typeof state.goalReachedDate !== "string") state.goalReachedDate = null;
+  if (typeof state.challengeSeed !== "string") state.challengeSeed = null;
+  state.dailyGoal = Math.max(1, Math.min(200, parseInt(state.dailyGoal, 10) || 10));
+  state.weeklyGoal = Math.max(1, Math.min(500, parseInt(state.weeklyGoal, 10) || 50));
+  state.xp = Math.max(0, parseInt(state.xp, 10) || 0);
+  state.focusMode = !!state.focusMode;
+  state.welcomeHintDismissed = !!state.welcomeHintDismissed;
+  return state;
 }
 
 let _saveTimer = 0;
@@ -371,6 +492,11 @@ function bookmarkIconSvg(on, size = 14) {
 function scrollToPageTop() {
   const smooth = !window.matchMedia || !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   window.scrollTo({ top: 0, behavior: smooth ? "smooth" : "auto" });
+}
+
+function scheduleIdle(cb, timeout = 700) {
+  if ("requestIdleCallback" in window) return requestIdleCallback(cb, { timeout });
+  return setTimeout(cb, Math.min(timeout, 250));
 }
 
 /* SVG icon library — stroke-only icons used across labels (tabs / filters / buttons).
@@ -467,9 +593,9 @@ function celebrate() {
    ==================================================================== */
 function renderSidebar() {
   document.getElementById("nav-days").innerHTML = DAYS.map(navItem).join("");
-  const basic = GIO.filter(l => (l.level || "basic") === "basic");
-  const inter = GIO.filter(l => l.level === "intermediate");
-  const adv = GIO.filter(l => l.level === "advanced");
+  const basic = W3SCHOOL.filter(l => (l.level || "basic") === "basic");
+  const inter = W3SCHOOL.filter(l => l.level === "intermediate");
+  const adv = W3SCHOOL.filter(l => l.level === "advanced");
   document.getElementById("nav-basic").innerHTML = basic.map(navItem).join("") || `<div class="empty-search">${T.noLesson}</div>`;
   document.getElementById("nav-intermediate").innerHTML = inter.map(navItem).join("") || `<div class="empty-search">${T.noLesson}</div>`;
   document.getElementById("nav-advanced").innerHTML = adv.map(navItem).join("") || `<div class="empty-search">${T.noLesson}</div>`;
@@ -829,6 +955,87 @@ function toggleDone(id) {
 /* ====================================================================
    EX AREA
    ==================================================================== */
+function exKey(lesson, ex) {
+  return lesson.id + "-" + ex.num;
+}
+
+function activeExerciseList(lesson) {
+  return currentTab === "probs" ? (lesson.problemes || []) : (lesson.exercises || []);
+}
+
+function isWeakExercise(lesson, ex) {
+  const c = state.confidence[exKey(lesson, ex)];
+  return c === "shaky" || c === "no";
+}
+
+function exerciseMatchesFilter(lesson, ex) {
+  if (exFilter === "all") return true;
+  const key = exKey(lesson, ex);
+  if (exFilter === "bookmark") return !!state.bookmarks[key];
+  if (exFilter === "weak") return isWeakExercise(lesson, ex);
+  return ex.diff === exFilter;
+}
+
+function emptyExerciseMessage() {
+  return exFilter === "weak" ? T.noWeak : T.noExos;
+}
+
+function refreshExercisePanelCounts(lesson) {
+  const area = document.getElementById("ex-area");
+  if (!area) return;
+  const exsRaw = lesson.exercises || [];
+  const probsRaw = lesson.problemes || [];
+  const updateTab = (tab, list) => {
+    const b = area.querySelector(`.tab[data-tab="${tab}"] b`);
+    if (b) b.textContent = `${list.filter(e => state.exDone[exKey(lesson, e)]).length}/${list.length}`;
+  };
+  updateTab("exos", exsRaw);
+  updateTab("probs", probsRaw);
+
+  if (currentTab !== "exos" && currentTab !== "probs") return;
+  const activeList = activeExerciseList(lesson);
+  const total = activeList.length;
+  const done = activeList.filter(e => state.exDone[exKey(lesson, e)]).length;
+  const countFor = filter => {
+    if (filter === "all") return total;
+    if (filter === "bookmark") return activeList.filter(e => state.bookmarks[exKey(lesson, e)]).length;
+    if (filter === "weak") return activeList.filter(e => isWeakExercise(lesson, e)).length;
+    return activeList.filter(e => e.diff === filter).length;
+  };
+  ["all", "easy", "medium", "hard", "extreme", "bookmark", "weak"].forEach(filter => {
+    const b = area.querySelector(`.ex-filter-btn[data-filter="${filter}"] b`);
+    if (b) b.textContent = countFor(filter);
+  });
+
+  const counter = area.querySelector(".ex-counter");
+  if (counter) {
+    const pct = total ? Math.round(done / total * 100) : 0;
+    counter.innerHTML = `
+      <b>${done}</b>/${total} ${T.done}
+      <span class="ex-counter-bar"><span class="ex-counter-fill" style="width:${pct}%"></span></span>
+    `;
+  }
+}
+
+function ensureExerciseEmptyState() {
+  const cards = document.querySelector("#ex-area .ex-cards");
+  if (!cards) return;
+  if (cards.querySelector(".ex-card")) {
+    cards.querySelector(".empty-search")?.remove();
+    return;
+  }
+  if (!cards.querySelector(".empty-search")) {
+    cards.innerHTML = `<div class="empty-search">${emptyExerciseMessage()}</div>`;
+  }
+}
+
+function removeCardIfFilteredOut(lesson, ex) {
+  if (exerciseMatchesFilter(lesson, ex)) return;
+  const card = document.getElementById("ex-" + exKey(lesson, ex));
+  if (card) card.remove();
+  ensureExerciseEmptyState();
+}
+
 function renderExArea(lesson) {
   const area = document.getElementById("ex-area");
   if (!area) return;
@@ -837,27 +1044,24 @@ function renderExArea(lesson) {
   const hasEx    = exsRaw.length > 0;
   const hasProbs = probsRaw.length > 0;
 
-  const doneEx = exsRaw.filter(e => state.exDone[lesson.id + "-" + e.num]).length;
-  const doneP  = probsRaw.filter(e => state.exDone[lesson.id + "-" + e.num]).length;
+  const doneEx = exsRaw.filter(e => state.exDone[exKey(lesson, e)]).length;
+  const doneP  = probsRaw.filter(e => state.exDone[exKey(lesson, e)]).length;
 
   // Pick which list the active tab points to (defaults to exercises if probs tab selected on a lesson without probs).
   if (currentTab === "probs" && !hasProbs) currentTab = "exos";
   if (currentTab === "exos"  && !hasEx)    currentTab = hasProbs ? "probs" : "cours";
 
-  const activeList = currentTab === "probs" ? probsRaw : exsRaw;
-  const isWeak    = e => { const c = state.confidence[lesson.id + "-" + e.num]; return c === "shaky" || c === "no"; };
+  const activeList = activeExerciseList(lesson);
   const total     = activeList.length;
-  const done      = activeList.filter(e => state.exDone[lesson.id + "-" + e.num]).length;
-  const bmCount   = activeList.filter(e => state.bookmarks[lesson.id + "-" + e.num]).length;
-  const weakCount = activeList.filter(isWeak).length;
+  const done      = activeList.filter(e => state.exDone[exKey(lesson, e)]).length;
+  const bmCount   = activeList.filter(e => state.bookmarks[exKey(lesson, e)]).length;
+  const weakCount = activeList.filter(e => isWeakExercise(lesson, e)).length;
 
   let filtered = activeList;
   if (exFilter !== "all") {
-    if (exFilter === "bookmark") filtered = activeList.filter(e => state.bookmarks[lesson.id + "-" + e.num]);
-    else if (exFilter === "weak") filtered = activeList.filter(isWeak);
-    else filtered = activeList.filter(e => e.diff === exFilter);
+    filtered = activeList.filter(e => exerciseMatchesFilter(lesson, e));
   }
-  const emptyMsg = exFilter === "weak" ? T.noWeak : T.noExos;
+  const emptyMsg = emptyExerciseMessage();
 
   const tabsHtml = `
     <div class="tab ${currentTab === "cours" ? "active" : ""}" data-tab="cours">${SVGI.book} <span>${T.tabCourse}</span></div>
@@ -954,7 +1158,7 @@ function renderExArea(lesson) {
     });
   });
 
-  if (!hasEx) return;
+  if (!hasEx && !hasProbs) return;
 
   // Exercise filter
   area.querySelectorAll(".ex-filter-btn").forEach(btn => {
@@ -995,8 +1199,7 @@ function renderExArea(lesson) {
         checkDailyGoal();
         if (!wasDone) checkChallenge();
         updateSidebarActive();
-        renderExArea(lesson);
-        bindCopyButtons();
+        refreshExercisePanelCounts(lesson);
       });
     });
   });
@@ -1009,9 +1212,14 @@ function renderExArea(lesson) {
       const on = !state.bookmarks[key];
       if (on) state.bookmarks[key] = Date.now();
       else delete state.bookmarks[key];
-      bm.classList.toggle("active", on);
+      const num = parseInt(key.split("-").pop(), 10);
+      const ex = [...(lesson.exercises || []), ...(lesson.problemes || [])].find(x => x.num === num);
+      _exSyncCardBookmark(key, on);
       saveState();
-      requestAnimationFrame(() => renderExArea(lesson));
+      requestAnimationFrame(() => {
+        refreshExercisePanelCounts(lesson);
+        if (ex) removeCardIfFilteredOut(lesson, ex);
+      });
     });
   });
 
@@ -1212,6 +1420,7 @@ function _exWireActions(lesson, ex, key) {
     checkDailyGoal();
     if (!wasDone) checkChallenge();
     updateSidebarActive();
+    refreshExercisePanelCounts(lesson);
   });
 
   // Solution toggle
@@ -1256,6 +1465,8 @@ function _exWireActions(lesson, ex, key) {
     bmBtn.title = on ? T.removeBookmark : T.addBookmark;
     bmBtn.setAttribute("aria-label", on ? T.removeBookmark : T.addBookmark);
     _exSyncCardBookmark(key, on);
+    refreshExercisePanelCounts(lesson);
+    removeCardIfFilteredOut(lesson, ex);
   });
 }
 
@@ -1405,6 +1616,16 @@ function bindCopyButtons() {
       } catch {}
     });
   });
+}
+
+const toastEl = document.getElementById("toast");
+let toastTimer = null;
+function toast(msg) {
+  if (!toastEl) return;
+  toastEl.textContent = msg;
+  toastEl.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2600);
 }
 
 /* ====================================================================
@@ -1639,34 +1860,21 @@ function checkDailyGoal() {
   updateWeeklyGoal();
 }
 
-/* ====================================================================
-   RANDOM PRACTICE — jump to a random not-yet-done exercise
-   ==================================================================== */
-function jumpToRandomExercise() {
-  const pool = [];
-  ALL_LESSONS.forEach(l => {
-    [...(l.exercises || []), ...(l.problemes || [])].forEach(e => {
-      if (!state.exDone[l.id + "-" + e.num]) pool.push({ lessonId: l.id, key: l.id + "-" + e.num });
-    });
-  });
-  if (!pool.length) { toast(T.allExosDone); return; }
-  const pick = pool[Math.floor(Math.random() * pool.length)];
-  const lesson = LESSON_BY_ID.get(pick.lessonId);
-  openLesson(pick.lessonId);
-  currentTab = "exos";
-  exFilter = "all";
+function showBookmarkedExercises(lesson) {
+  if (!lesson) return false;
+  const exs = lesson.exercises || [];
+  const probs = lesson.problemes || [];
+  const hasBookmarkedEx = exs.some(e => state.bookmarks[lesson.id + "-" + e.num]);
+  const hasBookmarkedProb = probs.some(e => state.bookmarks[lesson.id + "-" + e.num]);
+  if (!hasBookmarkedEx && !hasBookmarkedProb) return false;
+
+  if (currentTab === "probs" && hasBookmarkedProb) currentTab = "probs";
+  else if (currentTab === "exos" && hasBookmarkedEx) currentTab = "exos";
+  else currentTab = hasBookmarkedEx ? "exos" : "probs";
+  exFilter = "bookmark";
   renderExArea(lesson);
   bindCopyButtons();
-  document.body.classList.remove("drawer-open");
-  setTimeout(() => {
-    const card = document.getElementById("ex-" + pick.key);
-    if (card) {
-      card.scrollIntoView({ behavior: "smooth", block: "center" });
-      card.classList.remove("flash");
-      void card.offsetWidth; // restart animation
-      card.classList.add("flash");
-    }
-  }, 80);
+  return true;
 }
 
 /* ====================================================================
@@ -1686,9 +1894,9 @@ function _runSearch(q) {
     return hay.includes(q);
   });
   const days = filter(DAYS);
-  const basic = filter(GIO.filter(l => (l.level || "basic") === "basic"));
-  const inter = filter(GIO.filter(l => l.level === "intermediate"));
-  const adv = filter(GIO.filter(l => l.level === "advanced"));
+  const basic = filter(W3SCHOOL.filter(l => (l.level || "basic") === "basic"));
+  const inter = filter(W3SCHOOL.filter(l => l.level === "intermediate"));
+  const adv = filter(W3SCHOOL.filter(l => l.level === "advanced"));
   const fill = (id, list) =>
     document.getElementById(id).innerHTML = list.length
       ? list.map(navItem).join("")
@@ -1974,25 +2182,66 @@ function renderAnalytics() {
   </div>`;
 }
 
+function renderWelcomeDeferred() {
+  const badges = computeBadges();
+  const unlockedCount = badges.filter(b => b.unlocked).length;
+  const lockSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
+  const badgesHtml = badges.map(b =>
+    `<div class="wc-badge ${b.unlocked ? "unlocked" : "locked"}" title="${esc(b.label)}">
+      <span class="wc-badge-emoji">${b.unlocked ? (b.svg || '') : lockSvg}</span>
+      <span class="wc-badge-label">${esc(b.label)}</span>
+    </div>`
+  ).join("");
+
+  return `<div class="wc-achievements">
+    <div class="wc-ach-head">
+      <span>${t(T_DICT.achievements)}</span>
+      <span class="wc-ach-count">${unlockedCount}/${badges.length}</span>
+    </div>
+    <div class="wc-badges">${badgesHtml}</div>
+  </div>
+  ${renderAnalytics()}`;
+}
+
 /* ====================================================================
    PWA — service worker + install button
    ==================================================================== */
 let _pwaDeferred = null;
 const pwaInstallBtn = document.getElementById("pwa-install");
 if ("serviceWorker" in navigator && location.protocol !== "file:") {
-  // Register after load + idle so the SW install doesn't compete with first paint.
-  window.addEventListener("load", () => {
-    const ric = window.requestIdleCallback || (cb => setTimeout(cb, 1200));
-    ric(() => navigator.serviceWorker.register("../web/sw.js").catch(() => {}));
-  });
-  // When a freshly installed SW takes control (clients.claim), reload once so
-  // the page actually runs the new JS/CSS instead of waiting for a manual refresh.
-  let _swReloaded = false;
-  navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if (_swReloaded) return;
-    _swReloaded = true;
-    window.location.reload();
-  });
+  const isLocalDevHost = ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname);
+  if (isLocalDevHost) {
+    // Local dev should never be trapped behind an old service-worker cache.
+    window.addEventListener("load", () => scheduleIdle(() => {
+      navigator.serviceWorker.getRegistrations?.()
+        .then(regs => regs.forEach(r => r.unregister()))
+        .catch(() => {});
+      if ("caches" in window) {
+        caches.keys()
+          .then(keys => keys.filter(k => /^php-tracker/.test(k)).forEach(k => caches.delete(k)))
+          .catch(() => {});
+      }
+    }, 1200));
+  } else {
+    // Register after load + idle so the SW install doesn't compete with first paint.
+    window.addEventListener("load", () => {
+      const ric = window.requestIdleCallback || (cb => setTimeout(cb, 1200));
+      ric(() => navigator.serviceWorker.register("../web/sw.js").catch(() => {}));
+    });
+    // When a freshly installed SW takes control (clients.claim), reload at most
+    // once for this app build so an update cannot trap the page in a reload loop.
+    const SW_RELOAD_KEY = "php_tracker_sw_reload_v35";
+    let _swReloaded = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (_swReloaded) return;
+      _swReloaded = true;
+      try {
+        if (sessionStorage.getItem(SW_RELOAD_KEY)) return;
+        sessionStorage.setItem(SW_RELOAD_KEY, "1");
+      } catch {}
+      setTimeout(() => window.location.reload(), 80);
+    });
+  }
 }
 window.addEventListener("beforeinstallprompt", e => {
   e.preventDefault();
@@ -2088,7 +2337,6 @@ window.addEventListener("appinstalled", () => {
    Picks among: confidence === 'shaky' or 'no', or exercises not seen in 14+ days.
    Shown at the top of the lesson body when present; dismissable for the session.
    ==================================================================== */
-const _reviewDismissed = new Set();   // session-scoped — fresh on reload
 function pickReviewExercise() {
   const candidates = [];
   ALL_LESSONS.forEach(l => {
@@ -2518,9 +2766,11 @@ function updateDayIndicator() {
 /* ====================================================================
    WELCOME PAGE
    ==================================================================== */
+let _welcomeRenderToken = 0;
 function renderWelcome() {
   const main = document.getElementById("main");
   if (!main) return;
+  const welcomeToken = ++_welcomeRenderToken;
   document.documentElement.classList.remove("has-active");
 
   // Build day-card metadata with progress per day + which is "next up"
@@ -2580,7 +2830,7 @@ function renderWelcome() {
     const lesson = LESSON_BY_ID.get(m.id);
     // Show progress across the matching group (basic / intermediate / advanced)
     const group = m.id === "w3-intro" ? "basic" : m.id === "w3-forms" ? "intermediate" : "advanced";
-    const lessons = GIO.filter(l => (l.level || "basic") === group);
+    const lessons = W3SCHOOL.filter(l => (l.level || "basic") === group);
     const total = lessons.length;
     const done = lessons.filter(l => state.completed[l.id]).length;
     const pct = total ? Math.round(done / total * 100) : 0;
@@ -2608,15 +2858,6 @@ function renderWelcome() {
         : "Clique sur <b>Jour 1</b> ci-dessous pour démarrer. Chaque exercice donne de l'XP et avance l'objectif du jour."}</span>
       <button class="welcome-hint-dismiss" id="welcome-hint-dismiss">${state.lang === "en" ? "Got it" : "OK"}</button>
     </div>` : "";
-  const badges = computeBadges();
-  const unlockedCount = badges.filter(b => b.unlocked).length;
-  const lockSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
-  const badgesHtml = badges.map(b =>
-    `<div class="wc-badge ${b.unlocked ? "unlocked" : "locked"}" title="${esc(b.label)}">
-      <span class="wc-badge-emoji">${b.unlocked ? (b.svg || '') : lockSvg}</span>
-      <span class="wc-badge-label">${esc(b.label)}</span>
-    </div>`
-  ).join("");
   main.innerHTML = `
     <div class="welcome">
       <h1>${t(T_DICT.welcomeTitle)} <span class="accent">PHP</span></h1>
@@ -2637,14 +2878,7 @@ function renderWelcome() {
           <span>${state.lang === "en" ? "Share progress" : "Partager"}</span>
         </button>
       </div>
-      <div class="wc-achievements">
-        <div class="wc-ach-head">
-          <span>${t(T_DICT.achievements)}</span>
-          <span class="wc-ach-count">${unlockedCount}/${badges.length}</span>
-        </div>
-        <div class="wc-badges">${badgesHtml}</div>
-      </div>
-      ${renderAnalytics()}
+      <div class="wc-deferred" id="welcome-deferred"></div>
     </div>
   `;
   main.querySelectorAll(".quick-card").forEach(c => {
@@ -2666,6 +2900,12 @@ function renderWelcome() {
     saveState();
     const strip = document.querySelector(".welcome-hint");
     if (strip) strip.remove();
+  });
+  scheduleIdle(() => {
+    if (welcomeToken !== _welcomeRenderToken) return;
+    const deferred = document.getElementById("welcome-deferred");
+    if (!deferred || !document.querySelector(".welcome")) return;
+    deferred.innerHTML = renderWelcomeDeferred();
   });
 }
 
@@ -2719,16 +2959,6 @@ document.addEventListener("keydown", e => {
     hideModal();
   }
 }, true);
-
-const toastEl = document.getElementById("toast");
-let toastTimer = null;
-function toast(msg) {
-  if (!toastEl) return;
-  toastEl.textContent = msg;
-  toastEl.classList.add("show");
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2600);
-}
 
 /* ====================================================================
    RESET (uses modal)
@@ -2787,7 +3017,7 @@ if (importBtn) {
             try {
               const parsed = JSON.parse(ta.value);
               if (!parsed || typeof parsed !== "object") throw new Error("bad");
-              state = Object.assign(defaultState(), parsed);
+              state = normalizeState(parsed);
               saveState();
               renderSidebar();
               if (state.lastActive && LESSON_BY_ID.has(state.lastActive)) openLesson(state.lastActive);
@@ -2934,13 +3164,7 @@ document.addEventListener("keydown", e => {
   if (e.key === "b" || e.key === "B") {
     const lesson = ALL_LESSONS[idx];
     if (!lesson) return;
-    const exAll = [...(lesson.exercises || []), ...(lesson.problemes || [])];
-    const bmCount = exAll.filter(e => state.bookmarks[lesson.id + "-" + e.num]).length;
-    if (bmCount > 0 && exAll.length) {
-      currentTab = "exos";
-      renderExArea(lesson);
-      bindCopyButtons();
-    }
+    showBookmarkedExercises(lesson);
   }
   if (e.key === "d" || e.key === "D") {
     if (ALL_LESSONS[idx]) toggleDone(state.lastActive);

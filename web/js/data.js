@@ -1047,7 +1047,7 @@ const DAYS = [
     ]
   }
 ];
-const GIO = [
+const W3SCHOOL = [
   {
     "id": "w3-intro",
     "code": "B1",
@@ -1706,6 +1706,6 @@ const GIO = [
     "problemes": []
   }
 ];
-const ALL_LESSONS = [...DAYS, ...GIO];
+const ALL_LESSONS = [...DAYS, ...W3SCHOOL];
 const TOTAL = ALL_LESSONS.length;
 const TOTAL_EXERCISES = DAYS.reduce((s,d)=>s+(d.exercises?d.exercises.length:0)+(d.problemes?d.problemes.length:0),0);
