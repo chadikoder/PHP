@@ -96,6 +96,7 @@ const T_DICT = {
   diffMedium:    { fr: "Moyen",                en: "Medium" },
   diffHard:      { fr: "Difficile",            en: "Hard" },
   diffExtreme:   { fr: "Extrême",              en: "Extreme" },
+  proLabel:      { fr: "Pro",                  en: "Pro" },
   addBookmark:   { fr: "Ajouter un signet",    en: "Add bookmark" },
   removeBookmark:{ fr: "Retirer le signet",    en: "Remove bookmark" },
   viewSol:       { fr: "Voir solution",         en: "View solution" },
@@ -346,11 +347,11 @@ function esc(s) {
 const SVGI = {
   book:       `<svg class="lico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`,
   pencil:     `<svg class="lico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>`,
-  puzzle:     `<svg class="lico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568c.47.47.706 1.087.706 1.704s-.235 1.233-.706 1.704l-1.611 1.611a.98.98 0 0 1-.837.276c-.47-.07-.802-.48-.968-.925a2.501 2.501 0 1 0-3.214 3.214c.446.166.855.497.925.968a.98.98 0 0 1-.276.837l-1.61 1.61a2.404 2.404 0 0 1-3.41 0l-1.568-1.568a1.026 1.026 0 0 0-.877-.29 2.501 2.501 0 1 1-2.59-2.589.987.987 0 0 0 .29-.876l-1.568-1.568a2.404 2.404 0 0 1 0-3.408l1.61-1.611a.98.98 0 0 1 .838-.276c.47.07.802.48.968.925a2.501 2.501 0 1 0 3.214-3.214c-.446-.166-.855-.497-.925-.968a.98.98 0 0 1 .276-.837l1.61-1.61a2.404 2.404 0 0 1 3.408 0l1.568 1.568c.23.23.556.338.877.29a2.5 2.5 0 1 1 2.589 2.589Z"/></svg>`,
+  puzzle:     `<svg class="lico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>`,
   leaf:       `<svg class="lico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg>`,
   flame:      `<svg class="lico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>`,
   bolt:       `<svg class="lico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
-  alert:      `<svg class="lico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+  skull:      `<svg class="lico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><path d="M8 20v2h8v-2"/><path d="m12.5 17-.5-1-.5 1h1z"/><path d="M16 20a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20"/></svg>`,
   bookmark:   `<svg class="lico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`,
   filter:     `<svg class="lico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>`,
   triangle:   `<svg class="lico" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>`,
@@ -364,7 +365,7 @@ function diffIcoSvg(diff) {
   if (diff === "easy") return SVGI.leaf;
   if (diff === "medium") return SVGI.flame;
   if (diff === "hard") return SVGI.bolt;
-  if (diff === "extreme") return SVGI.alert;
+  if (diff === "extreme") return SVGI.skull;
   return "";
 }
 
@@ -809,7 +810,7 @@ function renderExArea(lesson) {
         <button class="ex-filter-btn diff-easy ${exFilter === "easy" ? "active" : ""}" data-filter="easy">${SVGI.leaf}<span>${T.filterEasy}</span><b>${activeList.filter(e => e.diff === "easy").length}</b></button>
         <button class="ex-filter-btn diff-medium ${exFilter === "medium" ? "active" : ""}" data-filter="medium">${SVGI.flame}<span>${T.filterMedium}</span><b>${activeList.filter(e => e.diff === "medium").length}</b></button>
         <button class="ex-filter-btn diff-hard ${exFilter === "hard" ? "active" : ""}" data-filter="hard">${SVGI.bolt}<span>${T.filterHard}</span><b>${activeList.filter(e => e.diff === "hard").length}</b></button>
-        <button class="ex-filter-btn diff-extreme ${exFilter === "extreme" ? "active" : ""}" data-filter="extreme">${SVGI.alert}<span>${T.filterExtreme}</span><b>${activeList.filter(e => e.diff === "extreme").length}</b></button>
+        <button class="ex-filter-btn diff-extreme ${exFilter === "extreme" ? "active" : ""}" data-filter="extreme">${SVGI.skull}<span>${T.filterExtreme}</span><b>${activeList.filter(e => e.diff === "extreme").length}</b></button>
         <button class="ex-filter-btn ${exFilter === "bookmark" ? "active" : ""}" data-filter="bookmark">${SVGI.bookmark}<span>${T.filterBookmark}</span><b>${bmCount}</b></button>
         <button class="ex-filter-btn ${exFilter === "weak" ? "active" : ""}" data-filter="weak"><span>${T.filterWeak}</span><b>${weakCount}</b></button>
       </div>
@@ -1047,17 +1048,23 @@ function renderExCard(lesson, ex) {
   const key = lesson.id + "-" + ex.num;
   const exDone = !!state.exDone[key];
   const isBm = !!state.bookmarks[key];
+  const isProb = (lesson.problemes || []).some(p => p.num === ex.num);
   const hasNote = !!(state.notes && state.notes[key] && state.notes[key].trim());
   const diffLbl = { easy: T.diffEasy, medium: T.diffMedium, hard: T.diffHard, extreme: T.diffExtreme };
   // Stroke-only SVGs for indicators — clean professional, no emoji, no flat dots
   const noteIco = hasNote ? `<svg class="ex-note-ico" aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><title>Notes</title><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg>` : "";
+  // Problèmes are inherently "pro tier" — show a crown instead of the extreme skull
+  // so the column doesn't read as a wall of skulls.
+  const probDiffSvg = `<svg class="ex-diff-svg" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/><path d="M5 21h14"/></svg>`;
   // Difficulty icon — sits on the same row as the chip
   const diffSvg = {
     easy:    `<svg class="ex-diff-svg" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg>`,
     medium:  `<svg class="ex-diff-svg" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>`,
     hard:    `<svg class="ex-diff-svg" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
-    extreme: `<svg class="ex-diff-svg" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+    extreme: `<svg class="ex-diff-svg" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><path d="M8 20v2h8v-2"/><path d="m12.5 17-.5-1-.5 1h1z"/><path d="M16 20a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20"/></svg>`,
   };
+  const chipSvg = isProb ? probDiffSvg : (diffSvg[ex.diff] || "");
+  const chipLbl = isProb ? (T.proLabel || "PRO") : (diffLbl[ex.diff] || ex.diff);
   const bmIco = isBm
     ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`
     : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`;
@@ -1065,7 +1072,7 @@ function renderExCard(lesson, ex) {
     <span class="ex-check ${exDone ? "done" : ""}" data-key="${key}" title="${T.markedAriaLabel}">${exDone ? "✓" : ""}</span>
     <span class="ex-meta">
       <span class="ex-num-text">#${ex.num}</span>
-      <span class="ex-diff ${ex.diff}">${diffSvg[ex.diff] || ""}<span class="ex-diff-lbl">${diffLbl[ex.diff] || ex.diff}</span></span>
+      <span class="ex-diff ${ex.diff}${isProb ? " prob" : ""}">${chipSvg}<span class="ex-diff-lbl">${chipLbl}</span></span>
       ${noteIco}
     </span>
     <div class="ex-title">${esc(t(ex.title))}</div>
@@ -1237,13 +1244,17 @@ function openExModal(lesson, ex) {
   _exModalLastFocus = document.activeElement;
 
   const diffLbl = { easy: T.diffEasy, medium: T.diffMedium, hard: T.diffHard, extreme: T.diffExtreme };
-  const diffIcoMap = { easy: SVGI.leaf, medium: SVGI.flame, hard: SVGI.bolt, extreme: SVGI.alert };
+  const diffIcoMap = { easy: SVGI.leaf, medium: SVGI.flame, hard: SVGI.bolt, extreme: SVGI.skull };
+  const isProb = (lesson.problemes || []).some(p => p.num === ex.num);
+  const probIco = `<svg class="lico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/><path d="M5 21h14"/></svg>`;
   document.getElementById("ex-modal-num").textContent = "#" + ex.num;
   document.getElementById("ex-modal-title").textContent = t(ex.title);
   const diffEl = document.getElementById("ex-modal-diff");
-  diffEl.className = "ex-modal-diff " + ex.diff;
+  diffEl.className = "ex-modal-diff " + ex.diff + (isProb ? " prob" : "");
   // Render the diff SVG icon side-by-side with the chip label so the snippet sits next to the emoji
-  diffEl.innerHTML = `${diffIcoMap[ex.diff] || ""}<span>${diffLbl[ex.diff] || ex.diff}</span>`;
+  const modalChipIco = isProb ? probIco : (diffIcoMap[ex.diff] || "");
+  const modalChipLbl = isProb ? (T.proLabel || "Pro") : (diffLbl[ex.diff] || ex.diff);
+  diffEl.innerHTML = `${modalChipIco}<span>${modalChipLbl}</span>`;
   document.getElementById("ex-modal-body").innerHTML = t(ex.desc || "");
 
   document.getElementById("ex-modal-actions").innerHTML = _exRenderActions(key);
@@ -1382,7 +1393,7 @@ function refreshProgress() {
 // Each is a 13x13 stroke-only icon coloured by currentColor.
 const ACH_SVG = {
   cap:      `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.66 4.03 3 6 3s6-1.34 6-3v-5"/></svg>`,
-  bolt:     `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+  badgeCheck: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>`,
   ten:      `<svg width="14" height="14" viewBox="0 0 24 24"><text x="12" y="17" text-anchor="middle" font-family="-apple-system,'Segoe UI',sans-serif" font-weight="800" font-size="13" fill="currentColor">10</text></svg>`,
   pin:      `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L9 7l-5 1 5 4-2 7 5-4 5 4-2-7 5-4-5-1z"/></svg>`,
   half:     `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3 a9 9 0 0 1 0 18 z" fill="currentColor"/></svg>`,
@@ -1418,7 +1429,7 @@ function computeBadges() {
   const lvl = xpLevel(state.xp || 0);
   return [
     { id: "first-lesson", svg: ACH_SVG.cap,       label: T.ach1,        unlocked: doneLessons >= 1 },
-    { id: "first-exo",    svg: ACH_SVG.bolt,      label: T.achEx1,      unlocked: doneEx >= 1 },
+    { id: "first-exo",    svg: ACH_SVG.badgeCheck, label: T.achEx1,     unlocked: doneEx >= 1 },
     { id: "exo-10",       svg: ACH_SVG.ten,       label: T.achEx10,     unlocked: doneEx >= 10 },
     { id: "bookmark",     svg: ACH_SVG.pin,       label: T.achBm,       unlocked: doneBm >= 1 },
     { id: "halfway",      svg: ACH_SVG.half,      label: T.ach2,        unlocked: doneLessons >= Math.ceil(TOTAL / 2) },
@@ -2417,13 +2428,28 @@ function updateDayIndicator() {
   // Current day = first day-N lesson not yet completed; if all done, last day.
   let currentDayIdx = DAYS.findIndex(d => !state.completed[d.id]);
   if (currentDayIdx === -1) currentDayIdx = DAYS.length - 1;
-  const bullets = DAYS.map((d, i) => {
-    if (state.completed[d.id]) return `<span class="day-bullet done" title="${esc(t(d.title))}"></span>`;
-    if (i === currentDayIdx) return `<span class="day-bullet current" title="${esc(t(d.title))}"></span>`;
-    return `<span class="day-bullet" title="${esc(t(d.title))}"></span>`;
+  const doneCount = DAYS.filter(d => state.completed[d.id]).length;
+  const pct = Math.round((doneCount / DAYS.length) * 100);
+  const dots = DAYS.map((d, i) => {
+    const isDone = !!state.completed[d.id];
+    const isCurrent = i === currentDayIdx && !isDone;
+    const cls = "day-dot" + (isDone ? " done" : "") + (isCurrent ? " current" : "");
+    const inner = isDone
+      ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="5 12 10 17 19 7"/></svg>`
+      : `<span>${i + 1}</span>`;
+    return `<button type="button" class="${cls}" data-lid="${esc(d.id)}" title="${esc(t(d.title))}" aria-label="${esc(t(d.title))}">${inner}</button>`;
   }).join("");
   el.hidden = false;
-  el.innerHTML = `${t(T_DICT.day)} <b>${currentDayIdx + 1}</b> / ${DAYS.length} ${bullets}`;
+  el.innerHTML = `
+    <div class="day-indicator-head">
+      <span class="day-indicator-lbl">${t(T_DICT.day)} <b>${currentDayIdx + 1}</b><span class="day-sep">/</span><span class="day-total">${DAYS.length}</span></span>
+      <span class="day-indicator-pct">${pct}%</span>
+    </div>
+    <div class="day-track" style="--day-pct:${pct}%"><div class="day-dots">${dots}</div></div>
+  `;
+  el.querySelectorAll(".day-dot").forEach(btn => {
+    btn.addEventListener("click", () => openLesson(btn.dataset.lid));
+  });
 }
 
 /* ====================================================================
