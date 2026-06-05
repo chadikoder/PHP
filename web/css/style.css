@@ -669,23 +669,27 @@ body.drawer-open{overflow:hidden}
 /* Nav items */
 .nav-section{display:flex;flex-direction:column;gap:2px}
 .nav-item{
-  display:grid;grid-template-columns:18px 28px 1fr auto;align-items:center;gap:8px;
-  padding:9px 10px;border-radius:8px;
+  display:grid;grid-template-columns:20px 30px 1fr auto;align-items:center;gap:9px;
+  padding:10px 11px;border-radius:11px;
   font-size:13px;color:var(--text-2);
   border:1px solid transparent;
-  transition:background-color .15s var(--ease),color .15s var(--ease),border-color .15s var(--ease),transform .15s var(--ease);
+  transition:background-color .18s var(--ease),color .18s var(--ease),border-color .18s var(--ease),transform .18s var(--ease),box-shadow .18s var(--ease);
   position:relative;
 }
-.nav-item:hover{background:var(--surface-2);color:var(--text);transform:translateX(2px)}
+.nav-item:hover{
+  background:var(--surface-2);color:var(--text);transform:translateX(2px);
+  border-color:var(--border);
+}
 .nav-item.active{
-  background:rgba(var(--accent-r),var(--accent-g),var(--accent-b),.10);
+  background:linear-gradient(90deg,rgba(var(--accent-r),var(--accent-g),var(--accent-b),.14),rgba(var(--accent-r),var(--accent-g),var(--accent-b),.06));
   border-color:rgba(var(--accent-r),var(--accent-g),var(--accent-b),.22);
   color:var(--text);
+  box-shadow:0 2px 8px -4px rgba(var(--accent-r),var(--accent-g),var(--accent-b),.35);
 }
 .nav-item.active::before{
-  content:"";position:absolute;left:-16px;top:7px;bottom:7px;width:3px;
+  content:"";position:absolute;left:-16px;top:8px;bottom:8px;width:3px;
   background:var(--accent);border-radius:99px;
-  box-shadow:0 0 10px rgba(var(--accent-r),var(--accent-g),var(--accent-b),.5);
+  box-shadow:0 0 12px rgba(var(--accent-r),var(--accent-g),var(--accent-b),.55);
 }
 .nav-check{
   width:22px;height:22px;border-radius:50%;
@@ -738,23 +742,50 @@ body.drawer-open{overflow:hidden}
   100%{transform:scale(1);opacity:1}
 }
 .nav-tag{
-  font-size:9.5px;font-weight:800;padding:2px 6px;border-radius:5px;
-  background:var(--surface-3);color:var(--text-3);text-align:center;
+  font-size:10px;font-weight:800;letter-spacing:.04em;
+  padding:3px 7px;border-radius:99px;
+  background:rgba(var(--accent-r),var(--accent-g),var(--accent-b),.10);
+  color:var(--accent);
+  text-align:center;
+  border:1px solid rgba(var(--accent-r),var(--accent-g),var(--accent-b),.18);
+  transition:background .15s var(--ease),color .15s var(--ease),border-color .15s var(--ease);
 }
-.nav-item.done .nav-tag{background:rgba(52,211,153,.12);color:var(--good)}
+.nav-item.done .nav-tag{
+  background:rgba(52,211,153,.14);color:var(--good);
+  border-color:rgba(52,211,153,.28);
+}
 .nav-label{
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;letter-spacing:.01em;
 }
-.nav-item.done .nav-label{color:var(--text-3);text-decoration:line-through;text-decoration-color:var(--good)}
-.nav-ex-wrap{display:flex;align-items:center;gap:6px}
-.nav-progress{width:28px;height:4px;background:var(--surface-3);border-radius:99px;overflow:hidden}
-.nav-progress-fill{height:100%;background:var(--accent);border-radius:99px;transition:width .4s var(--ease-out)}
-.nav-item.fully-done .nav-progress-fill{background:var(--good)}
+.nav-item.done .nav-label{color:var(--text-3);text-decoration:line-through;text-decoration-color:rgba(52,211,153,.55);text-decoration-thickness:1.5px}
+.nav-ex-wrap{display:inline-flex;align-items:center;gap:7px}
+.nav-progress{
+  width:38px;height:5px;border-radius:99px;overflow:hidden;
+  background:var(--surface-3);
+  box-shadow:inset 0 1px 1px rgba(0,0,0,.08);
+}
+.nav-progress-fill{
+  height:100%;border-radius:99px;
+  background:linear-gradient(90deg,#a78bfa,var(--accent));
+  box-shadow:0 0 6px -1px rgba(var(--accent-r),var(--accent-g),var(--accent-b),.55);
+  transition:width .5s var(--ease-out),background .25s var(--ease);
+}
+.nav-item.fully-done .nav-progress-fill{
+  background:linear-gradient(90deg,#34d399,#10b981);
+  box-shadow:0 0 6px -1px rgba(52,211,153,.55);
+}
 .nav-ex-count{
-  font-size:9.5px;font-weight:700;color:var(--text-3);background:var(--surface-3);
-  padding:2px 6px;border-radius:4px;font-variant-numeric:tabular-nums;min-width:30px;text-align:center;
+  font-size:10px;font-weight:700;letter-spacing:.01em;
+  color:var(--text-2);background:var(--surface-3);
+  padding:2.5px 7px;border-radius:99px;
+  font-variant-numeric:tabular-nums;min-width:36px;text-align:center;
+  border:1px solid var(--border);
+  transition:background .15s var(--ease),color .15s var(--ease),border-color .15s var(--ease);
 }
-.nav-item.fully-done .nav-ex-count{background:rgba(52,211,153,.12);color:var(--good)}
+.nav-item.fully-done .nav-ex-count{
+  background:rgba(52,211,153,.14);color:var(--good);
+  border-color:rgba(52,211,153,.28);
+}
 
 .reset-btn{
   margin-top:auto;padding:10px 14px;border-radius:8px;
@@ -1312,7 +1343,7 @@ body.drawer-open{overflow:hidden}
 .conf-btn.no.active{background:rgba(248,113,113,.16);border-color:rgba(248,113,113,.4)}
 
 /* Mastery star in sidebar */
-.nav-star{display:none;font-size:11px;line-height:1;flex-shrink:0;animation:badgePop .45s var(--ease-out)}
+.nav-star{display:none;font-size:11px;line-height:1;flex-shrink:0;animation:badgePop .45s var(--ease-out);filter:drop-shadow(0 0 4px rgba(250,204,21,.55))}
 .nav-item.fully-done .nav-star{display:inline-block}
 
 /* Daily-goal widget (inside progress card) */
@@ -2712,9 +2743,9 @@ header{flex-wrap:nowrap}
 /* Nav items on phone — readable density */
 @media(max-width:480px){
   .nav-item{padding:10px 11px;gap:7px;font-size:12.5px}
-  .nav-tag{font-size:9px;padding:2px 5px}
-  .nav-progress{width:24px}
-  .nav-ex-count{font-size:9px;padding:2px 5px;min-width:26px}
+  .nav-tag{font-size:9.5px;padding:2.5px 6px}
+  .nav-progress{width:30px;height:4.5px}
+  .nav-ex-count{font-size:9.5px;padding:2px 6px;min-width:32px}
 }
 
 /* Landscape phone — pomodoro stays inside viewport */
@@ -2890,12 +2921,12 @@ header{flex-wrap:nowrap}
 .section-title.collapsible{color:var(--text-2);font-weight:600}
 .section-title.collapsible:hover{background:var(--surface-2);color:var(--text)}
 
-/* Nav-item active — subtler highlight, no shadow on the left bar */
+/* Nav-item active — sleek gradient highlight with the accent rail intact */
 .nav-item.active{
-  background:rgba(var(--accent-r),var(--accent-g),var(--accent-b),.08);
-  border-color:rgba(var(--accent-r),var(--accent-g),var(--accent-b),.18);
+  background:linear-gradient(90deg,rgba(var(--accent-r),var(--accent-g),var(--accent-b),.13),rgba(var(--accent-r),var(--accent-g),var(--accent-b),.04));
+  border-color:rgba(var(--accent-r),var(--accent-g),var(--accent-b),.22);
+  box-shadow:0 2px 8px -5px rgba(var(--accent-r),var(--accent-g),var(--accent-b),.35);
 }
-.nav-item.active::before{box-shadow:none}
 
 /* Day-current J-tag — accent fill + subtle pulse so the "you are here" beat returns */
 .nav-item.day-current .nav-tag{

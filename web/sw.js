@@ -2,7 +2,7 @@
 // Network-first for the HTML shell so deploys roll out fast.
 // Cache-first for static assets — bump CACHE to push new JS/CSS/images.
 // Google Fonts get their own runtime cache so repeat visits don't hit the network.
-const CACHE = "php-tracker-v23";
+const CACHE = "php-tracker-v24";
 const FONT_CACHE = "php-tracker-fonts-v1";
 const PRECACHE = [
   "./study_tracker.html",
