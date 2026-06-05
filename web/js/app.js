@@ -298,11 +298,14 @@ const W3_URLS = {
   "day-1": "https://www.w3schools.com/php/php_syntax.asp",
   "day-2": "https://www.w3schools.com/php/php_functions.asp",
   "day-3": "https://www.w3schools.com/php/php_form_validation.asp",
-  "day-4": "https://www.w3schools.com/php/php_sessions.asp",
-  "day-5": "https://www.w3schools.com/php/php_mysql_intro.asp",
+  "day-4": "https://www.w3schools.com/php/php_mysql_intro.asp",
+  "day-5": "https://www.w3schools.com/php/php_sessions.asp",
   "day-6": "https://www.w3schools.com/php/php_file_upload.asp",
   "day-7": "https://www.w3schools.com/php/php_oop_what_is.asp",
 };
+
+const LESSON_BY_ID = new Map(ALL_LESSONS.map(l => [l.id, l]));
+const LESSON_INDEX_BY_ID = new Map(ALL_LESSONS.map((l, i) => [l.id, i]));
 
 function loadState() {
   try {
@@ -317,9 +320,11 @@ function defaultState() {
 }
 
 let _saveTimer = 0;
+let _saveIsIdle = false;
 let _lastSavedJson = "";
 function _flushSave() {
   _saveTimer = 0;
+  _saveIsIdle = false;
   try {
     const json = JSON.stringify(state);
     if (json === _lastSavedJson) return;          // skip redundant writes
@@ -331,15 +336,41 @@ function _flushSave() {
 }
 function saveState() {
   if (_saveTimer) return;
-  _saveTimer = setTimeout(_flushSave, 200);
+  if ("requestIdleCallback" in window) {
+    _saveIsIdle = true;
+    _saveTimer = requestIdleCallback(_flushSave, { timeout: 900 });
+  } else {
+    _saveTimer = setTimeout(_flushSave, 220);
+  }
 }
 // Flush pending writes on page hide so a freshly-toggled checkbox isn't lost
 // when the user closes the tab or backgrounds the app on mobile.
-window.addEventListener("pagehide", () => { if (_saveTimer) { clearTimeout(_saveTimer); _flushSave(); } });
-window.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden" && _saveTimer) { clearTimeout(_saveTimer); _flushSave(); } });
+function flushPendingSaveNow() {
+  if (!_saveTimer) return;
+  if (_saveIsIdle && "cancelIdleCallback" in window) cancelIdleCallback(_saveTimer);
+  else clearTimeout(_saveTimer);
+  _flushSave();
+}
+window.addEventListener("pagehide", flushPendingSaveNow);
+window.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flushPendingSaveNow(); });
 
 function esc(s) {
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function noteIconSvg() {
+  return `<svg class="ex-note-ico" aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><title>Notes</title><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg>`;
+}
+
+function bookmarkIconSvg(on, size = 14) {
+  return on
+    ? `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`
+    : `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`;
+}
+
+function scrollToPageTop() {
+  const smooth = !window.matchMedia || !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  window.scrollTo({ top: 0, behavior: smooth ? "smooth" : "auto" });
 }
 
 /* SVG icon library — stroke-only icons used across labels (tabs / filters / buttons).
@@ -451,7 +482,7 @@ function renderSidebar() {
 function updateSidebarActive() {
   document.querySelectorAll(".nav-item").forEach(el => {
     const id = el.dataset.id;
-    const lesson = ALL_LESSONS.find(l => l.id === id);
+    const lesson = LESSON_BY_ID.get(id);
     if (!lesson) return;
     el.classList.toggle("active", id === state.lastActive);
     el.classList.toggle("done", !!state.completed[id]);
@@ -655,7 +686,7 @@ function hydrateLesson(id) {
   const p = fetch("../web/data/" + id + ".json")
     .then(r => r.ok ? r.json() : Promise.reject(r.status))
     .then(detail => {
-      const lesson = ALL_LESSONS.find(l => l.id === id);
+      const lesson = LESSON_BY_ID.get(id);
       if (lesson) {
         if (detail.sections)  lesson.sections  = detail.sections;
         if (detail.quiz)      lesson.quiz      = detail.quiz;
@@ -675,7 +706,7 @@ function hydrateLesson(id) {
    OPEN LESSON
    ==================================================================== */
 function openLesson(id) {
-  const lesson = ALL_LESSONS.find(l => l.id === id);
+  const lesson = LESSON_BY_ID.get(id);
   if (!lesson) return;
   state.lastActive = id;
   saveState();
@@ -686,7 +717,7 @@ function openLesson(id) {
   state.navMode = isDay ? "plan" : "ref";
   applyNavMode();
   const hasEx = (lesson.exercises && lesson.exercises.length > 0) || (lesson.problemes && lesson.problemes.length > 0);
-  const idx = ALL_LESSONS.findIndex(l => l.id === id);
+  const idx = LESSON_INDEX_BY_ID.get(id);
   const prev = idx > 0 ? ALL_LESSONS[idx - 1] : null;
   const next = idx < ALL_LESSONS.length - 1 ? ALL_LESSONS[idx + 1] : null;
 
@@ -765,7 +796,7 @@ function openLesson(id) {
     });
   });
   bindReviewStrip();
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  scrollToPageTop();
 }
 
 function toggleDone(id) {
@@ -871,6 +902,7 @@ function renderExArea(lesson) {
       currentTab = tab.dataset.tab;
       renderExArea(lesson);
       bindCopyButtons();
+      area.querySelector(".tab.active")?.scrollIntoView({ block: "nearest", inline: "center" });
     });
   });
 
@@ -932,6 +964,7 @@ function renderExArea(lesson) {
       exFilter = btn.dataset.filter;
       renderExArea(lesson);
       bindCopyButtons();
+      area.querySelector(".ex-filter-btn.active")?.scrollIntoView({ block: "nearest", inline: "center" });
     });
   });
 
@@ -1083,7 +1116,7 @@ function renderExCard(lesson, ex) {
   const hasNote = !!(state.notes && state.notes[key] && state.notes[key].trim());
   const diffLbl = { easy: T.diffEasy, medium: T.diffMedium, hard: T.diffHard, extreme: T.diffExtreme };
   // Stroke-only SVGs for indicators — clean professional, no emoji, no flat dots
-  const noteIco = hasNote ? `<svg class="ex-note-ico" aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><title>Notes</title><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg>` : "";
+  const noteIco = hasNote ? noteIconSvg() : "";
   // Problèmes are inherently "pro tier" — show a crown instead of the extreme skull
   // so the column doesn't read as a wall of skulls.
   const probDiffSvg = `<svg class="ex-diff-svg" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/><path d="M5 21h14"/></svg>`;
@@ -1096,9 +1129,7 @@ function renderExCard(lesson, ex) {
   };
   const chipSvg = isProb ? probDiffSvg : (diffSvg[ex.diff] || "");
   const chipLbl = isProb ? (T.proLabel || "PRO") : (diffLbl[ex.diff] || ex.diff);
-  const bmIco = isBm
-    ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`
-    : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`;
+  const bmIco = bookmarkIconSvg(isBm);
   return `<div class="ex-card ${exDone ? "done" : ""}" id="ex-${key}" data-lesson="${lesson.id}" data-num="${ex.num}" role="button" tabindex="0">
     <span class="ex-check ${exDone ? "done" : ""}" data-key="${key}" title="${T.markedAriaLabel}">${exDone ? "✓" : ""}</span>
     <span class="ex-meta">
@@ -1130,7 +1161,12 @@ function _exSyncCardBookmark(key, on) {
   const card = document.getElementById("ex-" + key);
   if (!card) return;
   const bm = card.querySelector(".ex-bookmark");
-  if (bm) { bm.classList.toggle("active", on); bm.textContent = on ? "🔖" : "🏷️"; }
+  if (bm) {
+    bm.classList.toggle("active", on);
+    bm.innerHTML = bookmarkIconSvg(on);
+    bm.title = on ? T.removeBookmark : T.addBookmark;
+    bm.setAttribute("aria-label", on ? T.removeBookmark : T.addBookmark);
+  }
 }
 
 function _exRenderActions(key) {
@@ -1150,7 +1186,7 @@ function _exRenderActions(key) {
         <button class="conf-btn shaky ${conf === "shaky" ? "active" : ""}" data-conf="shaky" title="${T.confShaky}">😐</button>
         <button class="conf-btn no ${conf === "no" ? "active" : ""}" data-conf="no" title="${T.confNo}">😵</button>
       </div>
-      <button class="ex-modal-btn-icon ex-modal-bookmark ${isBm ? "active" : ""}" id="ex-modal-bookmark" title="${isBm ? T.removeBookmark : T.addBookmark}">${isBm ? "🔖" : "🏷️"}</button>
+      <button class="ex-modal-btn-icon ex-modal-bookmark ${isBm ? "active" : ""}" id="ex-modal-bookmark" title="${isBm ? T.removeBookmark : T.addBookmark}" aria-label="${isBm ? T.removeBookmark : T.addBookmark}">${bookmarkIconSvg(isBm, 15)}</button>
     </div>
   `;
 }
@@ -1176,7 +1212,6 @@ function _exWireActions(lesson, ex, key) {
     checkDailyGoal();
     if (!wasDone) checkChallenge();
     updateSidebarActive();
-    refreshProgress();
   });
 
   // Solution toggle
@@ -1217,8 +1252,9 @@ function _exWireActions(lesson, ex, key) {
     saveState();
     const on = !!state.bookmarks[key];
     bmBtn.classList.toggle("active", on);
-    bmBtn.textContent = on ? "🔖" : "🏷️";
+    bmBtn.innerHTML = bookmarkIconSvg(on, 15);
     bmBtn.title = on ? T.removeBookmark : T.addBookmark;
+    bmBtn.setAttribute("aria-label", on ? T.removeBookmark : T.addBookmark);
     _exSyncCardBookmark(key, on);
   });
 }
@@ -1246,16 +1282,12 @@ function _exWireNote(key) {
       const card = document.getElementById("ex-" + key);
       if (card) {
         const has = !!(state.notes[key] && state.notes[key].trim());
-        let dot = card.querySelector(".ex-note-dot");
-        if (has && !dot) {
-          dot = document.createElement("span");
-          dot.className = "ex-note-dot";
-          dot.title = "Notes";
-          dot.setAttribute("aria-hidden", "true");
-          const ref = card.querySelector(".ex-diff");
-          card.insertBefore(dot, ref);
-        } else if (!has && dot) {
-          dot.remove();
+        const meta = card.querySelector(".ex-meta");
+        const note = card.querySelector(".ex-note-ico");
+        if (has && meta && !note) {
+          meta.insertAdjacentHTML("beforeend", noteIconSvg());
+        } else if (!has && note) {
+          note.remove();
         }
       }
       if (savedTag) {
@@ -1499,7 +1531,7 @@ function refreshAchievements() {
       newly.forEach(b => { state.achSeen[b.id] = true; });
       saveState();
       const last = newly[newly.length - 1];
-      toast(`${last.emoji} ${T.achUnlocked} ${last.label}`);
+      toast(`${T.achUnlocked} ${last.label}`);
       celebrate();
     }
   }
@@ -1619,7 +1651,7 @@ function jumpToRandomExercise() {
   });
   if (!pool.length) { toast(T.allExosDone); return; }
   const pick = pool[Math.floor(Math.random() * pool.length)];
-  const lesson = ALL_LESSONS.find(l => l.id === pick.lessonId);
+  const lesson = LESSON_BY_ID.get(pick.lessonId);
   openLesson(pick.lessonId);
   currentTab = "exos";
   exFilter = "all";
@@ -1780,7 +1812,7 @@ function todayDoneByDiff(diff) {
     if (dash < 0) continue;
     const lessonId = k.slice(0, dash);
     const num = parseInt(k.slice(dash + 1), 10);
-    const lesson = ALL_LESSONS.find(l => l.id === lessonId);
+    const lesson = LESSON_BY_ID.get(lessonId);
     if (!lesson) continue;
     const ex = [...(lesson.exercises || []), ...(lesson.problemes || [])].find(e => e.num === num);
     if (ex && ex.diff === diff) n++;
@@ -2044,7 +2076,7 @@ window.addEventListener("appinstalled", () => {
       const dy = e.changedTouches[0].clientY - my;
       if (Math.abs(dx) < 90 || Math.abs(dy) > Math.abs(dx) * 0.7) return;
       if (!state.lastActive) return;
-      const idx = ALL_LESSONS.findIndex(l => l.id === state.lastActive);
+      const idx = LESSON_INDEX_BY_ID.get(state.lastActive);
       if (dx < 0 && idx < ALL_LESSONS.length - 1) openLesson(ALL_LESSONS[idx + 1].id);
       else if (dx > 0 && idx > 0) openLesson(ALL_LESSONS[idx - 1].id);
     });
@@ -2110,7 +2142,7 @@ function bindReviewStrip() {
     const lessonId = strip.dataset.lesson;
     const num = parseInt(strip.dataset.num, 10);
     strip.querySelector("[data-action=open]").addEventListener("click", () => {
-      const lesson = ALL_LESSONS.find(l => l.id === lessonId);
+      const lesson = LESSON_BY_ID.get(lessonId);
       if (!lesson) return;
       if (state.lastActive !== lessonId) openLesson(lessonId);
       hydrateLesson(lessonId).then(() => {
@@ -2379,7 +2411,7 @@ function applyLang() {
   renderSidebar();
   updateDayIndicator();
   // Re-render current view
-  if (state.lastActive && ALL_LESSONS.find(l => l.id === state.lastActive)) {
+  if (state.lastActive && LESSON_BY_ID.has(state.lastActive)) {
     openLesson(state.lastActive);
   } else {
     renderWelcome();
@@ -2511,8 +2543,8 @@ function renderWelcome() {
     { id: "day-1", ico: ICO.basics,    title: { fr: "PHP Basics",            en: "PHP Basics" },           sub: { fr: "Syntaxe · types · loops", en: "Syntax · types · loops" } },
     { id: "day-2", ico: ICO.functions, title: { fr: "Functions / Arrays",    en: "Functions / Arrays" },   sub: { fr: "fns · arrays · dates",    en: "fns · arrays · dates" } },
     { id: "day-3", ico: ICO.forms,     title: { fr: "Formulaires",           en: "Forms" },                sub: { fr: "forms · regex · validation", en: "forms · regex · validation" } },
-    { id: "day-4", ico: ICO.auth,      title: { fr: "Sessions / Auth",       en: "Sessions / Auth" },      sub: { fr: "cookies · sessions",      en: "cookies · sessions" } },
-    { id: "day-5", ico: ICO.db,        title: { fr: "MySQL / PDO",           en: "MySQL / PDO" },          sub: { fr: "DB · PDO · prepared",     en: "DB · PDO · prepared" } },
+    { id: "day-4", ico: ICO.db,        title: { fr: "MySQL / PDO",           en: "MySQL / PDO" },          sub: { fr: "DB · PDO · prepared",     en: "DB · PDO · prepared" } },
+    { id: "day-5", ico: ICO.auth,      title: { fr: "Sessions / Auth",       en: "Sessions / Auth" },      sub: { fr: "cookies · sessions",      en: "cookies · sessions" } },
     { id: "day-6", ico: ICO.upload,    title: { fr: "Uploads / CSV",         en: "Uploads / CSV" },        sub: { fr: "files · upload · CSV",   en: "files · upload · CSV" } },
     { id: "day-7", ico: ICO.oop,       title: { fr: "OOP + Exercice",        en: "OOP + Exercise" },       sub: { fr: "OOP · examen blanc",      en: "OOP · mock exam" } },
   ];
@@ -2523,7 +2555,7 @@ function renderWelcome() {
   ];
 
   function dayCardHtml(m, planIdx) {
-    const lesson = ALL_LESSONS.find(l => l.id === m.id);
+    const lesson = LESSON_BY_ID.get(m.id);
     const exs = lesson ? [...(lesson.exercises||[]), ...(lesson.problemes||[])] : [];
     const exTotal = exs.length;
     const exDone = exs.filter(e => state.exDone[m.id + "-" + e.num]).length;
@@ -2545,7 +2577,7 @@ function renderWelcome() {
     </button>`;
   }
   function refCardHtml(m) {
-    const lesson = ALL_LESSONS.find(l => l.id === m.id);
+    const lesson = LESSON_BY_ID.get(m.id);
     // Show progress across the matching group (basic / intermediate / advanced)
     const group = m.id === "w3-intro" ? "basic" : m.id === "w3-forms" ? "intermediate" : "advanced";
     const lessons = GIO.filter(l => (l.level || "basic") === group);
@@ -2758,7 +2790,7 @@ if (importBtn) {
               state = Object.assign(defaultState(), parsed);
               saveState();
               renderSidebar();
-              if (state.lastActive && ALL_LESSONS.find(l => l.id === state.lastActive)) openLesson(state.lastActive);
+              if (state.lastActive && LESSON_BY_ID.has(state.lastActive)) openLesson(state.lastActive);
               else renderWelcome();
               toast(T.importOk);
             } catch {
@@ -2877,7 +2909,7 @@ document.addEventListener("keydown", e => {
     return;
   }
   if (!state.lastActive) return;
-  const idx = ALL_LESSONS.findIndex(l => l.id === state.lastActive);
+  const idx = LESSON_INDEX_BY_ID.get(state.lastActive);
   if (e.key === "ArrowRight" && idx < ALL_LESSONS.length - 1) {
     openLesson(ALL_LESSONS[idx + 1].id);
   }
@@ -3233,7 +3265,7 @@ updateDayIndicator();
 // Refresh countdown once an hour (covers day rollover during long sessions)
 setInterval(updateExamCountdown, 60 * 60 * 1000);
 
-if (state.lastActive && ALL_LESSONS.find(l => l.id === state.lastActive)) {
+if (state.lastActive && LESSON_BY_ID.has(state.lastActive)) {
   openLesson(state.lastActive);
 } else {
   renderWelcome();
@@ -3260,7 +3292,7 @@ function onScroll() {
     const doc = document.documentElement;
     const max = (doc.scrollHeight - doc.clientHeight) || 1;
     const pct = Math.min(100, Math.max(0, (window.scrollY / max) * 100));
-    if (scrollBar) scrollBar.style.width = pct + "%";
+    if (scrollBar) scrollBar.style.transform = `scaleX(${pct / 100})`;
     if (jumpTopBtn) jumpTopBtn.classList.toggle("show", window.scrollY > 400);
   });
 }
